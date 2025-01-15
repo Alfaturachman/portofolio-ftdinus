@@ -131,7 +131,7 @@
     </div>
 
     <!-- Informasi Mata Kuliah -->
-    <div class="row d-none">
+    <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -224,7 +224,7 @@
                     </div>
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
                         <table class="table table-bordered">
-                            <thead class="table-light">
+                            <thead class="table-dark">
                                 <tr>
                                     <th style="width: 30%" colspan="2">CPL</th>
                                     <th style="width: 60%">IKCP</th>
@@ -274,7 +274,7 @@
     </div>
 
     <!-- CPMK & Sub CPMK -->
-    <div class="row">
+    <div class="row d-none">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -319,6 +319,109 @@
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </button>
                             <button type="button" id="submitBtn" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cetak -->
+    <div class="row d-none">
+        <div class="col d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-block align-items-center justify-content-center mb-4">
+                        <h5 class="card-title fw-bolder mb-3">Cetak</h5>
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Silahkan untuk mencetak file CPMK & Sub CPMK di bawah sebelum melanjutkan!
+                        </div>
+                    </div>
+
+                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <div class="form-group mb-2">
+                            <label for="rps_file" class="form-label">Cetak File CPMK & Sub CPMK</label>
+                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        </div>
+                        <p class="text-danger">*format file: PDF</p>
+                        <div class="d-flex justify-content-between pt-3">
+                            <button type="button" class="btn btn-secondary">
+                                <i class="ti ti-arrow-left"></i> Kembali
+                            </button>
+                            <button type="submit" id="submitBtn" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload RPS -->
+    <div class="row d-none">
+        <div class="col d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-block align-items-center justify-content-center mb-4">
+                        <h5 class="card-title fw-bolder mb-3">Upload RPS</h5>
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Silahkan untuk mengupload file RPS (PDF) di bawah sebelum melanjutkan!
+                        </div>
+                    </div>
+
+                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <div class="form-group mb-2">
+                            <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
+                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        </div>
+                        <p class="text-danger">*format file: PDF</p>
+                        <div class="d-flex justify-content-between pt-3">
+                            <button type="button" class="btn btn-secondary">
+                                <i class="ti ti-arrow-left"></i> Kembali
+                            </button>
+                            <button type="submit" id="submitBtn" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rancangan Asesmen -->
+    <div class="row d-none">
+        <div class="col d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-block align-items-center justify-content-center mb-4">
+                        <h5 class="card-title fw-bolder mb-3">Rancangan Asesmen</h5>
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Silahkan untuk mengisi rancangan asesmen di bawah sebelum melanjutkan!
+                        </div>
+                    </div>
+
+                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <div class="form-group mb-3">
+                            <label for="rps_file" class="form-label"><strong>1.</strong> Tugas</label>
+                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="rps_file" class="form-label"><strong>2.</strong> Ujian Tengah Semester</label>
+                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="rps_file" class="form-label"><strong>3.</strong> Ujian Akhir Semester</label>
+                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        </div>
+                        <div class="d-flex justify-content-between pt-3">
+                            <button type="button" class="btn btn-secondary">
+                                <i class="ti ti-arrow-left"></i> Kembali
+                            </button>
+                            <button type="submit" id="submitBtn" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
                         </div>
