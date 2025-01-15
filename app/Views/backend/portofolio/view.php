@@ -120,7 +120,7 @@
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-award"></i>
+                                <i class="ti ti-checklist"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
                         </div>
@@ -130,6 +130,7 @@
         </div>
     </div>
 
+    <!-- Informasi Mata Kuliah -->
     <div class="row d-none">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
@@ -179,6 +180,7 @@
         </div>
     </div>
 
+    <!-- Topik Perkuliahan -->
     <div class="row d-none">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
@@ -209,7 +211,8 @@
         </div>
     </div>
 
-    <div class="row">
+    <!-- CPL & IKCP -->
+    <div class="row d-none">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -253,6 +256,61 @@
                                 </tr>
                                 <tr>
                                     <td>Memahami etika komunikasi profesional ...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="d-flex justify-content-between pt-3">
+                            <button type="button" class="btn btn-secondary">
+                                <i class="ti ti-arrow-left"></i> Kembali
+                            </button>
+                            <button type="button" id="submitBtn" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CPMK & Sub CPMK -->
+    <div class="row">
+        <div class="col d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-block align-items-center justify-content-center mb-4">
+                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Mata Kuliah (CPMK) & Sub Capaian Pembelajaran Mata Kuliah (Sub CPMK)</h5>
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Silahkan untuk mengisi CPMK & Sub CPMK di bawah sebelum melanjutkan!
+                        </div>
+                    </div>
+
+                    <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 30%">CPMK</th>
+                                    <th style="width: 70%">Narasi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- CPMK 1 -->
+                                <tr class="table-light">
+                                    <td><strong>CPMK 1</strong></td>
+                                    <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit laboris.</td>
+                                </tr>
+                                <tr>
+                                    <td><i>Sub CPMK 1</i></td>
+                                    <td><i>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</i></td>
+                                </tr>
+                                <!-- CPMK 2 -->
+                                <tr class="table-light">
+                                    <td><strong>CPMK 2</strong></td>
+                                    <td>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</td>
+                                </tr>
+                                <tr>
+                                    <td><i>Sub CPMK 2</i></td>
+                                    <td><i>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</i></td>
                                 </tr>
                             </tbody>
                         </table>
