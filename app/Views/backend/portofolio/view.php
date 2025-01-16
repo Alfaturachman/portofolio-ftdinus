@@ -56,70 +56,70 @@
                     <div class="d-sm-flex d-block align-items-center justify-content-center">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div class="d-flex justify-content-between align-items-baseline mt-4">
+                    <div id="steps" class="d-flex justify-content-between align-items-baseline mt-4">
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle" data-step="info_matkul">
                                 <i class="ti ti-bookmark"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Info Matkul</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle" data-step="topik">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- CPL & Indikator -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle">
                                 <i class="ti ti-chart-line"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & Indikator</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle">
                                 <i class="ti ti-book"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle">
                                 <i class="ti ti-printer"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Cetak</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- Upload RPS -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle">
                                 <i class="ti ti-upload"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Upload RPS</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle">
                                 <i class="ti ti-checklist"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
@@ -131,7 +131,7 @@
     </div>
 
     <!-- Informasi Mata Kuliah -->
-    <div class="row">
+    <div class="row" data-step="info_matkul">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -142,7 +142,7 @@
                         </div>
                     </div>
 
-                    <form action="<?= base_url('form/submit') ?>" method="post">
+                    <form>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
                             <input type="text" class="form-control" id="nama_mk" name="nama_mk" placeholder="Masukkan nama mata kuliah" required>
@@ -170,7 +170,7 @@
                             <button type="button" class="btn btn-secondary">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </button>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" data-current-step="info_matkul" data-next-step="topik">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
                         </div>
@@ -181,7 +181,7 @@
     </div>
 
     <!-- Topik Perkuliahan -->
-    <div class="row d-none">
+    <div class="row d-none" data-step="topik">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -431,5 +431,7 @@
         </div>
     </div>
 </div>
+
+<script src="<?= base_url('') ?>backend/src/assets/js/form.js"></script>
 
 <?= $this->include('backend/partials/footer') ?>
