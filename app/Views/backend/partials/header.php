@@ -32,8 +32,8 @@
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                             <span class="hide-menu">Home</span>
                         </li>
-                        <li class="sidebar-item <?= current_url() == base_url('') ? 'active' : '' ?>">
-                            <a class="sidebar-link" href="<?= base_url('') ?>" aria-expanded="false">
+                        <li class="sidebar-item">
+                            <a class="sidebar-link <?= current_url() == base_url('') ? 'active' : '' ?>" href="<?= base_url('') ?>" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-layout-dashboard"></i>
                                 </span>
@@ -44,12 +44,12 @@
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                             <span class="hide-menu">PORTOFOLIO</span>
                         </li>
-                        <li class="sidebar-item <?= current_url() == base_url('portofolio-form') ? 'active' : '' ?>">
-                            <a class="sidebar-link" href="<?= base_url('portofolio-form') ?>" aria-expanded="false">
+                        <li class="sidebar-item">
+                            <a class="sidebar-link <?= (current_url() == base_url('portofolio-form/info-matkul') || current_url() == base_url('portofolio-form/topik-perkuliahan')) ? 'active' : '' ?>" href="<?= base_url('portofolio-form') ?>" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-file-description"></i>
                                 </span>
-                                <span class="hide-menu">Forms</span>
+                                <span class="hide-menu">Portofolio</span>
                             </a>
                         </li>
                     </ul>

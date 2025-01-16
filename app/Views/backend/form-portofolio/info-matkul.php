@@ -59,7 +59,7 @@
                     <div id="steps" class="d-flex justify-content-between align-items-baseline mt-4">
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle" data-step="info_matkul">
+                            <div class="step-circle active">
                                 <i class="ti ti-bookmark"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Info Matkul</small>
@@ -142,7 +142,8 @@
                         </div>
                     </div>
 
-                    <form>
+                    <form action="<?= base_url('portofolio/saveInfoMatkul') ?>" method="post">
+                        <?= csrf_field() ?>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
                             <input type="text" class="form-control" id="nama_mk" name="nama_mk" placeholder="Masukkan nama mata kuliah" required>
@@ -170,7 +171,7 @@
                             <button type="button" class="btn btn-secondary">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </button>
-                            <button type="button" class="btn btn-primary" data-current-step="info_matkul" data-next-step="topik">
+                            <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
                         </div>
@@ -181,7 +182,7 @@
     </div>
 
     <!-- Topik Perkuliahan -->
-    <div class="row d-none" data-step="topik">
+    <div class="row d-none">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -431,7 +432,5 @@
         </div>
     </div>
 </div>
-
-<script src="<?= base_url('') ?>backend/src/assets/js/form.js"></script>
 
 <?= $this->include('backend/partials/footer') ?>
