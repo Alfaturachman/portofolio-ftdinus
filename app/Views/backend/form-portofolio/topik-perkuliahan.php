@@ -75,11 +75,11 @@
                             <small class="d-block mt-2 step-label">Topik</small>
                         </div>
 
-                        <div class="step-line active"></div>
+                        <div class="step-line"></div>
 
                         <!-- CPL & Indikator -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle">
                                 <i class="ti ti-chart-line"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & Indikator</small>
@@ -151,9 +151,12 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <button type="button" id="submitBtn" class="btn btn-primary">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpl-ikcp') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button> -->
                         </div>
                     </form>
                 </div>

@@ -174,9 +174,12 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/topik-perkuliahan') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button> -->
                         </div>
                     </form>
                 </div>

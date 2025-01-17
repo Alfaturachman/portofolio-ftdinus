@@ -136,30 +136,51 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Rancangan Asesmen</h5>
+                        <h4 class="fw-bolder mb-3">Rancangan Asesmen</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengisi rancangan asesmen di bawah sebelum melanjutkan!
                         </div>
                     </div>
 
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <div class="form-group mb-3">
-                            <label for="rps_file" class="form-label"><strong>1.</strong> Tugas</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        <!-- Tugas -->
+                        <h5 class="fw-bolder mb-3">1. Tugas</h5>
+                        <div class="form-group mb-4">
+                            <label for="soal_tugas" class="form-label">Soal</label>
+                            <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
+                            <label for="jawaban_tugas" class="form-label mt-2">Jawaban</label>
+                            <input type="file" class="form-control" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" required>
+                            <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
+                            <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" required>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="rps_file" class="form-label"><strong>2.</strong> Ujian Tengah Semester</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+
+                        <!-- Ujian Tengah Semester -->
+                        <h5 class="fw-bolder mb-3">2. Ujian Tengah Semester</h5>
+                        <div class="form-group mb-4">
+                            <label for="soal_uts" class="form-label">Soal</label>
+                            <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
+                            <label for="jawaban_uts" class="form-label mt-2">Jawaban</label>
+                            <input type="file" class="form-control" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" required>
+                            <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
+                            <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" required>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="rps_file" class="form-label"><strong>3.</strong> Ujian Akhir Semester</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+
+                        <!-- Ujian Akhir Semester -->
+                        <h5 class="fw-bolder mb-3">3. Ujian Akhir Semester</h5>
+                        <div class="form-group mb-4">
+                            <label for="soal_uas" class="form-label">Soal</label>
+                            <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
+                            <label for="jawaban_uas" class="form-label mt-2">Jawaban</label>
+                            <input type="file" class="form-control" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" required>
+                            <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
+                            <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" required>
                         </div>
+
                         <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="submit" id="submitBtn" class="btn btn-primary">
+                            </a>
+                            <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
                         </div>

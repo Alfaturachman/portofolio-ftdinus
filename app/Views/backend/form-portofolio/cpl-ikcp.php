@@ -179,12 +179,15 @@
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/topik-perkuliahan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="button" id="submitBtn" class="btn btn-primary">
+                            </a>
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button> -->
                         </div>
                     </form>
                 </div>

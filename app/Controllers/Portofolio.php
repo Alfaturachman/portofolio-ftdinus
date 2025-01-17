@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\Controller;
-
 class Portofolio extends BaseController
 {
     public function index(): string

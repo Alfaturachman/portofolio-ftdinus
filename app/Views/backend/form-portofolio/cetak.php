@@ -136,7 +136,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Cetak</h5>
+                        <h4 class="fw-bolder mb-3">Cetak</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mencetak file CPMK & Sub CPMK di bawah sebelum melanjutkan!
                         </div>
@@ -149,12 +149,15 @@
                         </div>
                         <p class="text-danger">*format file: PDF</p>
                         <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="submit" id="submitBtn" class="btn btn-primary">
+                            </a>
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/upload-rps') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button> -->
                         </div>
                     </form>
                 </div>
