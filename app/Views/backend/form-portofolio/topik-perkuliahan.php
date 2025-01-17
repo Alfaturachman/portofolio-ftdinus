@@ -53,10 +53,10 @@
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
-                    <div class="d-sm-flex d-block align-items-center justify-content-center">
+                    <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div id="steps" class="d-flex justify-content-between align-items-baseline mt-4">
+                    <div id="steps" class="d-flex justify-content-between align-items-baseline">
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -69,7 +69,7 @@
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active data-step="topik">
+                            <div class="step-circle active data-step=" topik">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
@@ -148,9 +148,9 @@
                             <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
+                            </a>
                             <button type="button" id="submitBtn" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>

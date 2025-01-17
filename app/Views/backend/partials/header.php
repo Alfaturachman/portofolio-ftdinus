@@ -44,8 +44,13 @@
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                             <span class="hide-menu">PORTOFOLIO</span>
                         </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link <?= (current_url() == base_url('portofolio-form/info-matkul') || current_url() == base_url('portofolio-form/topik-perkuliahan')) ? 'active' : '' ?>" href="<?= base_url('portofolio-form') ?>" aria-expanded="false">
+                        <li class="sidebar-item <?= (strpos(current_url(), 'portofolio-form') !== false) ? 'selected' : '' ?>">
+                            <a class="sidebar-link <?= (current_url() == base_url('portofolio-form') ||
+                                                        current_url() == base_url('portofolio-form/info-matkul') ||
+                                                        current_url() == base_url('portofolio-form/topik-perkuliahan'))
+                                                        ? 'active' : '' ?>"
+                                href="<?= base_url('portofolio-form') ?>"
+                                aria-expanded="false">
                                 <span>
                                     <i class="ti ti-file-description"></i>
                                 </span>

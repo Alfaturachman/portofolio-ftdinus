@@ -6,7 +6,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-sm-flex d-block align-items-center justify-content-center">
-                        <h5 class="fw-bolder mb-0">Portofolio Mata Kuliah</h5>
+                        <h4 class="fw-bolder mb-0">Portofolio Mata Kuliah</h4>
                     </div>
                 </div>
             </div>
@@ -19,42 +19,47 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Portofolio Mata Kuliah</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi CPMK & Sub CPMK di bawah sebelum melanjutkan!
-                        </div>
-                        <div class="d-flex justify-content-between">
+                        
+                        <div class="d-flex justify-content-start mb-3">
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 Tambah Portofolio
                             </a>
+                        </div>
+
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Di bawah merupakan portofolio mata kuliah!
                         </div>
                     </div>
 
                     <table class="table table-bordered">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 30%">CPMK</th>
-                                <th style="width: 70%">Narasi</th>
+                                <th style="width: 10%">No</th>
+                                <th style="width: 20%">Program Studi</th>
+                                <th style="width: 70%">Mata Kuliah</th>
+                                <th style="width: 30%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- CPMK 1 -->
-                            <tr class="table-light">
-                                <td><strong>CPMK 1</strong></td>
-                                <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit laboris.</td>
+                            <tr>
+                                <td>1</td>
+                                <td><strong>Teknik Elektro</strong></td>
+                                <td><strong>Pemrograman Web</strong></td>
+                                <td>
+                                    <a class="btn btn-primary" href="<?= base_url('detail-portofolio') ?>">
+                                        Detail
+                                    </a>
+                                </td>
                             </tr>
                             <tr>
-                                <td><i>Sub CPMK 1</i></td>
-                                <td><i>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</i></td>
-                            </tr>
-                            <!-- CPMK 2 -->
-                            <tr class="table-light">
-                                <td><strong>CPMK 2</strong></td>
-                                <td>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</td>
-                            </tr>
-                            <tr>
-                                <td><i>Sub CPMK 2</i></td>
-                                <td><i>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</i></td>
+                                <td>2</td>
+                                <td><strong>Teknik Industri</strong></td>
+                                <td><strong>Basis Data</strong></td>
+                                <td>
+                                    <a class="btn btn-primary" href="<?= base_url('detail-portofolio') ?>">
+                                        Detail
+                                    </a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

@@ -1,7 +1,7 @@
 <?= $this->include('backend/partials/header') ?>
 
 <div class="container-fluid">
-    <div class="row">
+    <div class="row pt-3">
         <div class="col">
             <div class="card">
                 <div class="card-body">
@@ -13,7 +13,7 @@
             </div>
         </div>
     </div>
-    <div class="row pt-3">
+    <div class="row">
         <div class="col-lg-12">
             <div class="row">
                 <div class="col-lg-4">

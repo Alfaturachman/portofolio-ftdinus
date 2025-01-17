@@ -13,7 +13,11 @@ class Portofolio extends BaseController
 
     public function info_matkul(): string
     {
-        return view('backend/form-portofolio/info-matkul');
+        // Ambil data dari session
+        $data['info_matkul'] = session()->get('info_matkul') ?? [];
+
+        // Kirim data ke view
+        return view('backend/form-portofolio/info-matkul', $data);
     }
 
     public function saveInfoMatkul()
@@ -55,5 +59,16 @@ class Portofolio extends BaseController
     public function topik_perkuliahan(): string
     {
         return view('backend/form-portofolio/topik-perkuliahan');
+    }
+
+    // Method baru untuk menghapus session
+    public function deleteSession()
+    {
+        // Hapus session 'info_matkul'
+        session()->remove('info_matkul');
+        log_message('info', 'Session info_matkul telah dihapus.');
+
+        // Redirect kembali ke halaman sebelumnya setelah session dihapus
+        return redirect()->to('portofolio-form/');
     }
 }

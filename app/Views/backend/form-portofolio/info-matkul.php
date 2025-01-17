@@ -131,7 +131,7 @@
     </div>
 
     <!-- Informasi Mata Kuliah -->
-    <div class="row" data-step="info_matkul">
+    <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
@@ -143,34 +143,37 @@
                     </div>
 
                     <form action="<?= base_url('portofolio/saveInfoMatkul') ?>" method="post">
-                        <?= csrf_field() ?>
+                        <?=
+                        csrf_field();
+                        $infoMatkul = $info_matkul ?? [];
+                        ?>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
-                            <input type="text" class="form-control" id="nama_mk" name="nama_mk" placeholder="Masukkan nama mata kuliah" required>
+                            <input type="text" class="form-control" id="nama_mk" name="nama_mk" placeholder="Masukkan nama mata kuliah" value="<?= old('nama_mk', $infoMatkul['nama_mk'] ?? '') ?>" required>
                         </div>
                         <div class="form-group mb-3">
                             <label for="kode_mk" class="form-label">Kode MK</label>
-                            <input type="text" class="form-control" id="kode_mk" name="kode_mk" placeholder="Masukkan kode mata kuliah" required>
+                            <input type="text" class="form-control" id="kode_mk" name="kode_mk" placeholder="Masukkan kode mata kuliah" value="<?= old('kode_mk', $infoMatkul['kode_mk'] ?? '') ?>" required>
                         </div>
                         <div class="form-group mb-3">
                             <label for="kelompok_mk" class="form-label">Kelompok MK</label>
-                            <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" placeholder="Masukkan kelompok mata kuliah" required>
+                            <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" placeholder="Masukkan kelompok mata kuliah" value="<?= old('kelompok_mk', $infoMatkul['kelompok_mk'] ?? '') ?>" required>
                         </div>
                         <div class="form-group mb-3">
                             <label for="sks" class="form-label">SKS</label>
                             <div class="d-flex">
-                                <input type="number" class="form-control me-2" id="sks_teori" name="sks_teori" placeholder="SKS Teori" required>
-                                <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" placeholder="SKS Praktik" required>
+                                <input type="number" class="form-control me-2" id="sks_teori" name="sks_teori" placeholder="SKS Teori" value="<?= old('sks_teori', $infoMatkul['sks_teori'] ?? '') ?>" required>
+                                <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" placeholder="SKS Praktik" value="<?= old('sks_praktik', $infoMatkul['sks_praktik'] ?? '') ?>" required>
                             </div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="mk_prasyarat" class="form-label">MK Prasyarat</label>
-                            <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"></textarea>
+                            <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= old('mk_prasyarat', $infoMatkul['mk_prasyarat'] ?? '') ?></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
+                            </a>
                             <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
