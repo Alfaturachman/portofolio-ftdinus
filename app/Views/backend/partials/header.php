@@ -47,7 +47,12 @@
                         <li class="sidebar-item <?= (strpos(current_url(), 'portofolio-form') !== false) ? 'selected' : '' ?>">
                             <a class="sidebar-link <?= (current_url() == base_url('portofolio-form') ||
                                                         current_url() == base_url('portofolio-form/info-matkul') ||
-                                                        current_url() == base_url('portofolio-form/topik-perkuliahan'))
+                                                        current_url() == base_url('portofolio-form/topik-perkuliahan') ||
+                                                        current_url() == base_url('portofolio-form/cpl-ikcp') ||
+                                                        current_url() == base_url('portofolio-form/cpmk-subcpmk') ||
+                                                        current_url() == base_url('portofolio-form/cetak') ||
+                                                        current_url() == base_url('portofolio-form/upload-rps') ||
+                                                        current_url() == base_url('portofolio-form/rancangan-asesmen'))
                                                         ? 'active' : '' ?>"
                                 href="<?= base_url('portofolio-form') ?>"
                                 aria-expanded="false">
