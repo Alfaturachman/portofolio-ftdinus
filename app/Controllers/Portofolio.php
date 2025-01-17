@@ -13,15 +13,12 @@ class Portofolio extends BaseController
 
     public function info_matkul(): string
     {
-        // Ambil data dari session
         $data['info_matkul'] = session()->get('info_matkul') ?? [];
-
         return view('backend/form-portofolio/info-matkul', $data);
     }
 
     public function saveInfoMatkul()
     {
-        // Validasi input
         $validation = \Config\Services::validation();
         $validation->setRules([
             'nama_mk' => 'required',
@@ -35,7 +32,6 @@ class Portofolio extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        // Ambil data dari request
         $data = [
             'nama_mk' => $this->request->getPost('nama_mk'),
             'kode_mk' => $this->request->getPost('kode_mk'),
@@ -45,12 +41,10 @@ class Portofolio extends BaseController
             'mk_prasyarat' => $this->request->getPost('mk_prasyarat'),
         ];
 
-        // Simpan ke session
         session()->set('info_matkul', $data);
 
         log_message('info', 'Data Mata Kuliah disimpan ke session: ' . json_encode($data));
 
-        // Redirect ke langkah berikutnya
         return redirect()->to('portofolio-form/topik-perkuliahan');
     }
 
@@ -59,12 +53,35 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/topik-perkuliahan');
     }
 
-    // Method baru untuk menghapus session
+    public function cpl_ikcp(): string
+    {
+        return view('backend/form-portofolio/cpl-ikcp');
+    }
+
+    public function cpmk_subcpmk(): string
+    {
+        return view('backend/form-portofolio/cpmk-subcpmk');
+    }
+
+    public function cetak(): string
+    {
+        return view('backend/form-portofolio/cetak');
+    }
+
+    public function upload_rps(): string
+    {
+        return view('backend/form-portofolio/upload-rps');
+    }
+
+    public function rancangan_asesmen(): string
+    {
+        return view('backend/form-portofolio/rancangan-asesmen');
+    }
+
     public function deleteSession()
     {
         session()->remove('info_matkul');
         log_message('info', 'Session info_matkul telah dihapus.');
-
         return redirect()->to('portofolio-form/');
     }
 }

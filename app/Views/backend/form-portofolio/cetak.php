@@ -69,7 +69,7 @@
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle active data-step=" topik">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
@@ -85,21 +85,21 @@
                             <small class="d-block mt-2 step-label">CPL & Indikator</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-book"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-printer"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Cetak</small>
@@ -130,28 +130,29 @@
         </div>
     </div>
 
-    <!-- Topik Perkuliahan -->
-    <div class="row" data-step="topik">
+    <!-- Cetak -->
+    <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Topik Perkuliahan</h5>
+                        <h5 class="card-title fw-bolder mb-3">Cetak</h5>
                         <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi topik perkuliahan di bawah sebelum melanjutkan!
+                            Silahkan untuk mencetak file CPMK & Sub CPMK di bawah sebelum melanjutkan!
                         </div>
                     </div>
 
-                    <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
-                        <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"></textarea>
+                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <div class="form-group mb-2">
+                            <label for="rps_file" class="form-label">Cetak File CPMK & Sub CPMK</label>
+                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
                         </div>
+                        <p class="text-danger">*format file: PDF</p>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
+                            <button type="button" class="btn btn-secondary">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
-                            <button type="button" id="submitBtn" class="btn btn-primary">
+                            </button>
+                            <button type="submit" id="submitBtn" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
                         </div>

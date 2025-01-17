@@ -69,7 +69,7 @@
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle active data-step=" topik">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
@@ -85,11 +85,11 @@
                             <small class="d-block mt-2 step-label">CPL & Indikator</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-book"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
@@ -130,27 +130,51 @@
         </div>
     </div>
 
-    <!-- Topik Perkuliahan -->
-    <div class="row" data-step="topik">
+    <!-- CPMK & Sub CPMK -->
+    <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Topik Perkuliahan</h5>
+                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Mata Kuliah (CPMK) & Sub Capaian Pembelajaran Mata Kuliah (Sub CPMK)</h5>
                         <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi topik perkuliahan di bawah sebelum melanjutkan!
+                            Silahkan untuk mengisi CPMK & Sub CPMK di bawah sebelum melanjutkan!
                         </div>
                     </div>
 
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
-                        <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"></textarea>
-                        </div>
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 30%">CPMK</th>
+                                    <th style="width: 70%">Narasi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- CPMK 1 -->
+                                <tr class="table-light">
+                                    <td><strong>CPMK 1</strong></td>
+                                    <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit laboris.</td>
+                                </tr>
+                                <tr>
+                                    <td><i>Sub CPMK 1</i></td>
+                                    <td><i>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</i></td>
+                                </tr>
+                                <!-- CPMK 2 -->
+                                <tr class="table-light">
+                                    <td><strong>CPMK 2</strong></td>
+                                    <td>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</td>
+                                </tr>
+                                <tr>
+                                    <td><i>Sub CPMK 2</i></td>
+                                    <td><i>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</i></td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
+                            <button type="button" class="btn btn-secondary">
                                 <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
+                            </button>
                             <button type="button" id="submitBtn" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </button>
