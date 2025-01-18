@@ -60,7 +60,38 @@ class Portofolio extends BaseController
 
     public function topik_perkuliahan(): string
     {
-        return view('backend/form-portofolio/topik-perkuliahan');
+         // Data tambahan dari session (jika ada)
+         $topikPerkuliahan = session()->get('topik_perkuliahan') ?? [];
+
+         // Kirim data ke view
+         return view('backend/form-portofolio/topik-perkuliahan', [
+             'topikPerkuliahan' => $topikPerkuliahan,
+         ]);
+    }
+
+    public function saveTopikPerkuliahan()
+    {
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'topik_mk' => 'required',
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+
+        // Ambil data topik perkuliahan dari form
+        $topik = $this->request->getPost('topik_mk');
+
+        // Simpan data topik perkuliahan ke session
+        $data = array_merge(['topik_mk' => $topik]);
+
+        // Set data ke session
+        session()->set('topik_perkuliahan', $data);
+
+        log_message('info', 'Topik Perkuliahan disimpan ke session: ' . json_encode($data));
+
+        return redirect()->to('portofolio-form/cpl-ikcp');
     }
 
     public function cpl_ikcp(): string

@@ -18,3 +18,4 @@ $routes->get('portofolio-form/upload-rps', 'Portofolio::upload_rps');
 $routes->get('portofolio-form/rancangan-asesmen', 'Portofolio::rancangan_asesmen');
 
 $routes->post('/portofolio/saveInfoMatkul', 'Portofolio::saveInfoMatkul');
+$routes->post('portofolio/saveTopikPerkuliahan', 'Portofolio::saveTopikPerkuliahan');
