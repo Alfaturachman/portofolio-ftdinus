@@ -11,8 +11,20 @@ class Portofolio extends BaseController
 
     public function info_matkul(): string
     {
-        $data['info_matkul'] = session()->get('info_matkul') ?? [];
-        return view('backend/form-portofolio/info-matkul', $data);
+        // Data statis mata kuliah
+        $mataKuliah = [
+            ['nama_mk' => 'Pemrograman', 'kode_mk' => 'MK001', 'kelompok_mk' => 'A', 'sks_teori' => 3, 'sks_praktik' => 1],
+            ['nama_mk' => 'Manajemen', 'kode_mk' => 'MK002', 'kelompok_mk' => 'B', 'sks_teori' => 2, 'sks_praktik' => 2],
+        ];
+
+        // Data tambahan dari session (jika ada)
+        $infoMatkul = session()->get('info_matkul') ?? [];
+
+        // Kirim data ke view
+        return view('backend/form-portofolio/info-matkul', [
+            'mataKuliah' => $mataKuliah,
+            'infoMatkul' => $infoMatkul,
+        ]);
     }
 
     public function saveInfoMatkul()

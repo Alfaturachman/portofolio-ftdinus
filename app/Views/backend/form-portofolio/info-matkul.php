@@ -143,45 +143,67 @@
                     </div>
 
                     <form action="<?= base_url('portofolio/saveInfoMatkul') ?>" method="post">
-                        <?=
-                        csrf_field();
-                        $infoMatkul = $info_matkul ?? [];
-                        ?>
+                        <?= csrf_field(); ?>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
-                            <input type="text" class="form-control" id="nama_mk" name="nama_mk" placeholder="Masukkan nama mata kuliah" value="<?= old('nama_mk', $infoMatkul['nama_mk'] ?? '') ?>" required>
+                            <select class="form-select" id="nama_mk" name="nama_mk" required>
+                                <option value="">Pilih Mata Kuliah</option>
+                                <?php foreach ($mataKuliah as $mk): ?>
+                                    <option value="<?= htmlspecialchars(json_encode($mk)) ?>"
+                                        <?= (isset($infoMatkul['nama_mk']) && $infoMatkul['nama_mk'] == json_encode($mk)) ? 'selected' : '' ?>>
+                                        <?= $mk['nama_mk'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="form-group mb-3">
                             <label for="kode_mk" class="form-label">Kode MK</label>
-                            <input type="text" class="form-control" id="kode_mk" name="kode_mk" placeholder="Masukkan kode mata kuliah" value="<?= old('kode_mk', $infoMatkul['kode_mk'] ?? '') ?>" required>
+                            <input type="text" class="form-control" id="kode_mk" name="kode_mk" readonly value="<?= isset($infoMatkul['kode_mk']) ? $infoMatkul['kode_mk'] : '' ?>">
                         </div>
                         <div class="form-group mb-3">
                             <label for="kelompok_mk" class="form-label">Kelompok MK</label>
-                            <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" placeholder="Masukkan kelompok mata kuliah" value="<?= old('kelompok_mk', $infoMatkul['kelompok_mk'] ?? '') ?>" required>
+                            <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" readonly value="<?= isset($infoMatkul['kelompok_mk']) ? $infoMatkul['kelompok_mk'] : '' ?>">
                         </div>
                         <div class="form-group mb-3">
                             <label for="sks" class="form-label">SKS</label>
                             <div class="d-flex">
-                                <input type="number" class="form-control me-2" id="sks_teori" name="sks_teori" placeholder="SKS Teori" value="<?= old('sks_teori', $infoMatkul['sks_teori'] ?? '') ?>" required>
-                                <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" placeholder="SKS Praktik" value="<?= old('sks_praktik', $infoMatkul['sks_praktik'] ?? '') ?>" required>
+                                <input type="number" class="form-control me-2" id="sks_teori" name="sks_teori" readonly value="<?= isset($infoMatkul['sks_teori']) ? $infoMatkul['sks_teori'] : '' ?>">
+                                <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" readonly value="<?= isset($infoMatkul['sks_praktik']) ? $infoMatkul['sks_praktik'] : '' ?>">
                             </div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="mk_prasyarat" class="form-label">MK Prasyarat</label>
-                            <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= old('mk_prasyarat', $infoMatkul['mk_prasyarat'] ?? '') ?></textarea>
+                            <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= isset($infoMatkul['mk_prasyarat']) ? $infoMatkul['mk_prasyarat'] : '' ?></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/topik-perkuliahan') ?>">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            <button type="submit" class="btn btn-primary">
+                                Simpan <i class="ti ti-save"></i>
+                            </button>
                         </div>
                     </form>
+
+                    <script>
+                        // JavaScript untuk mengisi data otomatis berdasarkan pilihan
+                        document.getElementById('nama_mk').addEventListener('change', function() {
+                            const selectedOption = this.value;
+                            if (selectedOption) {
+                                const data = JSON.parse(selectedOption);
+                                document.getElementById('kode_mk').value = data.kode_mk || '';
+                                document.getElementById('kelompok_mk').value = data.kelompok_mk || '';
+                                document.getElementById('sks_teori').value = data.sks_teori || '';
+                                document.getElementById('sks_praktik').value = data.sks_praktik || '';
+                            } else {
+                                // Kosongkan field jika tidak ada yang dipilih
+                                document.getElementById('kode_mk').value = '';
+                                document.getElementById('kelompok_mk').value = '';
+                                document.getElementById('sks_teori').value = '';
+                                document.getElementById('sks_praktik').value = '';
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>
