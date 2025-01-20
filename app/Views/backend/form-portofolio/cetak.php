@@ -143,11 +143,88 @@
                     </div>
 
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <div class="form-group mb-2">
-                            <label for="rps_file" class="form-label">Cetak File CPMK & Sub CPMK</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr class="align-middle text-center">
+                                        <th style="width: 20%" rowspan="2">CPL</th>
+                                        <th style="width: 30%" rowspan="2">CPMK</th>
+                                        <th colspan="5">Sub CPMK</th>
+                                    </tr>
+                                    <tr class="text-center">
+                                        <th>1</th>
+                                        <th>2</th>
+                                        <th>3</th>
+                                        <th>4</th>
+                                        <th>5</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- CPL 1 -->
+                                    <tr>
+                                        <td rowspan="3" class="align-middle"><strong>CPL 1</strong></td>
+                                        <td>Mengidentifikasi masalah dasar ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Menerapkan metode analisis ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Menyampaikan analisis secara tertulis ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+
+                                    <!-- CPL 2 -->
+                                    <tr>
+                                        <td rowspan="4" class="align-middle"><strong>CPL 2</strong></td>
+                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <p class="text-danger">*format file: PDF</p>
+
                         <div class="d-flex justify-content-between pt-3">
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
