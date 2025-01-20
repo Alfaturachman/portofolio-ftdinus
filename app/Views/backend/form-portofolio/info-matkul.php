@@ -149,9 +149,13 @@
                             <select class="form-select" id="nama_mk" name="nama_mk" required>
                                 <option value="">Pilih Mata Kuliah</option>
                                 <?php foreach ($mataKuliah as $mk): ?>
-                                    <option value="<?= htmlspecialchars(json_encode($mk)) ?>"
-                                        <?= (isset($infoMatkul['nama_mk']) && $infoMatkul['nama_mk'] == json_encode($mk)) ? 'selected' : '' ?>>
-                                        <?= $mk['nama_mk'] ?>
+                                    <option value="<?= htmlspecialchars($mk['nama_mk']) ?>"
+                                        data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
+                                        data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
+                                        data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
+                                        data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>"
+                                        <?= (isset($infoMatkul['nama_mk']) && $infoMatkul['nama_mk'] === $mk['nama_mk']) ? 'selected' : '' ?>>
+                                        <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -184,281 +188,28 @@
                             </button>
                         </div>
                     </form>
-
-                    <script>
-                        // JavaScript untuk mengisi data otomatis berdasarkan pilihan
-                        document.getElementById('nama_mk').addEventListener('change', function() {
-                            const selectedOption = this.value;
-                            if (selectedOption) {
-                                const data = JSON.parse(selectedOption);
-                                document.getElementById('kode_mk').value = data.kode_mk || '';
-                                document.getElementById('kelompok_mk').value = data.kelompok_mk || '';
-                                document.getElementById('sks_teori').value = data.sks_teori || '';
-                                document.getElementById('sks_praktik').value = data.sks_praktik || '';
-                            } else {
-                                // Kosongkan field jika tidak ada yang dipilih
-                                document.getElementById('kode_mk').value = '';
-                                document.getElementById('kelompok_mk').value = '';
-                                document.getElementById('sks_teori').value = '';
-                                document.getElementById('sks_praktik').value = '';
-                            }
-                        });
-                    </script>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Topik Perkuliahan -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Topik Perkuliahan</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi topik perkuliahan di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-
-                    <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
-                        <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"></textarea>
-                        </div>
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="button" id="submitBtn" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CPL & IKCP -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Lulusan (CPL) & Indikator Kinerja Capaian Pembelajaran (IKCP)</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi CPL dan indikator kinerja di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-                    <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
-                        <table class="table table-bordered">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th style="width: 30%" colspan="2">CPL</th>
-                                    <th style="width: 60%">IKCP</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td rowspan="3" style="white-space: nowrap;"><strong>CPL 1</strong></td>
-                                    <td rowspan="3">Mampu menguasai konsep dasar...</td>
-                                    <td>Mengidentifikasi masalah dasar ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menerapkan metode analisis ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menyampaikan hasil analisis secara tertulis ...</td>
-                                </tr>
-
-                                <tr>
-                                    <td rowspan="4" style="white-space: nowrap;"><strong>CPL 2</strong></td>
-                                    <td rowspan="4">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                    <td>Berkomunikasi secara efektif dalam tim ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menyusun laporan sesuai standar ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menggunakan teknologi untuk kolaborasi ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Memahami etika komunikasi profesional ...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="button" id="submitBtn" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CPMK & Sub CPMK -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Mata Kuliah (CPMK) & Sub Capaian Pembelajaran Mata Kuliah (Sub CPMK)</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi CPMK & Sub CPMK di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-
-                    <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
-                        <table class="table table-bordered">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th style="width: 30%">CPMK</th>
-                                    <th style="width: 70%">Narasi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- CPMK 1 -->
-                                <tr class="table-light">
-                                    <td><strong>CPMK 1</strong></td>
-                                    <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit laboris.</td>
-                                </tr>
-                                <tr>
-                                    <td><i>Sub CPMK 1</i></td>
-                                    <td><i>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</i></td>
-                                </tr>
-                                <!-- CPMK 2 -->
-                                <tr class="table-light">
-                                    <td><strong>CPMK 2</strong></td>
-                                    <td>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</td>
-                                </tr>
-                                <tr>
-                                    <td><i>Sub CPMK 2</i></td>
-                                    <td><i>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</i></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="button" id="submitBtn" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cetak -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Cetak</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mencetak file CPMK & Sub CPMK di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <div class="form-group mb-2">
-                            <label for="rps_file" class="form-label">Cetak File CPMK & Sub CPMK</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                        </div>
-                        <p class="text-danger">*format file: PDF</p>
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="submit" id="submitBtn" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Upload RPS -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Upload RPS</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengupload file RPS (PDF) di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <div class="form-group mb-2">
-                            <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                        </div>
-                        <p class="text-danger">*format file: PDF</p>
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="submit" id="submitBtn" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Rancangan Asesmen -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Rancangan Asesmen</h5>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi rancangan asesmen di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <div class="form-group mb-3">
-                            <label for="rps_file" class="form-label"><strong>1.</strong> Tugas</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="rps_file" class="form-label"><strong>2.</strong> Ujian Tengah Semester</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="rps_file" class="form-label"><strong>3.</strong> Ujian Akhir Semester</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                        </div>
-                        <div class="d-flex justify-content-between pt-3">
-                            <button type="button" class="btn btn-secondary">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </button>
-                            <button type="submit" id="submitBtn" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script>
+        document.getElementById('nama_mk').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex]; // Ambil option yang dipilih
+            if (selectedOption.value) {
+                document.getElementById('kode_mk').value = selectedOption.getAttribute('data-kode_mk') || '';
+                document.getElementById('kelompok_mk').value = selectedOption.getAttribute('data-kelompok_mk') || '';
+                document.getElementById('sks_teori').value = selectedOption.getAttribute('data-sks_teori') || '';
+                document.getElementById('sks_praktik').value = selectedOption.getAttribute('data-sks_praktik') || '';
+            } else {
+                // Kosongkan field jika tidak ada yang dipilih
+                document.getElementById('kode_mk').value = '';
+                document.getElementById('kelompok_mk').value = '';
+                document.getElementById('sks_teori').value = '';
+                document.getElementById('sks_praktik').value = '';
+            }
+        });
+    </script>
 </div>
 
 <?= $this->include('backend/partials/footer') ?>
