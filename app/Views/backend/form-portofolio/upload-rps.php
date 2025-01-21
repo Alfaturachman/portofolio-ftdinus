@@ -56,63 +56,63 @@
                     <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div id="steps" class="d-flex justify-content-between align-items-baseline">
-                        <!-- Info Matkul -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-bookmark"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Info Matkul</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
-                        <!-- Topik -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active data-step=" topik">
-                                <i class="ti ti-analyze"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Topik</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
-                        <!-- CPL & Indikator -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-chart-line"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">CPL & Indikator</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
-                        <!-- CPMK & Sub CPMK -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-book"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">CPMK & Sub</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
-                        <!-- Cetak -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-printer"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Cetak</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
+                    <div class="d-flex justify-content-between align-items-baseline">
                         <!-- Upload RPS -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-upload"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Upload RPS</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Info Matkul -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-bookmark"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Info Matkul</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Topik -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-analyze"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Topik</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- CPL & PI -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-chart-line"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">CPL & PI</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- CPMK & Sub CPMK -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-book"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">CPMK & Sub</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Cetak -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-report-analytics"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -142,22 +142,36 @@
                         </div>
                     </div>
 
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
+                    <?php endif; ?>
+
+                    <?php if (session()->getFlashdata('success')): ?>
+                        <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
+                    <?php endif; ?>
+
+                    <form id="rpsForm" action="<?= base_url('portofolio-form/save-upload-rps') ?>" method="post" enctype="multipart/form-data">
                         <div class="form-group mb-2">
                             <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
                             <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
                         </div>
                         <p class="text-danger">*format file: PDF</p>
+
+                        <?php if (!empty($pdfUrl)): ?>
+                            <div style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <?php else: ?>
+                            <p class="text-warning">File belum diunggah atau belum tersedia.</p>
+                        <?php endif; ?>
+
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cetak') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/rancangan-asesmen') ?>">
+                            <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            </button>
                         </div>
                     </form>
                 </div>

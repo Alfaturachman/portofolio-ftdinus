@@ -56,7 +56,7 @@
                     <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div id="steps" class="d-flex justify-content-between align-items-baseline">
+                    <div class="d-flex justify-content-between align-items-baseline">
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -69,7 +69,7 @@
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle active data-step=" topik">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
@@ -77,12 +77,12 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- CPL & Indikator -->
+                        <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-chart-line"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">CPL & Indikator</small>
+                            <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -100,19 +100,9 @@
                         <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-printer"></i>
+                                <i class="ti ti-report-analytics"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Cetak</small>
-                        </div>
-
-                        <div class="step-line"></div>
-
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
+                            <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -136,7 +126,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Lulusan (CPL) & Indikator Kinerja Capaian Pembelajaran (IKCP)</h5>
+                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Lulusan (CPL) & Performa Index (PI)</h5>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengisi CPL dan indikator kinerja di bawah sebelum melanjutkan!
                         </div>

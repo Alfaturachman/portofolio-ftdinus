@@ -56,7 +56,7 @@
                     <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div id="steps" class="d-flex justify-content-between align-items-baseline">
+                    <div class="d-flex justify-content-between align-items-baseline">
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -77,12 +77,12 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- CPL & Indikator -->
+                        <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-chart-line"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">CPL & Indikator</small>
+                            <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
 
                         <div class="step-line active"></div>
@@ -100,19 +100,9 @@
                         <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-printer"></i>
+                                <i class="ti ti-report-analytics"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Cetak</small>
-                        </div>
-
-                        <div class="step-line"></div>
-
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
+                            <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -123,6 +113,16 @@
                                 <i class="ti ti-checklist"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Rancangan Assesmen -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-checklist"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
                         </div>
                     </div>
                 </div>
@@ -136,7 +136,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h4 class="fw-bolder mb-3">Cetak</h4>
+                        <h4 class="fw-bolder mb-3">Pemetaan CPL - CPMK - Sub CPMK</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mencetak file CPMK & Sub CPMK di bawah sebelum melanjutkan!
                         </div>
@@ -164,62 +164,62 @@
                                     <tr>
                                         <td rowspan="3" class="align-middle"><strong>CPL 1</strong></td>
                                         <td>Mengidentifikasi masalah dasar ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="5"></td>
                                     </tr>
                                     <tr>
                                         <td>Menerapkan metode analisis ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="5"></td>
                                     </tr>
                                     <tr>
-                                        <td>Menyampaikan analisis secara tertulis ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td>Menyampaikan hasil analisis secara tertulis ...</td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="5"></td>
                                     </tr>
 
                                     <!-- CPL 2 -->
                                     <tr>
                                         <td rowspan="4" class="align-middle"><strong>CPL 2</strong></td>
-                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="5"></td>
                                     </tr>
                                     <tr>
-                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="5"></td>
                                     </tr>
                                     <tr>
-                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="5"></td>
                                     </tr>
                                     <tr>
-                                        <td class="align-middle">Memiliki kemampuan untuk ...</td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
-                                        <td class="text-center align-middle"><strong>✓</strong></td>
+                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="1"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="2"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="3"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="4"></td>
+                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="5"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -229,7 +229,7 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/upload-rps') ?>">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/rancangan-asesmen') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a>
                             <!-- <button type="submit" class="btn btn-primary">

@@ -115,11 +115,11 @@
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- Nilai CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-checklist"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Nilai CPMK</small>
@@ -130,62 +130,92 @@
         </div>
     </div>
 
-    <!-- Rancangan Asesmen -->
+    <!-- Nilai CPMK -->
     <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h4 class="fw-bolder mb-3">Rancangan Asesmen</h4>
+                        <h4 class="fw-bolder mb-3">Nilai Capaian Pembelajaran Mata Kuliah</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi rancangan asesmen di bawah sebelum melanjutkan!
+                            Silahkan untuk mengisi nilai CPMK di bawah sebelum melanjutkan!
                         </div>
                     </div>
 
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <!-- Tugas -->
-                        <h5 class="fw-bolder mb-3">1. Tugas</h5>
-                        <div class="form-group mb-4">
-                            <label for="soal_tugas" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
-                            <label for="jawaban_tugas" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" required>
-                            <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
-                            <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" required>
-                        </div>
+                        <!-- Tabel Header -->
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fakultas</th>
+                                    <th>Kode Mata Kuliah</th>
+                                    <th>Nama Mata Kuliah</th>
+                                    <th>Kelompok</th>
+                                    <th>Jenis Mata Kuliah</th>
+                                    <th>Semester</th>
+                                    <th>Tahun Akademik</th>
+                                    <th>Nama Dosen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Fakultas Teknik</td>
+                                    <td>MK001</td>
+                                    <td>Pemrograman</td>
+                                    <td>A</td>
+                                    <td>Teori</td>
+                                    <td>1</td>
+                                    <td>2024/2025</td>
+                                    <td>Dr. John Doe</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <!-- Ujian Tengah Semester -->
-                        <h5 class="fw-bolder mb-3">2. Ujian Tengah Semester</h5>
-                        <div class="form-group mb-4">
-                            <label for="soal_uts" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
-                            <label for="jawaban_uts" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" required>
-                            <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
-                            <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" required>
-                        </div>
-
-                        <!-- Ujian Akhir Semester -->
-                        <h5 class="fw-bolder mb-3">3. Ujian Akhir Semester</h5>
-                        <div class="form-group mb-4">
-                            <label for="soal_uas" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
-                            <label for="jawaban_uas" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" required>
-                            <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
-                            <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" required>
-                        </div>
+                        <!-- Tabel Data Mahasiswa -->
+                        <table class="table table-bordered mt-4">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>No</th>
+                                    <th>NIM</th>
+                                    <th>Nama</th>
+                                    <th>CPMK 1</th>
+                                    <th>CPMK 2</th>
+                                    <th>CPMK 3</th>
+                                    <th>CPMK 4</th>
+                                    <th>CPMK 5</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>123456</td>
+                                    <td>Ahmad Zaki</td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>789012</td>
+                                    <td>Rina Amalia</td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                    <td><input type="checkbox"></td>
+                                </tr>
+                            </tbody>
+                        </table>
 
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/nilai-cpmk') ?>">
+                            <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            </button>
                         </div>
                     </form>
                 </div>

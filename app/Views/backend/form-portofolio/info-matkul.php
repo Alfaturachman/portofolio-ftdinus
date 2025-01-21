@@ -53,10 +53,20 @@
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
-                    <div class="d-sm-flex d-block align-items-center justify-content-center">
+                    <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div id="steps" class="d-flex justify-content-between align-items-baseline mt-4">
+                    <div class="d-flex justify-content-between align-items-baseline">
+                        <!-- Upload RPS -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle active">
+                                <i class="ti ti-upload"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Upload RPS</small>
+                        </div>
+
+                        <div class="step-line active"></div>
+
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -69,7 +79,7 @@
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle" data-step="topik">
+                            <div class="step-circle">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
@@ -77,12 +87,12 @@
 
                         <div class="step-line"></div>
 
-                        <!-- CPL & Indikator -->
+                        <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-chart-line"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">CPL & Indikator</small>
+                            <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -100,19 +110,9 @@
                         <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-printer"></i>
+                                <i class="ti ti-report-analytics"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Cetak</small>
-                        </div>
-
-                        <div class="step-line"></div>
-
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
+                            <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -144,6 +144,13 @@
 
                     <form action="<?= base_url('portofolio/saveInfoMatkul') ?>" method="post">
                         <?= csrf_field(); ?>
+                        <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                            <iframe src="<?= $pdfUrl ?>" width="100%" height="100%" style="border: none;"></iframe>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="view-pdf" class="form-label">Soal</label>
+                            <input type="file" class="form-control" id="view-pdf" name="view-pdf" accept="application/pdf" required>
+                        </div>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
                             <select class="form-select" id="nama_mk" name="nama_mk" required>
@@ -180,7 +187,7 @@
                             <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= isset($infoMatkul['mk_prasyarat']) ? $infoMatkul['mk_prasyarat'] : '' ?></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <button type="submit" class="btn btn-primary">

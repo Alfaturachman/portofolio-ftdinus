@@ -9,6 +9,57 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/index');
     }
 
+    public function upload_rps(): string
+    {
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/form-portofolio/upload-rps', [
+            'pdfUrl' => $pdfUrl,
+        ]);
+    }
+
+    public function view_uploaded_pdf($filename)
+    {
+        $path = WRITEPATH . 'uploads/temp/' . $filename;
+
+        if (file_exists($path)) {
+            return $this->response
+                ->setHeader('Content-Type', 'application/pdf')
+                ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+                ->setBody(file_get_contents($path));
+        } else {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('PDF not found');
+        }
+    }
+
+    public function saveUploadRps()
+    {
+        // Validasi file
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'rps_file' => 'uploaded[rps_file]|mime_in[rps_file,application/pdf]|max_size[rps_file,2048]', // Maks 2MB
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->with('error', 'File harus berupa PDF dengan ukuran maksimal 2MB');
+        }
+
+        // Ambil file yang diunggah
+        $file = $this->request->getFile('rps_file');
+
+        // Generate nama file unik dan simpan ke folder sementara
+        $newFileName = $file->getRandomName();
+        $file->move(WRITEPATH . 'uploads/temp', $newFileName);
+
+        // Simpan nama file ke session
+        session()->set('uploaded_rps', $newFileName);
+
+        log_message('info', 'File RPS diunggah dan disimpan sementara: ' . $newFileName);
+
+        return redirect()->to('portofolio-form/upload-rps')->with('success', 'File berhasil diunggah!');
+    }
+
     public function info_matkul(): string
     {
         // Data statis mata kuliah
@@ -20,11 +71,32 @@ class Portofolio extends BaseController
         // Data tambahan dari session (jika ada)
         $infoMatkul = session()->get('info_matkul') ?? [];
 
+        // URL untuk PDF Viewer
+        $pdfUrl = base_url('portofolio-form/view-pdf');
+
         // Kirim data ke view
         return view('backend/form-portofolio/info-matkul', [
             'mataKuliah' => $mataKuliah,
             'infoMatkul' => $infoMatkul,
+            'pdfUrl' => $pdfUrl,
         ]);
+    }
+
+    public function view_pdf(): object
+    {
+        // Path file PDF
+        $filePath = WRITEPATH . 'uploads/RPS Sistem Robotika.pdf';
+
+        // Cek apakah file ada
+        if (file_exists($filePath)) {
+            $fileContent = file_get_contents($filePath);
+            return $this->response
+                ->setHeader('Content-Type', 'application/pdf')
+                ->setHeader('Content-Disposition', 'inline; filename="RPS Sistem Robotika.pdf"')
+                ->setBody($fileContent);
+        } else {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('PDF not found.');
+        }
     }
 
     public function saveInfoMatkul()
@@ -60,13 +132,13 @@ class Portofolio extends BaseController
 
     public function topik_perkuliahan(): string
     {
-         // Data tambahan dari session (jika ada)
-         $topikPerkuliahan = session()->get('topik_perkuliahan') ?? [];
+        // Data tambahan dari session (jika ada)
+        $topikPerkuliahan = session()->get('topik_perkuliahan') ?? [];
 
-         // Kirim data ke view
-         return view('backend/form-portofolio/topik-perkuliahan', [
-             'topikPerkuliahan' => $topikPerkuliahan,
-         ]);
+        // Kirim data ke view
+        return view('backend/form-portofolio/topik-perkuliahan', [
+            'topikPerkuliahan' => $topikPerkuliahan,
+        ]);
     }
 
     public function saveTopikPerkuliahan()
@@ -91,12 +163,12 @@ class Portofolio extends BaseController
 
         log_message('info', 'Topik Perkuliahan disimpan ke session: ' . json_encode($data));
 
-        return redirect()->to('portofolio-form/cpl-ikcp');
+        return redirect()->to('portofolio-form/cpl-pi');
     }
 
-    public function cpl_ikcp(): string
+    public function cpl_pi(): string
     {
-        return view('backend/form-portofolio/cpl-ikcp');
+        return view('backend/form-portofolio/cpl-pi');
     }
 
     public function cpmk_subcpmk(): string
@@ -104,19 +176,19 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/cpmk-subcpmk');
     }
 
-    public function cetak(): string
+    public function pemetaan(): string
     {
-        return view('backend/form-portofolio/cetak');
-    }
-
-    public function upload_rps(): string
-    {
-        return view('backend/form-portofolio/upload-rps');
+        return view('backend/form-portofolio/pemetaan');
     }
 
     public function rancangan_asesmen(): string
     {
         return view('backend/form-portofolio/rancangan-asesmen');
+    }
+
+    public function nilai_cpmk(): string
+    {
+        return view('backend/form-portofolio/nilai-cpmk');
     }
 
     public function deleteSession()

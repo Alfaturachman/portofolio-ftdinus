@@ -56,7 +56,7 @@
                     <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
-                    <div id="steps" class="d-flex justify-content-between align-items-baseline">
+                    <div class="d-flex justify-content-between align-items-baseline">
                         <!-- Info Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -69,7 +69,7 @@
 
                         <!-- Topik -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
+                            <div class="step-circle active data-step=" topik">
                                 <i class="ti ti-analyze"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Topik</small>
@@ -77,12 +77,12 @@
 
                         <div class="step-line"></div>
 
-                        <!-- CPL & Indikator -->
+                        <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-chart-line"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">CPL & Indikator</small>
+                            <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -100,19 +100,9 @@
                         <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-printer"></i>
+                                <i class="ti ti-report-analytics"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Cetak</small>
-                        </div>
-
-                        <div class="step-line"></div>
-
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
+                            <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -151,7 +141,7 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <!-- <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpl-ikcp') ?>">
+                            <!-- <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpl-pi') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a> -->
                             <button type="submit" class="btn btn-primary">
