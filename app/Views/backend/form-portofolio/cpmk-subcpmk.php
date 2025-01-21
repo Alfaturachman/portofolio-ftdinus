@@ -142,35 +142,19 @@
                         </div>
                     </div>
 
+                    <table class="table table-bordered">
+                        <thead class="text-white" style="background-color: #0f4c92;">
+                            <tr>
+                                <th style="width: 30%">CPMK</th>
+                                <th style="width: 70%">Narasi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cpmkTableBody">
+                            <!-- CPMK rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                    <button class="btn btn-success" onclick="addCPMK()">Tambah CPMK</button>
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
-                        <table class="table table-bordered">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th style="width: 30%">CPMK</th>
-                                    <th style="width: 70%">Narasi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- CPMK 1 -->
-                                <tr class="table-light">
-                                    <td><strong>CPMK 1</strong></td>
-                                    <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit laboris.</td>
-                                </tr>
-                                <tr>
-                                    <td><i>Sub CPMK 1</i></td>
-                                    <td><i>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</i></td>
-                                </tr>
-                                <!-- CPMK 2 -->
-                                <tr class="table-light">
-                                    <td><strong>CPMK 2</strong></td>
-                                    <td>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</td>
-                                </tr>
-                                <tr>
-                                    <td><i>Sub CPMK 2</i></td>
-                                    <td><i>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</i></td>
-                                </tr>
-                            </tbody>
-                        </table>
                         <div class="d-flex justify-content-between pt-3">
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpl-pi') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
@@ -188,5 +172,67 @@
         </div>
     </div>
 </div>
+
+<script>
+    let cpmkCounter = 1;
+
+    // Tambahkan CPMK baru
+    function addCPMK() {
+        const tbody = document.getElementById('cpmkTableBody');
+        const newRow = `
+                <tr class="table-light cpmk-row" data-cpmk="${cpmkCounter}">
+                    <td><strong>CPMK ${cpmkCounter}</strong></td>
+                    <td><input type="text" class="form-control" placeholder="Narasi CPMK ${cpmkCounter}" name="cpmk[${cpmkCounter}][narasi]"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkCounter})">Tambah Sub CPMK</button>
+                        <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkCounter}">
+                            <!-- Sub CPMK rows will be appended here -->
+                        </div>
+                    </td>
+                </tr>`;
+        tbody.insertAdjacentHTML('beforeend', newRow);
+        cpmkCounter++;
+    }
+
+    // Tambahkan Sub CPMK pada CPMK tertentu
+    function addSubCPMK(cpmkId) {
+        const wrapper = document.getElementById(`subCpmkWrapper${cpmkId}`);
+        const subCpmkCount = wrapper.childElementCount + 1;
+        const subRow = `
+                <div class="row g-2 align-items-center mb-2">
+                    <div class="col-auto sub-cpmk-label">
+                        <strong>Sub CPMK ${subCpmkCount}</strong>
+                    </div>
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Narasi Sub CPMK ${subCpmkCount}" name="cpmk[${cpmkId}][sub][${subCpmkCount}]">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-sm btn-danger" onclick="removeSubCPMK(this, ${cpmkId})">Hapus</button>
+                    </div>
+                </div>`;
+        wrapper.insertAdjacentHTML('beforeend', subRow);
+    }
+
+    // Hapus Sub CPMK dan perbarui penomoran
+    function removeSubCPMK(button, cpmkId) {
+        const wrapper = document.getElementById(`subCpmkWrapper${cpmkId}`);
+        button.parentElement.parentElement.remove(); // Hapus elemen Sub CPMK
+
+        // Perbarui penomoran Sub CPMK
+        const subRows = wrapper.querySelectorAll('.row');
+        subRows.forEach((row, index) => {
+            const subCpmkLabel = row.querySelector('.sub-cpmk-label strong');
+            const inputField = row.querySelector('input');
+            const subIndex = index + 1;
+
+            // Update label dan placeholder
+            subCpmkLabel.textContent = `Sub CPMK ${subIndex}`;
+            inputField.setAttribute('placeholder', `Narasi Sub CPMK ${subIndex}`);
+            inputField.setAttribute('name', `cpmk[${cpmkId}][sub][${subIndex}]`);
+        });
+    }
+</script>
 
 <?= $this->include('backend/partials/footer') ?>

@@ -133,6 +133,8 @@ class Portofolio extends BaseController
     {
         $validation = \Config\Services::validation();
         $validation->setRules([
+            'fakultas' => 'required',
+            'progdi' => 'required',
             'nama_mk' => 'required',
             'kode_mk' => 'required',
             'kelompok_mk' => 'required',
@@ -145,6 +147,8 @@ class Portofolio extends BaseController
         }
 
         $data = [
+            'fakultas' => $this->request->getPost('fakultas'),
+            'progdi' => $this->request->getPost('progdi'),
             'nama_mk' => $this->request->getPost('nama_mk'),
             'kode_mk' => $this->request->getPost('kode_mk'),
             'kelompok_mk' => $this->request->getPost('kelompok_mk'),

@@ -143,10 +143,10 @@
                     </div>
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
                         <table class="table table-bordered">
-                            <thead class="table-dark">
+                            <thead class="text-white" style="background-color: #0f4c92;">
                                 <tr>
-                                    <th style="width: 30%" colspan="2">CPL</th>
-                                    <th style="width: 60%">IKCP</th>
+                                    <th style="width: 30%" colspan="2">Capaian Pembelajaran Lulusan</th>
+                                    <th style="width: 60%">Performa Index</th>
                                 </tr>
                             </thead>
                             <tbody>
