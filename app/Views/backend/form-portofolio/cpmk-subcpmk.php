@@ -147,6 +147,7 @@
                             <tr>
                                 <th style="width: 30%">CPMK</th>
                                 <th style="width: 70%">Narasi</th>
+                                <th style="width: 10%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="cpmkTableBody">
@@ -183,9 +184,10 @@
                 <tr class="table-light cpmk-row" data-cpmk="${cpmkCounter}">
                     <td><strong>CPMK ${cpmkCounter}</strong></td>
                     <td><input type="text" class="form-control" placeholder="Narasi CPMK ${cpmkCounter}" name="cpmk[${cpmkCounter}][narasi]"></td>
+                    <td><button class="btn btn-sm btn-danger" onclick="removeCPMK(this)">Hapus CPMK</button></td>
                 </tr>
                 <tr>
-                    <td colspan="2">
+                    <td colspan="3">
                         <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkCounter})">Tambah Sub CPMK</button>
                         <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkCounter}">
                             <!-- Sub CPMK rows will be appended here -->
@@ -232,6 +234,12 @@
             inputField.setAttribute('placeholder', `Narasi Sub CPMK ${subIndex}`);
             inputField.setAttribute('name', `cpmk[${cpmkId}][sub][${subIndex}]`);
         });
+    }
+
+    // Hapus CPMK beserta Sub CPMK-nya
+    function removeCPMK(button) {
+        const cpmkRow = button.closest('.cpmk-row').parentElement; // Ambil baris CPMK beserta Sub CPMK-nya
+        cpmkRow.remove(); // Hapus CPMK beserta Sub CPMK-nya
     }
 </script>
 
