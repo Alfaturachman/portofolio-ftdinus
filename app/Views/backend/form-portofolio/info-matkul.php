@@ -151,6 +151,14 @@
                         <?php else: ?>
                         <?php endif; ?>
                         <div class="form-group mb-3">
+                            <label for="fakultas" class="form-label">Fakultas</label>
+                            <input type="text" class="form-control" id="fakultas" name="fakultas" readonly value="<?= isset($infoMatkul['fakultas']) ? $infoMatkul['fakultas'] : '' ?>">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="progdi" class="form-label">Program Studi</label>
+                            <input type="text" class="form-control" id="progdi" name="progdi" readonly value="<?= isset($infoMatkul['progdi']) ? $infoMatkul['progdi'] : '' ?>">
+                        </div>
+                        <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
                             <select class="form-select" id="nama_mk" name="nama_mk" required>
                                 <option value="">Pilih Mata Kuliah</option>
@@ -174,11 +182,17 @@
                             <label for="kelompok_mk" class="form-label">Kelompok MK</label>
                             <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" readonly value="<?= isset($infoMatkul['kelompok_mk']) ? $infoMatkul['kelompok_mk'] : '' ?>">
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="sks" class="form-label">SKS</label>
-                            <div class="d-flex">
-                                <input type="number" class="form-control me-2" id="sks_teori" name="sks_teori" readonly value="<?= isset($infoMatkul['sks_teori']) ? $infoMatkul['sks_teori'] : '' ?>">
-                                <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" readonly value="<?= isset($infoMatkul['sks_praktik']) ? $infoMatkul['sks_praktik'] : '' ?>">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="sks_teori" class="form-label">SKS Teori</label>
+                                    <input type="number" class="form-control" id="sks_teori" name="sks_teori" readonly value="<?= isset($infoMatkul['sks_teori']) ? $infoMatkul['sks_teori'] : '' ?>">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="sks_praktik" class="form-label">SKS Praktik</label>
+                                    <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" readonly value="<?= isset($infoMatkul['sks_praktik']) ? $infoMatkul['sks_praktik'] : '' ?>">
+                                </div>
                             </div>
                         </div>
                         <div class="form-group mb-3">

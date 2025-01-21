@@ -149,9 +149,13 @@ class Portofolio extends BaseController
         // Data tambahan dari session (jika ada)
         $topikPerkuliahan = session()->get('topik_perkuliahan') ?? [];
 
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+
         // Kirim data ke view
         return view('backend/form-portofolio/topik-perkuliahan', [
             'topikPerkuliahan' => $topikPerkuliahan,
+            'pdfUrl' => $pdfUrl,
         ]);
     }
 
