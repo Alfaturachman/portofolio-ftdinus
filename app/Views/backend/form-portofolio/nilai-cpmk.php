@@ -154,35 +154,53 @@
 
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
                         <!-- Tabel Header -->
-                        <table class="table table-bordered">
-                            <thead class="table-dark">
+                        <table class="table mb-4">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>Fakultas</th>
-                                    <th>Kode Mata Kuliah</th>
-                                    <th>Nama Mata Kuliah</th>
-                                    <th>Kelompok</th>
-                                    <th>Jenis Mata Kuliah</th>
-                                    <th>Semester</th>
-                                    <th>Tahun Akademik</th>
-                                    <th>Nama Dosen</th>
+                                    <th class="text-start" style="width: 350px;">Fakultas</th>
+                                    <th class="text-end">:</th>
+                                    <th><b>Fakultas Teknik</b></th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Kode Mata Kuliah</th>
+                                    <th class="text-end">:</th>
+                                    <th>E1144902</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Nama Mata Kuliah</th>
+                                    <th class="text-end">:</th>
+                                    <th>Sistem Robotika</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Kelompok</th>
+                                    <th class="text-end">:</th>
+                                    <th>01</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Jenis Mata Kuliah</th>
+                                    <th class="text-end">:</th>
+                                    <th>Teori</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Semester</th>
+                                    <th class="text-end">:</th>
+                                    <th>Genap</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Tahun Akademik</th>
+                                    <th class="text-end">:</th>
+                                    <th>2024/2025</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Nama Dosen</th>
+                                    <th class="text-end">:</th>
+                                    <th>Arga Dwi Pambudi, M.T.</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Fakultas Teknik</td>
-                                    <td>MK001</td>
-                                    <td>Pemrograman</td>
-                                    <td>A</td>
-                                    <td>Teori</td>
-                                    <td>1</td>
-                                    <td>2024/2025</td>
-                                    <td>Dr. John Doe</td>
-                                </tr>
-                            </tbody>
                         </table>
 
                         <!-- Tabel Data Mahasiswa -->
-                        <table class="table table-bordered mt-4">
+                        <table class="table table-bordered">
                             <thead class="table-dark">
                                 <tr>
                                     <th>No</th>
