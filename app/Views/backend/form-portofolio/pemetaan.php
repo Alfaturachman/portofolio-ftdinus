@@ -127,7 +127,7 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Rancangan Assesmen -->
+                        <!-- Nilai CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-checklist"></i>

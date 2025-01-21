@@ -124,6 +124,16 @@
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
                         </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Nilai CPMK -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-checklist"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
+                        </div>
                     </div>
                 </div>
             </div>
