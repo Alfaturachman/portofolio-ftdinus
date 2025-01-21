@@ -35,29 +35,43 @@ class Portofolio extends BaseController
 
     public function saveUploadRps()
     {
-        // Validasi file
         $validation = \Config\Services::validation();
+
+        // Validasi file upload
         $validation->setRules([
-            'rps_file' => 'uploaded[rps_file]|mime_in[rps_file,application/pdf]|max_size[rps_file,2048]', // Maks 2MB
+            'rps_file' => [
+                'label' => 'RPS File',
+                'rules' => 'uploaded[rps_file]|ext_in[rps_file,pdf]|max_size[rps_file,10240]',
+            ],
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            return redirect()->back()->with('error', 'File harus berupa PDF dengan ukuran maksimal 2MB');
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $validation->getError('rps_file'),
+            ]);
         }
 
-        // Ambil file yang diunggah
+        // Handle upload file
         $file = $this->request->getFile('rps_file');
+        if ($file->isValid() && !$file->hasMoved()) {
+            $newName = time() . '_' . $file->getRandomName();
+            $file->move(WRITEPATH . 'uploads/temp', $newName);
 
-        // Generate nama file unik dan simpan ke folder sementara
-        $newFileName = $file->getRandomName();
-        $file->move(WRITEPATH . 'uploads/temp', $newFileName);
+            // Simpan nama file ke session
+            session()->set('uploaded_rps', $newName);
 
-        // Simpan nama file ke session
-        session()->set('uploaded_rps', $newFileName);
+            // Return URL untuk iframe
+            return $this->response->setJSON([
+                'success' => true,
+                'pdfUrl' => base_url('view-pdf/' . $newName),
+            ]);
+        }
 
-        log_message('info', 'File RPS diunggah dan disimpan sementara: ' . $newFileName);
-
-        return redirect()->to('portofolio-form/upload-rps')->with('success', 'File berhasil diunggah!');
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Gagal mengupload file.',
+        ]);
     }
 
     public function info_matkul(): string

@@ -155,14 +155,13 @@
                             <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
                             <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
                         </div>
-                        <p class="text-danger">*format file: PDF</p>
+                        <p class="text-danger" style="color: #dc3545!important;">*format file: PDF, ukuran maksimal 10MB</p>
 
                         <?php if (!empty($pdfUrl)): ?>
-                            <div style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
                                 <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
                             </div>
                         <?php else: ?>
-                            <p class="text-warning">File belum diunggah atau belum tersedia.</p>
                         <?php endif; ?>
 
                         <div class="d-flex justify-content-between pt-3">
@@ -179,5 +178,39 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('rps_file').addEventListener('change', function() {
+        const fileInput = this;
+        const formData = new FormData();
+        formData.append('rps_file', fileInput.files[0]);
+
+        // Cek apakah file dipilih
+        if (fileInput.files.length === 0) {
+            alert('Harap pilih file untuk diupload.');
+            return;
+        }
+
+        // AJAX Request
+        fetch('<?= base_url('portofolio-form/save-upload-rps') ?>', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('File berhasil diupload.');
+                    // Refresh halaman setelah berhasil upload
+                    location.reload();
+                } else {
+                    alert('Gagal mengupload file: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengupload file.');
+            });
+    });
+</script>
 
 <?= $this->include('backend/partials/footer') ?>
