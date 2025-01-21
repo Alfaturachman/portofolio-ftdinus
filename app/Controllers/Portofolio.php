@@ -85,8 +85,8 @@ class Portofolio extends BaseController
         // Data tambahan dari session (jika ada)
         $infoMatkul = session()->get('info_matkul') ?? [];
 
-        // URL untuk PDF Viewer
-        $pdfUrl = base_url('portofolio-form/view-pdf');
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
         // Kirim data ke view
         return view('backend/form-portofolio/info-matkul', [

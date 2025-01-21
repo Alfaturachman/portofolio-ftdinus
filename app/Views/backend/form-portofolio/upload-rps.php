@@ -143,7 +143,7 @@
                             </div>
                         <?php else: ?>
                             <div id="alert" class="alert alert-primary" role="alert">
-                                Silahkan untuk mengupload file RPS (PDF) di bawah sebelum melanjutkan!
+                                Silahkan untuk mengupload file RPS di bawah sebelum melanjutkan!
                             </div>
                         <?php endif; ?>
                     </div>

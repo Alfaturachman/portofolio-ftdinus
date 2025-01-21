@@ -144,13 +144,12 @@
 
                     <form action="<?= base_url('portofolio/saveInfoMatkul') ?>" method="post">
                         <?= csrf_field(); ?>
-                        <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
-                            <iframe src="<?= $pdfUrl ?>" width="100%" height="100%" style="border: none;"></iframe>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="view-pdf" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="view-pdf" name="view-pdf" accept="application/pdf" required>
-                        </div>
+                        <?php if (!empty($pdfUrl)): ?>
+                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <?php else: ?>
+                        <?php endif; ?>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
                             <select class="form-select" id="nama_mk" name="nama_mk" required>
