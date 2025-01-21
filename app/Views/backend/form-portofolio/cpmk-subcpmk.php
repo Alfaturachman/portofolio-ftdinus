@@ -136,7 +136,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Capaian Pembelajaran Mata Kuliah (CPMK) & Sub Capaian Pembelajaran Mata Kuliah (Sub CPMK)</h5>
+                        <h4 class="fw-bolder mb-3">Capaian Pembelajaran Mata Kuliah (CPMK) & Sub Capaian Pembelajaran Mata Kuliah (Sub CPMK)</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengisi CPMK & Sub CPMK di bawah sebelum melanjutkan!
                         </div>

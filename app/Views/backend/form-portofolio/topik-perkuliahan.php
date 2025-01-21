@@ -136,7 +136,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h5 class="card-title fw-bolder mb-3">Topik Perkuliahan</h5>
+                        <h4 class="fw-bolder mb-3">Topik Perkuliahan</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengisi topik perkuliahan di bawah sebelum melanjutkan!
                         </div>

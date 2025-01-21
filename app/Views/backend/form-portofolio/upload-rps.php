@@ -137,9 +137,15 @@
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
                         <h4 class="fw-bolder mb-3">Upload RPS</h4>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengupload file RPS (PDF) di bawah sebelum melanjutkan!
-                        </div>
+                        <?php if (!empty($pdfUrl)): ?>
+                            <div id="alert" class="alert alert-success" role="alert">
+                                Upload RPS sudah selesai, silahkan untuk ke tahap selanjutnya.
+                            </div>
+                        <?php else: ?>
+                            <div id="alert" class="alert alert-primary" role="alert">
+                                Silahkan untuk mengupload file RPS (PDF) di bawah sebelum melanjutkan!
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <?php if (session()->getFlashdata('error')): ?>
@@ -151,11 +157,14 @@
                     <?php endif; ?>
 
                     <form id="rpsForm" action="<?= base_url('portofolio-form/save-upload-rps') ?>" method="post" enctype="multipart/form-data">
-                        <div class="form-group mb-2">
-                            <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
-                            <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                        </div>
-                        <p class="text-danger" style="color: #dc3545!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                        <?php if (!empty($pdfUrl)): ?>
+                        <?php else: ?>
+                            <div class="form-group mb-2">
+                                <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
+                                <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                            </div>
+                            <p style="color: #dc3545!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                        <?php endif; ?>
 
                         <?php if (!empty($pdfUrl)): ?>
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
@@ -168,9 +177,12 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button> -->
                         </div>
                     </form>
                 </div>
