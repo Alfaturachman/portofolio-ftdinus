@@ -159,7 +159,12 @@
                                 <tr>
                                     <th class="text-start" style="width: 350px;">Fakultas</th>
                                     <th class="text-end">:</th>
-                                    <th><b>Fakultas Teknik</b></th>
+                                    <th>Fakultas Teknik</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-start" style="width: 350px;">Progdi</th>
+                                    <th class="text-end">:</th>
+                                    <th>Teknik Elektro - S1</th>
                                 </tr>
                                 <tr>
                                     <th class="text-start" style="width: 350px;">Kode Mata Kuliah</th>

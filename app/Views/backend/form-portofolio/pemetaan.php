@@ -155,7 +155,7 @@
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
                         <div class="table-responsive">
                             <table class="table table-bordered">
-                                <thead class="table-light">
+                                <thead class="text-white" style="background-color: #0f4c92;">
                                     <tr class="align-middle text-center">
                                         <th style="width: 20%" rowspan="2">CPL</th>
                                         <th style="width: 30%" rowspan="2">CPMK</th>
@@ -174,62 +174,62 @@
                                     <tr>
                                         <td rowspan="3" class="align-middle"><strong>CPL 1</strong></td>
                                         <td>Mengidentifikasi masalah dasar ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_1[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="5"></td>
                                     </tr>
                                     <tr>
                                         <td>Menerapkan metode analisis ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_2[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="5"></td>
                                     </tr>
                                     <tr>
                                         <td>Menyampaikan hasil analisis secara tertulis ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_3[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="5"></td>
                                     </tr>
 
                                     <!-- CPL 2 -->
                                     <tr>
                                         <td rowspan="4" class="align-middle"><strong>CPL 2</strong></td>
                                         <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_4[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="5"></td>
                                     </tr>
                                     <tr>
                                         <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_5[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="5"></td>
                                     </tr>
                                     <tr>
                                         <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_6[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="5"></td>
                                     </tr>
                                     <tr>
                                         <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="1"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="2"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="3"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="4"></td>
-                                        <td class="text-center"><input type="checkbox" name="sub_cpmk_7[]" value="5"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="1"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="2"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="3"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="4"></td>
+                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="5"></td>
                                     </tr>
                                 </tbody>
                             </table>
