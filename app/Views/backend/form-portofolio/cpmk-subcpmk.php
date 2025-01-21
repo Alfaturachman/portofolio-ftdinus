@@ -181,21 +181,21 @@
     function addCPMK() {
         const tbody = document.getElementById('cpmkTableBody');
         const newRow = `
-                <tr class="table-light cpmk-row" data-cpmk="${cpmkCounter}">
-                    <td><strong>CPMK ${cpmkCounter}</strong></td>
-                    <td><input type="text" class="form-control" placeholder="Narasi CPMK ${cpmkCounter}" name="cpmk[${cpmkCounter}][narasi]"></td>
-                    <td><button class="btn btn-sm btn-danger" onclick="removeCPMK(this)">Hapus CPMK</button></td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkCounter})">Tambah Sub CPMK</button>
-                        <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkCounter}">
-                            <!-- Sub CPMK rows will be appended here -->
-                        </div>
-                    </td>
-                </tr>`;
+        <tr class="table-light cpmk-row" data-cpmk="${cpmkCounter}">
+            <td><strong>CPMK ${cpmkCounter}</strong></td>
+            <td><input type="text" class="form-control" placeholder="Narasi CPMK ${cpmkCounter}" name="cpmk[${cpmkCounter}][narasi]"></td>
+            <td><button class="btn btn-sm btn-danger" onclick="removeCPMK(this)">Hapus CPMK</button></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkCounter})">Tambah Sub CPMK</button>
+                <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkCounter}">
+                    <!-- Sub CPMK rows will be appended here -->
+                </div>
+            </td>
+        </tr>`;
         tbody.insertAdjacentHTML('beforeend', newRow);
-        cpmkCounter++;
+        cpmkCounter = document.querySelectorAll('.cpmk-row').length + 1; // Update counter berdasarkan jumlah CPMK yang ada
     }
 
     // Tambahkan Sub CPMK pada CPMK tertentu
@@ -203,17 +203,17 @@
         const wrapper = document.getElementById(`subCpmkWrapper${cpmkId}`);
         const subCpmkCount = wrapper.childElementCount + 1;
         const subRow = `
-                <div class="row g-2 align-items-center mb-2">
-                    <div class="col-auto sub-cpmk-label">
-                        <strong>Sub CPMK ${subCpmkCount}</strong>
-                    </div>
-                    <div class="col">
-                        <input type="text" class="form-control" placeholder="Narasi Sub CPMK ${subCpmkCount}" name="cpmk[${cpmkId}][sub][${subCpmkCount}]">
-                    </div>
-                    <div class="col-auto">
-                        <button class="btn btn-sm btn-danger" onclick="removeSubCPMK(this, ${cpmkId})">Hapus</button>
-                    </div>
-                </div>`;
+        <div class="row g-2 align-items-center mb-2">
+            <div class="col-auto sub-cpmk-label">
+                <strong>Sub CPMK ${subCpmkCount}</strong>
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Narasi Sub CPMK ${subCpmkCount}" name="cpmk[${cpmkId}][sub][${subCpmkCount}]">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-sm btn-danger" onclick="removeSubCPMK(this, ${cpmkId})">Hapus</button>
+            </div>
+        </div>`;
         wrapper.insertAdjacentHTML('beforeend', subRow);
     }
 
@@ -238,8 +238,33 @@
 
     // Hapus CPMK beserta Sub CPMK-nya
     function removeCPMK(button) {
-        const cpmkRow = button.closest('.cpmk-row').parentElement; // Ambil baris CPMK beserta Sub CPMK-nya
-        cpmkRow.remove(); // Hapus CPMK beserta Sub CPMK-nya
+        const cpmkRow = button.closest('tr'); // Ambil baris CPMK yang tepat
+        const cpmkId = cpmkRow.dataset.cpmk; // Ambil ID CPMK dari atribut data-cpmk
+
+        cpmkRow.nextElementSibling.remove(); // Hapus baris Sub CPMK-nya
+        cpmkRow.remove(); // Hapus baris CPMK itu sendiri
+
+        // Update nomor CPMK setelah penghapusan
+        updateCPMKNumbers();
+        cpmkCounter = document.querySelectorAll('.cpmk-row').length + 1; // Update cpmkCounter setelah penghapusan
+    }
+
+    // Perbarui nomor CPMK
+    function updateCPMKNumbers() {
+        const cpmkRows = document.querySelectorAll('.cpmk-row');
+        cpmkRows.forEach((row, index) => {
+            const cpmkNumber = index + 1; // Nomor CPMK baru
+            const cpmkLabel = row.querySelector('td strong');
+            const cpmkInput = row.querySelector('input');
+
+            // Update label CPMK dan placeholder input
+            cpmkLabel.textContent = `CPMK ${cpmkNumber}`;
+            cpmkInput.setAttribute('placeholder', `Narasi CPMK ${cpmkNumber}`);
+            cpmkInput.setAttribute('name', `cpmk[${cpmkNumber}][narasi]`);
+
+            // Update ID data-cpmk
+            row.dataset.cpmk = cpmkNumber;
+        });
     }
 </script>
 
