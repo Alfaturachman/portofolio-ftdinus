@@ -150,13 +150,18 @@
                             </div>
                         <?php else: ?>
                         <?php endif; ?>
-                        <div class="form-group mb-3">
-                            <label for="fakultas" class="form-label">Fakultas</label>
-                            <input type="text" class="form-control" id="fakultas" name="fakultas" readonly value="<?= isset($infoMatkul['fakultas']) ? $infoMatkul['fakultas'] : '' ?>">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="progdi" class="form-label">Program Studi</label>
-                            <input type="text" class="form-control" id="progdi" name="progdi" readonly value="<?= isset($infoMatkul['progdi']) ? $infoMatkul['progdi'] : '' ?>">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fakultas" class="form-label">Fakultas</label>
+                                    <input type="text" class="form-control" id="fakultas" name="fakultas" readonly value="<?= isset($infoMatkul['fakultas']) ? $infoMatkul['fakultas'] : '' ?>">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="progdi" class="form-label">Program Studi</label>
+                                    <input type="text" class="form-control" id="progdi" name="progdi" readonly value="<?= isset($infoMatkul['progdi']) ? $infoMatkul['progdi'] : '' ?>">
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
@@ -164,6 +169,8 @@
                                 <option value="">Pilih Mata Kuliah</option>
                                 <?php foreach ($mataKuliah as $mk): ?>
                                     <option value="<?= htmlspecialchars($mk['nama_mk']) ?>"
+                                        data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
+                                        data-progdi="<?= htmlspecialchars($mk['progdi']) ?>"
                                         data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
                                         data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
                                         data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
@@ -215,18 +222,23 @@
 
     <script>
         document.getElementById('nama_mk').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex]; // Ambil option yang dipilih
+            const selectedOption = this.options[this.selectedIndex];
             if (selectedOption.value) {
+                // Mengisi field berdasarkan atribut data pada option
                 document.getElementById('kode_mk').value = selectedOption.getAttribute('data-kode_mk') || '';
                 document.getElementById('kelompok_mk').value = selectedOption.getAttribute('data-kelompok_mk') || '';
                 document.getElementById('sks_teori').value = selectedOption.getAttribute('data-sks_teori') || '';
                 document.getElementById('sks_praktik').value = selectedOption.getAttribute('data-sks_praktik') || '';
+                document.getElementById('fakultas').value = selectedOption.getAttribute('data-fakultas') || '';
+                document.getElementById('progdi').value = selectedOption.getAttribute('data-progdi') || '';
             } else {
                 // Kosongkan field jika tidak ada yang dipilih
                 document.getElementById('kode_mk').value = '';
                 document.getElementById('kelompok_mk').value = '';
                 document.getElementById('sks_teori').value = '';
                 document.getElementById('sks_praktik').value = '';
+                document.getElementById('fakultas').value = '';
+                document.getElementById('progdi').value = '';
             }
         });
     </script>

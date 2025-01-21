@@ -78,8 +78,24 @@ class Portofolio extends BaseController
     {
         // Data statis mata kuliah
         $mataKuliah = [
-            ['nama_mk' => 'Pemrograman', 'kode_mk' => 'MK001', 'kelompok_mk' => 'A', 'sks_teori' => 3, 'sks_praktik' => 1],
-            ['nama_mk' => 'Manajemen', 'kode_mk' => 'MK002', 'kelompok_mk' => 'B', 'sks_teori' => 2, 'sks_praktik' => 2],
+            [
+                'fakultas' => 'Teknik',
+                'progdi' => 'Teknik Elektro',
+                'nama_mk' => 'Sistem Robotika',
+                'kode_mk' => 'E1144902',
+                'kelompok_mk' => '01',
+                'sks_teori' => 1,
+                'sks_praktik' => 2
+            ],
+            [
+                'fakultas' => 'Teknik',
+                'progdi' => 'Teknik Industri',
+                'nama_mk' => 'Matematika Quantum',
+                'kode_mk' => 'E1282576',
+                'kelompok_mk' => '02',
+                'sks_teori' => 2,
+                'sks_praktik' => 1
+            ],
         ];
 
         // Data tambahan dari session (jika ada)
