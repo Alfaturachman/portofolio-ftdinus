@@ -152,6 +152,12 @@
                         </div>
                     </div>
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
+                        <?php if (!empty($pdfUrl)): ?>
+                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <?php else: ?>
+                        <?php endif; ?>
                         <table class="table table-bordered">
                             <thead class="text-white" style="background-color: #0f4c92;">
                                 <tr>

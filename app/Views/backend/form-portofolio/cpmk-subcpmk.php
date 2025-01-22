@@ -152,6 +152,13 @@
                         </div>
                     </div>
 
+                    <?php if (!empty($pdfUrl)): ?>
+                        <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                            <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                        </div>
+                    <?php else: ?>
+                    <?php endif; ?>
+
                     <table class="table table-bordered">
                         <thead class="text-white" style="background-color: #0f4c92;">
                             <tr>
@@ -192,7 +199,7 @@
         const tbody = document.getElementById('cpmkTableBody');
         const newRow = `
         <tr class="table-light cpmk-row" data-cpmk="${cpmkCounter}">
-            <td><strong>CPMK ${cpmkCounter}</strong></td>
+            <td class="align-middle"><strong>CPMK ${cpmkCounter}</strong></td>
             <td><input type="text" class="form-control" placeholder="Narasi CPMK ${cpmkCounter}" name="cpmk[${cpmkCounter}][narasi]"></td>
             <td><button class="btn btn-sm btn-danger" onclick="removeCPMK(this)">Hapus CPMK</button></td>
         </tr>

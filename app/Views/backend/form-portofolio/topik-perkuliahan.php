@@ -153,6 +153,12 @@
                     </div>
 
                     <form id="topicForm" action="<?= base_url('portofolio/saveTopikPerkuliahan') ?>" method="post">
+                        <?php if (!empty($pdfUrl)): ?>
+                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <?php else: ?>
+                        <?php endif; ?>
                         <div class="form-group mb-3">
                             <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
                             <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($topikPerkuliahan['topik_mk']) ? $topikPerkuliahan['topik_mk'] : '' ?></textarea>
