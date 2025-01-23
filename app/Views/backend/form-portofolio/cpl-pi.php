@@ -67,22 +67,12 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Info Matkul -->
+                        <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-bookmark"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Info Matkul</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
-                        <!-- Topik -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active data-step=" topik">
-                                <i class="ti ti-analyze"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Topik</small>
+                            <small class="d-block mt-2 step-label">Informasi Matkul</small>
                         </div>
 
                         <div class="step-line active"></div>
@@ -90,7 +80,7 @@
                         <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-chart-line"></i>
+                                <i class="ti ti-bulb"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
@@ -100,7 +90,7 @@
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-book"></i>
+                                <i class="ti ti-list-details"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
@@ -120,9 +110,19 @@
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-checklist"></i>
+                                <i class="ti ti-file-text"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Pelaksanaan Perkuliahan -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-school"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -195,7 +195,7 @@
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/topik-perkuliahan') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">

@@ -67,22 +67,12 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Info Matkul -->
+                        <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-bookmark"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Info Matkul</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
-                        <!-- Topik -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active data-step=" topik">
-                                <i class="ti ti-analyze"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Topik</small>
+                            <small class="d-block mt-2 step-label">Informasi Matkul</small>
                         </div>
 
                         <div class="step-line active"></div>
@@ -90,7 +80,7 @@
                         <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-chart-line"></i>
+                                <i class="ti ti-bulb"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
@@ -100,7 +90,7 @@
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-book"></i>
+                                <i class="ti ti-list-details"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
@@ -120,7 +110,7 @@
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-checklist"></i>
+                                <i class="ti ti-file-text"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
                         </div>
@@ -130,7 +120,7 @@
                         <!-- Pelaksanaan Perkuliahan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
-                                <i class="ti ti-checklist"></i>
+                                <i class="ti ti-school"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
                         </div>
@@ -166,26 +156,26 @@
                         <!-- Kontrak Kuliah -->
                         <h5 class="fw-bolder mb-3">1. Kontrak Kuliah</h5>
                         <div class="form-group mb-4">
-                            <label for="soal_tugas" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
+                            <label for="kontrak_kuliah" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="kontrak_kuliah" name="kontrak_kuliah" accept="application/pdf" required>
                         </div>
 
                         <!-- Realisasi Mengajar -->
                         <h5 class="fw-bolder mb-3">2. Realisasi Mengajar</h5>
                         <div class="form-group mb-4">
-                            <label for="soal_uts" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
+                            <label for="realisasi_mengajar" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="realisasi_mengajar" name="realisasi_mengajar" accept="application/pdf" required>
                         </div>
 
                         <!-- Kehadiran Mahasiswa -->
                         <h5 class="fw-bolder mb-3">3. Kehadiran Mahasiswa</h5>
                         <div class="form-group mb-4">
-                            <label for="soal_uas" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
+                            <label for="kehadiran_mahasiswa" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="kehadiran_mahasiswa" name="kehadiran_mahasiswa" accept="application/pdf" required>
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/rancangan-asesmen') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">

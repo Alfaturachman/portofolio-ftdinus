@@ -155,13 +155,14 @@ class Portofolio extends BaseController
             'sks_teori' => $this->request->getPost('sks_teori'),
             'sks_praktik' => $this->request->getPost('sks_praktik'),
             'mk_prasyarat' => $this->request->getPost('mk_prasyarat'),
+            'topik_mk' => $this->request->getPost('topik_mk'),
         ];
 
         session()->set('info_matkul', $data);
 
         log_message('info', 'Data Mata Kuliah disimpan ke session: ' . json_encode($data));
 
-        return redirect()->to('portofolio-form/topik-perkuliahan');
+        return redirect()->to('portofolio-form/cpl-pi');
     }
 
     public function topik_perkuliahan(): string

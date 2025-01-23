@@ -67,22 +67,12 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Info Matkul -->
+                        <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-bookmark"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Info Matkul</small>
-                        </div>
-
-                        <div class="step-line"></div>
-
-                        <!-- Topik -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-analyze"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Topik</small>
+                            <small class="d-block mt-2 step-label">Informasi Matkul</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -90,7 +80,7 @@
                         <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-chart-line"></i>
+                                <i class="ti ti-bulb"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
@@ -100,7 +90,7 @@
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-book"></i>
+                                <i class="ti ti-list-details"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
@@ -120,9 +110,19 @@
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
-                                <i class="ti ti-checklist"></i>
+                                <i class="ti ti-file-text"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Pelaksanaan Perkuliahan -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-school"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -213,8 +213,12 @@
                             </div>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="mk_prasyarat" class="form-label">MK Prasyarat</label>
+                            <label for="mk_prasyarat" class="form-label">Mata Kuliah Prasyarat</label>
                             <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= isset($infoMatkul['mk_prasyarat']) ? $infoMatkul['mk_prasyarat'] : '' ?></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
+                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($infoMatkul['topik_mk']) ? $infoMatkul['topik_mk'] : '' ?></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">

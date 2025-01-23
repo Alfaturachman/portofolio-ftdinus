@@ -159,10 +159,7 @@
                             </div>
                         <?php else: ?>
                         <?php endif; ?>
-                        <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($topikPerkuliahan['topik_mk']) ? $topikPerkuliahan['topik_mk'] : '' ?></textarea>
-                        </div>
+                        
                         <div class="d-flex justify-content-between pt-3">
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
