@@ -107,7 +107,7 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Cetak -->
+                        <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-report-analytics"></i>
@@ -127,12 +127,22 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Nilai CPMK -->
+                        <!-- Pelaksanaan Perkuliahan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-checklist"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
+                            <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
+                        </div>
+
+                        <div class="step-line active"></div>
+
+                        <!-- Hasil Asesmen -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle active">
+                                <i class="ti ti-checklist"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
                     </div>
                 </div>
@@ -140,8 +150,86 @@
         </div>
     </div>
 
-    <!-- Nilai CPMK -->
+    <!-- Hasil Asesmen -->
     <div class="row">
+        <div class="col d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-block align-items-center justify-content-center mb-4">
+                        <h4 class="fw-bolder mb-3">Hasil Asesmen</h4>
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Silahkan untuk mengupload hasil asesmen di bawah sebelum melanjutkan!
+                        </div>
+                    </div>
+
+                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <!-- Tugas -->
+                        <h5 class="fw-bolder mb-3">1. Hasil Tugas</h5>
+                        <div class="form-group mb-4">
+                            <label for="jawaban_tugas" class="form-label mt-2">Jawaban</label>
+                            <input type="file" class="form-control mb-2" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" required>
+                            <small class="form-text text-muted">
+                                Contoh <span>Jawaban benar</span>, <span>Jawaban sedang</span>, <span>Jawaban salah</span>
+                            </small>
+                        </div>
+
+                        <!-- Ujian Tengah Semester -->
+                        <h5 class="fw-bolder mb-3">2. Hasil Ujian Tengah Semester</h5>
+                        <div class="form-group mb-4">
+                            <label for="jawaban_uts" class="form-label mt-2">Jawaban</label>
+                            <input type="file" class="form-control mb-2" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" required>
+                            <small class="form-text text-muted">
+                                Contoh <span>Jawaban benar</span>, <span>Jawaban sedang</span>, <span>Jawaban salah</span>
+                            </small>
+                        </div>
+
+                        <!-- Ujian Akhir Semester -->
+                        <h5 class="fw-bolder mb-3">3. Hasil Ujian Akhir Semester</h5>
+                        <div class="form-group mb-4">
+                            <label for="jawaban_uas" class="form-label mt-2">Jawaban</label>
+                            <input type="file" class="form-control mb-2" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" required>
+                            <small class="form-text text-muted">
+                                Contoh <span>Jawaban benar</span>, <span>Jawaban sedang</span>, <span>Jawaban salah</span>
+                            </small>
+                        </div>
+
+                        <!-- 4.	Nilai Mata Kuliah -->
+                        <h5 class="fw-bolder mb-3">4. Nilai Mata Kuliah</h5>
+                        <div class="form-group mb-4">
+                            <input type="file" class="form-control mb-2" id="nilai_mata_kuliah" name="nilai_mata_kuliah" accept="application/pdf">
+                            <small class="form-text text-muted">
+                                Opsional
+                            </small>
+                        </div>
+
+                        <!-- 5.	Nilai Mata Kuliah -->
+                        <h5 class="fw-bolder mb-3">5. Nilai CPMK</h5>
+                        <div class="form-group mb-4">
+                            <input type="file" class="form-control mb-2" id="nilai_cpmk" name="nilai_cpmk" accept="application/pdf" required>
+                            <small class="form-text text-muted">
+                                Wajib diisi
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-3">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/rancangan-asesmen') ?>">
+                                <i class="ti ti-arrow-left"></i> Kembali
+                            </a>
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/nilai-cpmk') ?>">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                            </button> -->
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nilai CPMK -->
+    <div class="row d-none">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">

@@ -206,17 +206,32 @@ class Portofolio extends BaseController
 
     public function cpl_pi(): string
     {
-        return view('backend/form-portofolio/cpl-pi');
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/form-portofolio/cpl-pi', [
+            'pdfUrl' => $pdfUrl,
+        ]);
     }
 
     public function cpmk_subcpmk(): string
     {
-        return view('backend/form-portofolio/cpmk-subcpmk');
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/form-portofolio/cpmk-subcpmk', [
+            'pdfUrl' => $pdfUrl,
+        ]);
     }
 
     public function pemetaan(): string
     {
-        return view('backend/form-portofolio/pemetaan');
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/form-portofolio/pemetaan', [
+            'pdfUrl' => $pdfUrl,
+        ]);
     }
 
     public function rancangan_asesmen(): string
@@ -224,9 +239,14 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/rancangan-asesmen');
     }
 
-    public function nilai_cpmk(): string
+    public function pelaksanaan_perkuliahan(): string
     {
-        return view('backend/form-portofolio/nilai-cpmk');
+        return view('backend/form-portofolio/pelaksanaan-perkuliahan');
+    }
+
+    public function hasil_asesmen(): string
+    {
+        return view('backend/form-portofolio/hasil-asesmen');
     }
 
     public function deleteSession()

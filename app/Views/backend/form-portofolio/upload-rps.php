@@ -77,12 +77,12 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Topik -->
+                        <!-- Topik Perkuliahan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-analyze"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Topik</small>
+                            <small class="d-block mt-2 step-label">Topik Perkuliahan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -107,7 +107,7 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Cetak -->
+                        <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-report-analytics"></i>
@@ -127,12 +127,22 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Nilai CPMK -->
+                        <!-- Pelaksanaan Perkuliahan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-checklist"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
+                            <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
+                        </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Hasil Asesmen -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-checklist"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
                     </div>
                 </div>

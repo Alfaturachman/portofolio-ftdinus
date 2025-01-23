@@ -107,7 +107,7 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Cetak -->
+                        <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-report-analytics"></i>
@@ -127,12 +127,12 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Nilai CPMK -->
+                        <!-- Hasil Asesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-checklist"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
+                            <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
                     </div>
                 </div>
@@ -158,8 +158,6 @@
                         <div class="form-group mb-4">
                             <label for="soal_tugas" class="form-label">Soal</label>
                             <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
-                            <label for="jawaban_tugas" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" required>
                             <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
                             <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" required>
                         </div>
@@ -169,8 +167,6 @@
                         <div class="form-group mb-4">
                             <label for="soal_uts" class="form-label">Soal</label>
                             <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
-                            <label for="jawaban_uts" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" required>
                             <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
                             <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" required>
                         </div>
@@ -180,17 +176,15 @@
                         <div class="form-group mb-4">
                             <label for="soal_uas" class="form-label">Soal</label>
                             <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
-                            <label for="jawaban_uas" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" required>
                             <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
                             <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" required>
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/nilai-cpmk') ?>">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a>
                             <!-- <button type="submit" class="btn btn-primary">

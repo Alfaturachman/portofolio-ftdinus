@@ -107,7 +107,7 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Pemetaan -->
+                        <!-- Cetak -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-report-analytics"></i>

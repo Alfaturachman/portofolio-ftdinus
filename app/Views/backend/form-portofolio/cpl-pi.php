@@ -107,7 +107,7 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Cetak -->
+                        <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-report-analytics"></i>
@@ -127,12 +127,12 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Nilai CPMK -->
+                        <!-- Hasil Asesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-checklist"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
+                            <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
                     </div>
                 </div>

@@ -19,7 +19,8 @@ $routes->get('portofolio-form/cpl-pi', 'Portofolio::cpl_pi');
 $routes->get('portofolio-form/cpmk-subcpmk', 'Portofolio::cpmk_subcpmk');
 $routes->get('portofolio-form/pemetaan', 'Portofolio::pemetaan');
 $routes->get('portofolio-form/rancangan-asesmen', 'Portofolio::rancangan_asesmen');
-$routes->get('portofolio-form/nilai-cpmk', 'Portofolio::nilai_cpmk');
+$routes->get('portofolio-form/pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
+$routes->get('portofolio-form/hasil-asesmen', 'Portofolio::hasil_asesmen');
 
 $routes->post('portofolio-form/save-upload-rps', 'Portofolio::saveUploadRps');
 $routes->post('portofolio/saveInfoMatkul', 'Portofolio::saveInfoMatkul');

@@ -85,44 +85,54 @@
                             <small class="d-block mt-2 step-label">Topik</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-chart-line"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-book"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-report-analytics"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-checklist"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
+                        </div>
+
+                        <div class="step-line active"></div>
+
+                        <!-- Pelaksanaan Perkuliahan -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle active">
+                                <i class="ti ti-checklist"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
                         </div>
 
                         <div class="step-line"></div>
@@ -140,39 +150,50 @@
         </div>
     </div>
 
-    <!-- Topik Perkuliahan -->
-    <div class="row" data-step="topik">
+    <!-- Pelaksanaan Perkuliahan -->
+    <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h4 class="fw-bolder mb-3">Topik Perkuliahan</h4>
+                        <h4 class="fw-bolder mb-3">Pelaksanaan Perkuliahan</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi topik perkuliahan di bawah sebelum melanjutkan!
+                            Silahkan untuk mengupload pelaksanaan perkuliahan di bawah sebelum melanjutkan!
                         </div>
                     </div>
 
-                    <form id="topicForm" action="<?= base_url('portofolio/saveTopikPerkuliahan') ?>" method="post">
-                        <?php if (!empty($pdfUrl)): ?>
-                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
-                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
-                            </div>
-                        <?php else: ?>
-                        <?php endif; ?>
-                        <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($topikPerkuliahan['topik_mk']) ? $topikPerkuliahan['topik_mk'] : '' ?></textarea>
+                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <!-- Kontrak Kuliah -->
+                        <h5 class="fw-bolder mb-3">1. Kontrak Kuliah</h5>
+                        <div class="form-group mb-4">
+                            <label for="soal_tugas" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
                         </div>
+
+                        <!-- Realisasi Mengajar -->
+                        <h5 class="fw-bolder mb-3">2. Realisasi Mengajar</h5>
+                        <div class="form-group mb-4">
+                            <label for="soal_uts" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
+                        </div>
+
+                        <!-- Kehadiran Mahasiswa -->
+                        <h5 class="fw-bolder mb-3">3. Kehadiran Mahasiswa</h5>
+                        <div class="form-group mb-4">
+                            <label for="soal_uas" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
+                        </div>
+
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <!-- <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpl-pi') ?>">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a> -->
-                            <button type="submit" class="btn btn-primary">
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </button> -->
                         </div>
                     </form>
                 </div>

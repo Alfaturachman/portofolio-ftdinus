@@ -107,7 +107,7 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Cetak -->
+                        <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-report-analytics"></i>
@@ -127,12 +127,12 @@
 
                         <div class="step-line"></div>
 
-                        <!-- Nilai CPMK -->
+                        <!-- Hasil Asesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle">
                                 <i class="ti ti-checklist"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Nilai CPMK</small>
+                            <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
                     </div>
                 </div>
@@ -153,6 +153,12 @@
                     </div>
 
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <?php if (!empty($pdfUrl)): ?>
+                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
+                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <?php else: ?>
+                        <?php endif; ?>
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead class="text-white" style="background-color: #0f4c92;">
