@@ -172,8 +172,8 @@
                             <div class="form-group mb-2">
                                 <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
                                 <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                             </div>
-                            <p style="color: #dc3545!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         <?php endif; ?>
 
                         <?php if (!empty($pdfUrl)): ?>

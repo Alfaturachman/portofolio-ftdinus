@@ -158,8 +158,10 @@
                         <div class="form-group mb-4">
                             <label for="soal_tugas" class="form-label">Soal</label>
                             <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                             <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
                             <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
                         <!-- Ujian Tengah Semester -->
@@ -167,8 +169,10 @@
                         <div class="form-group mb-4">
                             <label for="soal_uts" class="form-label">Soal</label>
                             <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                             <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
                             <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
                         <!-- Ujian Akhir Semester -->
@@ -176,8 +180,10 @@
                         <div class="form-group mb-4">
                             <label for="soal_uas" class="form-label">Soal</label>
                             <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                             <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
                             <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">

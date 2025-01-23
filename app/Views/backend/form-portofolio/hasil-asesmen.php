@@ -158,9 +158,7 @@
                         <div class="form-group mb-4">
                             <label for="jawaban_tugas" class="form-label mt-2">Jawaban</label>
                             <input type="file" class="form-control mb-2" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" required>
-                            <small class="form-text text-muted">
-                                Contoh <span>Jawaban benar</span>, <span>Jawaban sedang</span>, <span>Jawaban salah</span>
-                            </small>
+                            <p class="mt-2" style="color: #5a6a85!important;">*contoh jawaban benar, jawaban sedang, jawaban salah</p>
                         </div>
 
                         <!-- Ujian Tengah Semester -->
@@ -168,9 +166,7 @@
                         <div class="form-group mb-4">
                             <label for="jawaban_uts" class="form-label mt-2">Jawaban</label>
                             <input type="file" class="form-control mb-2" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" required>
-                            <small class="form-text text-muted">
-                                Contoh <span>Jawaban benar</span>, <span>Jawaban sedang</span>, <span>Jawaban salah</span>
-                            </small>
+                            <p class="mt-2" style="color: #5a6a85!important;">*contoh jawaban benar, jawaban sedang, jawaban salah</p>
                         </div>
 
                         <!-- Ujian Akhir Semester -->
@@ -178,27 +174,21 @@
                         <div class="form-group mb-4">
                             <label for="jawaban_uas" class="form-label mt-2">Jawaban</label>
                             <input type="file" class="form-control mb-2" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" required>
-                            <small class="form-text text-muted">
-                                Contoh <span>Jawaban benar</span>, <span>Jawaban sedang</span>, <span>Jawaban salah</span>
-                            </small>
+                            <p class="mt-2" style="color: #5a6a85!important;">*contoh jawaban benar, jawaban sedang, jawaban salah</p>
                         </div>
 
                         <!-- 4.	Nilai Mata Kuliah -->
                         <h5 class="fw-bolder mb-3">4. Nilai Mata Kuliah</h5>
                         <div class="form-group mb-4">
                             <input type="file" class="form-control mb-2" id="nilai_mata_kuliah" name="nilai_mata_kuliah" accept="application/pdf">
-                            <small class="form-text text-muted">
-                                Opsional
-                            </small>
+                            <p class="mt-2" style="color: #5a6a85!important;">*opsional</p>
                         </div>
 
                         <!-- 5.	Nilai Mata Kuliah -->
                         <h5 class="fw-bolder mb-3">5. Nilai CPMK</h5>
                         <div class="form-group mb-4">
                             <input type="file" class="form-control mb-2" id="nilai_cpmk" name="nilai_cpmk" accept="application/pdf" required>
-                            <small class="form-text text-muted">
-                                Wajib diisi
-                            </small>
+                            <p class="mt-2" style="color: #5a6a85!important;">*wajib diisi</p>
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
@@ -206,7 +196,7 @@
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/nilai-cpmk') ?>">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                                Simpan <i class="ti ti-download"></i>
                             </a>
                             <!-- <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>

@@ -158,6 +158,7 @@
                         <div class="form-group mb-4">
                             <label for="kontrak_kuliah" class="form-label">Upload File</label>
                             <input type="file" class="form-control" id="kontrak_kuliah" name="kontrak_kuliah" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
                         <!-- Realisasi Mengajar -->
@@ -165,6 +166,7 @@
                         <div class="form-group mb-4">
                             <label for="realisasi_mengajar" class="form-label">Upload File</label>
                             <input type="file" class="form-control" id="realisasi_mengajar" name="realisasi_mengajar" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
                         <!-- Kehadiran Mahasiswa -->
@@ -172,6 +174,7 @@
                         <div class="form-group mb-4">
                             <label for="kehadiran_mahasiswa" class="form-label">Upload File</label>
                             <input type="file" class="form-control" id="kehadiran_mahasiswa" name="kehadiran_mahasiswa" accept="application/pdf" required>
+                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
