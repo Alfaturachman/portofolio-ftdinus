@@ -36,13 +36,21 @@
     }
 
     @media (max-width: 768px) {
-        .step-line {
-            width: 50%;
+        .d-flex.justify-content-between.align-items-baseline {
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
 
-        .step-label {
-            max-width: 60px;
+        .step-line {
+            display: none;
         }
+    }
+
+    #cpmkChart {
+        max-width: 650px;
+        height: 400px;
+        max-height: 400px;
     }
 </style>
 
@@ -67,72 +75,82 @@
 
                         <div class="step-line active"></div>
 
-                        <!-- Info Matkul -->
+                        <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
                                 <i class="ti ti-bookmark"></i>
                             </div>
-                            <small class="d-block mt-2 step-label">Info Matkul</small>
+                            <small class="d-block mt-2 step-label">Informasi Matkul</small>
                         </div>
 
                         <div class="step-line active"></div>
 
-                        <!-- Topik -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active data-step=" topik">
-                                <i class="ti ti-analyze"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Topik</small>
-                        </div>
-
-                        <div class="step-line"></div>
-
                         <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-chart-line"></i>
+                            <div class="step-circle active">
+                                <i class="ti ti-bulb"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & PI</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- CPMK & Sub CPMK -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-book"></i>
+                            <div class="step-circle active">
+                                <i class="ti ti-list-details"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPMK & Sub</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
-                        <!-- Cetak -->
+                        <!-- Pemetaan -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-report-analytics"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Pemetaan</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- Rancangan Assesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
-                                <i class="ti ti-checklist"></i>
+                            <div class="step-circle active">
+                                <i class="ti ti-file-text"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Rancangan Assesmen</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
+
+                        <!-- Pelaksanaan Perkuliahan -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle active">
+                                <i class="ti ti-school"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Pelaksanaan Perkuliahan</small>
+                        </div>
+
+                        <div class="step-line active"></div>
 
                         <!-- Hasil Asesmen -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-checklist"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Hasil Asesmen</small>
+                        </div>
+
+                        <div class="step-line active"></div>
+
+                        <!-- Evaluasi Perkuliahan -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle active">
+                                <i class="ti ti-chart-bar"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Evaluasi Perkuliahan</small>
                         </div>
                     </div>
                 </div>
@@ -140,16 +158,20 @@
         </div>
     </div>
 
-    <!-- Topik Perkuliahan -->
+    <!-- Evaluasi Perkuliahan -->
     <div class="row" data-step="topik">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h4 class="fw-bolder mb-3">Topik Perkuliahan</h4>
+                        <h4 class="fw-bolder mb-3">Evaluasi Perkuliahan</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi topik perkuliahan di bawah sebelum melanjutkan!
+                            Silahkan untuk mengisi evaluasi perkuliahan di bawah sebelum melanjutkan!
                         </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center pt-3">
+                        <canvas id="cpmkChart" width="400" height="200"></canvas>
                     </div>
 
                     <form id="topicForm" action="<?= base_url('portofolio/saveTopikPerkuliahan') ?>" method="post">
@@ -160,14 +182,14 @@
                         <?php else: ?>
                         <?php endif; ?>
                         <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($topikPerkuliahan['topik_mk']) ? $topikPerkuliahan['topik_mk'] : '' ?></textarea>
+                            <label for="topik_mk" class="form-label">Evaluasi Perkuliahan</label>
+                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan evaluasi perkuliahan"><?= isset($topikPerkuliahan['topik_mk']) ? $topikPerkuliahan['topik_mk'] : '' ?></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <!-- <a class="btn btn-primary" href="<?= base_url('portofolio-form/cpl-pi') ?>">
+                            <!-- <a class="btn btn-primary" href="<?= base_url('portofolio-form/') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a> -->
                             <button type="submit" class="btn btn-primary">
@@ -180,5 +202,86 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const data = {
+        labels: ['CPMK 1', 'CPMK 2', 'CPMK 3', 'CPMK 4'],
+        datasets: [{
+            label: 'Nilai CPMK',
+            data: [3.5, 2.8, 3.2, 2.5],
+            backgroundColor: 'rgba(15, 76, 146, 0.1)',
+            borderColor: 'rgba(15, 76, 146, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 4,
+                    ticks: {
+                        stepSize: 0.5
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Nilai Rerata CPMK',
+                    font: {
+                        size: 18
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 20
+                    }
+                }
+            }
+        },
+        plugins: [{
+            id: 'midLine',
+            afterDraw: (chart) => {
+                const {
+                    ctx,
+                    chartArea: {
+                        top,
+                        bottom,
+                        left,
+                        right
+                    },
+                    scales: {
+                        y
+                    }
+                } = chart;
+                const yValue = y.getPixelForValue(2); // Posisi garis pada y=2
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(left, yValue);
+                ctx.lineTo(right, yValue);
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]); // Garis putus-putus
+                ctx.stroke();
+                ctx.restore();
+            }
+        }]
+    };
+
+    const ctx = document.getElementById('cpmkChart').getContext('2d');
+    const cpmkChart = new Chart(ctx, config);
+</script>
+
 
 <?= $this->include('backend/partials/footer') ?>

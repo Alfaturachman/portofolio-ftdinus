@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use GuzzleHttp\Client;
+
 class Portofolio extends BaseController
 {
     public function index(): string
@@ -76,30 +78,77 @@ class Portofolio extends BaseController
 
     public function info_matkul(): string
     {
-        // Data statis mata kuliah
-        $mataKuliah = [
-            [
-                'fakultas' => 'Teknik',
-                'progdi' => 'Teknik Elektro',
-                'nama_mk' => 'Sistem Robotika',
-                'kode_mk' => 'E1144902',
-                'kelompok_mk' => '01',
-                'sks_teori' => 1,
-                'sks_praktik' => 2
-            ],
-            [
-                'fakultas' => 'Teknik',
-                'progdi' => 'Teknik Industri',
-                'nama_mk' => 'Matematika Quantum',
-                'kode_mk' => 'E1282576',
-                'kelompok_mk' => '02',
-                'sks_teori' => 2,
-                'sks_praktik' => 1
-            ],
-        ];
+        // Data API dalam format JSON
+        $apiResponse = '{
+        "status": 1,
+        "message": "success",
+        "data": {
+            "infoMatkul": {
+                "fakultas": "Fakultas Teknik",
+                "progdi": "Teknik Informatika",
+                "nama_mk": "Pemrograman Web",
+                "kode_mk": "IF123",
+                "kelompok_mk": "Wajib",
+                "sks_teori": 3,
+                "sks_praktik": 1
+            },
+            "mataKuliah": [
+                {
+                    "nama_mk": "Pemrograman Web",
+                    "kode_mk": "IF123",
+                    "kelompok_mk": "Wajib",
+                    "fakultas": "Fakultas Teknik",
+                    "progdi": "Teknik Informatika",
+                    "sks_teori": 3,
+                    "sks_praktik": 1
+                },
+                {
+                    "nama_mk": "Basis Data",
+                    "kode_mk": "IF124",
+                    "kelompok_mk": "Wajib",
+                    "fakultas": "Fakultas Teknik",
+                    "progdi": "Teknik Informatika",
+                    "sks_teori": 2,
+                    "sks_praktik": 2
+                }
+            ]
+        }
+    }';
+
+        // Decode JSON ke array PHP
+        $data = json_decode($apiResponse, true);
+
+        // Pastikan message API adalah 'success'
+        if ($data['message'] === 'success') {
+            $mataKuliah = $data['data']['mataKuliah'];
+            $infoMatkul = $data['data']['infoMatkul'];
+        } else {
+            // Jika message tidak 'success', gunakan data statis sebagai fallback
+            $mataKuliah = [
+                [
+                    'fakultas' => 'Teknik',
+                    'progdi' => 'Teknik Elektro',
+                    'nama_mk' => 'Sistem Robotika',
+                    'kode_mk' => 'E1144902',
+                    'kelompok_mk' => '01',
+                    'sks_teori' => 1,
+                    'sks_praktik' => 2
+                ],
+                [
+                    'fakultas' => 'Teknik',
+                    'progdi' => 'Teknik Industri',
+                    'nama_mk' => 'Matematika Quantum',
+                    'kode_mk' => 'E1282576',
+                    'kelompok_mk' => '02',
+                    'sks_teori' => 2,
+                    'sks_praktik' => 1
+                ],
+            ];
+            $infoMatkul = [];
+        }
 
         // Data tambahan dari session (jika ada)
-        $infoMatkul = session()->get('info_matkul') ?? [];
+        $infoMatkul = array_merge($infoMatkul, session()->get('info_matkul') ?? []);
 
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
@@ -248,6 +297,11 @@ class Portofolio extends BaseController
     public function hasil_asesmen(): string
     {
         return view('backend/form-portofolio/hasil-asesmen');
+    }
+
+    public function evaluasi_perkuliahan(): string
+    {
+        return view('backend/form-portofolio/evaluasi-perkuliahan');
     }
 
     public function deleteSession()

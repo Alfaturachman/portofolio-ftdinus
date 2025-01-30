@@ -21,6 +21,7 @@ $routes->get('portofolio-form/pemetaan', 'Portofolio::pemetaan');
 $routes->get('portofolio-form/rancangan-asesmen', 'Portofolio::rancangan_asesmen');
 $routes->get('portofolio-form/pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
 $routes->get('portofolio-form/hasil-asesmen', 'Portofolio::hasil_asesmen');
+$routes->get('portofolio-form/evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
 
 $routes->post('portofolio-form/save-upload-rps', 'Portofolio::saveUploadRps');
 $routes->post('portofolio/saveInfoMatkul', 'Portofolio::saveInfoMatkul');

@@ -36,12 +36,14 @@
     }
 
     @media (max-width: 768px) {
-        .step-line {
-            width: 50%;
+        .d-flex.justify-content-between.align-items-baseline {
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
 
-        .step-label {
-            max-width: 60px;
+        .step-line {
+            display: none;
         }
     }
 </style>
@@ -134,6 +136,16 @@
                             </div>
                             <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
+
+                        <div class="step-line"></div>
+
+                        <!-- Evaluasi Perkuliahan -->
+                        <div class="d-flex flex-column align-items-center text-center px-2">
+                            <div class="step-circle">
+                                <i class="ti ti-chart-bar"></i>
+                            </div>
+                            <small class="d-block mt-2 step-label">Evaluasi Perkuliahan</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -195,7 +207,7 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/nilai-cpmk') ?>">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/evaluasi-perkuliahan') ?>">
                                 Simpan <i class="ti ti-download"></i>
                             </a>
                             <!-- <button type="submit" class="btn btn-primary">
