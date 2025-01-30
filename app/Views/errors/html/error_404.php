@@ -22,6 +22,8 @@
         .wrap {
             max-width: 600px;
             padding: 2rem;
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             backdrop-filter: blur(10px);
