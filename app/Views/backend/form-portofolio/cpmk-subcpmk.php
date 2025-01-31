@@ -237,7 +237,7 @@
         cpmkCounter = document.querySelectorAll('.cpmk-row').length + 1;
     }
 
-    // Tambahkan Sub CPMK pada CPMK tertentu
+    // Add new Sub CPMK
     function addSubCPMK(cpmkId) {
         const wrapper = document.getElementById(`subCpmkWrapper${cpmkId}`);
         globalSubCpmkCounter = getTotalSubCPMKCount() + 1;
@@ -246,7 +246,7 @@
             <div class="col-auto sub-cpmk-label">
                 <strong class="d-flex align-items-center gap-2">
                     Sub CPMK 
-                    <input type="text" class="form-control" style="width: 60px;" name="no_cpmk[${cpmkId}][sub][${globalSubCpmkCounter}]" value="${globalSubCpmkCounter}">
+                    <input type="text" class="form-control" style="width: 70px;" name="no_cpmk[${cpmkId}][sub][${globalSubCpmkCounter}]" value="${globalSubCpmkCounter}">
                 </strong>
             </div>
             <div class="col">
@@ -263,24 +263,6 @@
     function removeSubCPMK(button, cpmkId) {
         button.parentElement.parentElement.remove();
         updateAllSubCPMKNumbers();
-    }
-
-    // Update all Sub CPMK numbers sequentially
-    function updateAllSubCPMKNumbers() {
-        let newCounter = 1;
-        document.querySelectorAll('.sub-cpmk-wrapper').forEach(wrapper => {
-            wrapper.querySelectorAll('.row').forEach(row => {
-                const cpmkId = wrapper.id.replace('subCpmkWrapper', '');
-                const subCpmkLabel = row.querySelector('.sub-cpmk-label strong');
-                const inputField = row.querySelector('input');
-
-                subCpmkLabel.textContent = `Sub CPMK ${newCounter}`;
-                inputField.setAttribute('placeholder', `Narasi Sub CPMK ${newCounter}`);
-                inputField.setAttribute('name', `cpmk[${cpmkId}][sub][${newCounter}]`);
-                newCounter++;
-            });
-        });
-        globalSubCpmkCounter = newCounter;
     }
 
     // Hapus CPMK beserta Sub CPMK-nya
@@ -333,6 +315,30 @@
             });
     });
 
+    // Update all Sub CPMK numbers sequentially
+    function updateAllSubCPMKNumbers() {
+        let newCounter = 1;
+        document.querySelectorAll('.sub-cpmk-wrapper').forEach(wrapper => {
+            wrapper.querySelectorAll('.row').forEach(row => {
+                const cpmkId = wrapper.id.replace('subCpmkWrapper', '');
+                const numberInput = row.querySelector('input[name^="no_cpmk"]');
+                const narasiInput = row.querySelector('input[name^="cpmk"]');
+                
+                // Update the number input value
+                numberInput.value = newCounter;
+                numberInput.setAttribute('name', `no_cpmk[${cpmkId}][sub][${newCounter}]`);
+                
+                // Update the narasi input attributes
+                narasiInput.setAttribute('placeholder', `Narasi Sub CPMK ${newCounter}`);
+                narasiInput.setAttribute('name', `cpmk[${cpmkId}][sub][${newCounter}]`);
+                
+                newCounter++;
+            });
+        });
+        globalSubCpmkCounter = newCounter;
+    }
+
+    // Load CPMK data from session
     function loadCPMKFromSession(data) {
         const tbody = document.getElementById('cpmkTableBody');
         tbody.innerHTML = '';
@@ -356,15 +362,14 @@
             tbody.insertAdjacentHTML('beforeend', newRow);
 
             if (cpmkData.sub) {
-                Object.entries(cpmkData.sub).forEach(([_, subNarasi]) => {
+                Object.entries(cpmkData.sub).forEach(([subNumber, subNarasi]) => {
                     const wrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
                     const subRow = `
                     <div class="row g-2 align-items-center mb-2">
                         <div class="col-auto sub-cpmk-label">
-                            <strong class="d-flex align-items-center gap-2">
-                                Sub CPMK
-                                <input type="text" class="form-control form-control-sm" style="width: 60px;" 
-                                    name="no_cpmk[${cpmkNumber}][sub][${subCpmkCounter}]" value="${subCpmkCounter}">
+                            <strong>
+                                Sub CPMK 
+                                <input type="text" class="form-control" style="width: 70px;" name="no_cpmk[${cpmkNumber}][sub][${subCpmkCounter}]" value="${subCpmkCounter}">
                             </strong>
                         </div>
                         <div class="col">
@@ -387,7 +392,7 @@
         globalSubCpmkCounter = subCpmkCounter;
     }
 
-    // Modify the form submission to save to session
+    // Modify form submission to include number inputs
     document.querySelector('a[href*="pemetaan"]').addEventListener('click', function(e) {
         e.preventDefault();
 
@@ -398,27 +403,26 @@
         document.querySelectorAll('.cpmk-row').forEach(row => {
             const cpmkNumber = row.dataset.cpmk;
             const narasi = row.querySelector('input[name^="cpmk["]').value;
-            cpmkData[cpmkNumber] = {
-                narasi: narasi,
-                sub: {}
-            };
-
+            cpmkData[cpmkNumber] = { narasi: narasi, sub: {}, sub_numbers: {} };
+            
             // Collect sub CPMK data
             const subWrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
-            const subInputs = subWrapper.querySelectorAll('input');
-            subInputs.forEach(input => {
-                const subNumber = input.name.match(/\[sub\]\[(\d+)\]/)[1];
-                cpmkData[cpmkNumber].sub[subNumber] = input.value;
+            const subRows = subWrapper.querySelectorAll('.row');
+            subRows.forEach(subRow => {
+                const narasiInput = subRow.querySelector('input[name^="cpmk["]');
+                const numberInput = subRow.querySelector('input[name^="no_cpmk["]');
+                if (narasiInput && numberInput) {
+                    const subNumber = numberInput.value;
+                    cpmkData[cpmkNumber].sub[subNumber] = narasiInput.value;
+                    cpmkData[cpmkNumber].sub_numbers[subNumber] = numberInput.value;
+                }
             });
         });
 
         formData.append('cpmk', JSON.stringify(cpmkData));
 
         // Save to session
-        fetch('<?= base_url('portofolio-form/saveCPMKToSession') ?>', {
-                method: 'POST',
-                body: formData
-            })
+        fetch('<?= base_url('portofolio-form/saveCPMKToSession') ?>')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
