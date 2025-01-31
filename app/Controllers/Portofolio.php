@@ -161,6 +161,53 @@ class Portofolio extends BaseController
         ]);
     }
 
+    public function saveInfoMatkul()
+    {
+        // Inisialisasi validasi
+        $validation = \Config\Services::validation();
+
+        // Aturan validasi
+        $validation->setRules([
+            'fakultas' => 'required',
+            'progdi' => 'required',
+            'nama_mk' => 'required',
+            'kode_mk' => 'required',
+            'kelompok_mk' => 'required',
+            'sks_teori' => 'required|numeric',
+            'sks_praktik' => 'required|numeric',
+            'mk_prasyarat' => 'permit_empty',
+            'topik_mk' => 'permit_empty',
+        ]);
+
+        // Jalankan validasi
+        if (!$validation->withRequest($this->request)->run()) {
+            // Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+
+        // Ambil data dari form
+        $data = [
+            'fakultas' => $this->request->getPost('fakultas'),
+            'progdi' => $this->request->getPost('progdi'),
+            'nama_mk' => $this->request->getPost('nama_mk'),
+            'kode_mk' => $this->request->getPost('kode_mk'),
+            'kelompok_mk' => $this->request->getPost('kelompok_mk'),
+            'sks_teori' => $this->request->getPost('sks_teori'),
+            'sks_praktik' => $this->request->getPost('sks_praktik'),
+            'mk_prasyarat' => $this->request->getPost('mk_prasyarat'),
+            'topik_mk' => $this->request->getPost('topik_mk'),
+        ];
+
+        // Simpan data ke session
+        session()->set('info_matkul', $data);
+
+        // Log informasi penyimpanan data
+        log_message('info', 'Data Mata Kuliah disimpan ke session: ' . json_encode($data));
+
+        // Redirect ke halaman berikutnya dengan pesan sukses
+        return redirect()->to('portofolio-form/cpl-pi')->with('message', 'Data mata kuliah berhasil disimpan.');
+    }
+
     public function view_pdf(): object
     {
         // Path file PDF
@@ -176,42 +223,6 @@ class Portofolio extends BaseController
         } else {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('PDF not found.');
         }
-    }
-
-    public function saveInfoMatkul()
-    {
-        $validation = \Config\Services::validation();
-        $validation->setRules([
-            'fakultas' => 'required',
-            'progdi' => 'required',
-            'nama_mk' => 'required',
-            'kode_mk' => 'required',
-            'kelompok_mk' => 'required',
-            'sks_teori' => 'required|numeric',
-            'sks_praktik' => 'required|numeric',
-        ]);
-
-        if (!$validation->withRequest($this->request)->run()) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
-        }
-
-        $data = [
-            'fakultas' => $this->request->getPost('fakultas'),
-            'progdi' => $this->request->getPost('progdi'),
-            'nama_mk' => $this->request->getPost('nama_mk'),
-            'kode_mk' => $this->request->getPost('kode_mk'),
-            'kelompok_mk' => $this->request->getPost('kelompok_mk'),
-            'sks_teori' => $this->request->getPost('sks_teori'),
-            'sks_praktik' => $this->request->getPost('sks_praktik'),
-            'mk_prasyarat' => $this->request->getPost('mk_prasyarat'),
-            'topik_mk' => $this->request->getPost('topik_mk'),
-        ];
-
-        session()->set('info_matkul', $data);
-
-        log_message('info', 'Data Mata Kuliah disimpan ke session: ' . json_encode($data));
-
-        return redirect()->to('portofolio-form/cpl-pi');
     }
 
     public function topik_perkuliahan(): string
