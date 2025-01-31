@@ -23,6 +23,9 @@ $routes->get('portofolio-form/pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan
 $routes->get('portofolio-form/hasil-asesmen', 'Portofolio::hasil_asesmen');
 $routes->get('portofolio-form/evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
 
+$routes->post('portofolio-form/saveCPMKToSession', 'Portofolio::saveCPMKToSession');
+$routes->get('portofolio-form/getCPMKFromSession', 'Portofolio::getCPMKFromSession');
+
 $routes->post('portofolio-form/save-upload-rps', 'Portofolio::saveUploadRps');
 $routes->post('portofolio/saveInfoMatkul', 'Portofolio::saveInfoMatkul');
 $routes->post('portofolio/saveTopikPerkuliahan', 'Portofolio::saveTopikPerkuliahan');

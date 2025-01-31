@@ -295,6 +295,104 @@
             row.dataset.cpmk = cpmkNumber;
         });
     }
+
+    // Load CPMK data from session when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('<?= base_url('portofolio-form/getCPMKFromSession') ?>')
+            .then(response => response.json())
+            .then(data => {
+                if (data && Object.keys(data).length > 0) {
+                    loadCPMKFromSession(data);
+                } else {
+                    addCPMK(); // Add one empty CPMK if no session data
+                }
+            });
+    });
+
+    function loadCPMKFromSession(data) {
+        const tbody = document.getElementById('cpmkTableBody');
+        tbody.innerHTML = ''; // Clear existing content
+        
+        Object.entries(data).forEach(([cpmkNumber, cpmkData]) => {
+            // Add CPMK row
+            const newRow = `
+            <tr class="table-light cpmk-row" data-cpmk="${cpmkNumber}">
+                <td class="align-middle"><strong>CPMK ${cpmkNumber}</strong></td>
+                <td><input type="text" class="form-control" placeholder="Narasi CPMK ${cpmkNumber}" 
+                    name="cpmk[${cpmkNumber}][narasi]" value="${cpmkData.narasi || ''}"></td>
+                <td><button class="btn btn-sm btn-danger" onclick="removeCPMK(this)">Hapus CPMK</button></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkNumber})">Tambah Sub CPMK</button>
+                    <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkNumber}">
+                        <!-- Sub CPMK rows will be added here -->
+                    </div>
+                </td>
+            </tr>`;
+            tbody.insertAdjacentHTML('beforeend', newRow);
+
+            // Add Sub CPMK rows if they exist
+            if (cpmkData.sub) {
+                Object.entries(cpmkData.sub).forEach(([subNumber, subNarasi]) => {
+                    const wrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
+                    const subRow = `
+                    <div class="row g-2 align-items-center mb-2">
+                        <div class="col-auto sub-cpmk-label">
+                            <strong>Sub CPMK ${subNumber}</strong>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" placeholder="Narasi Sub CPMK ${subNumber}" 
+                                name="cpmk[${cpmkNumber}][sub][${subNumber}]" value="${subNarasi}">
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-sm btn-danger" onclick="removeSubCPMK(this, ${cpmkNumber})">Hapus</button>
+                        </div>
+                    </div>`;
+                    wrapper.insertAdjacentHTML('beforeend', subRow);
+                });
+            }
+        });
+        
+        cpmkCounter = Object.keys(data).length + 1;
+    }
+
+    // Modify the form submission to save to session
+    document.querySelector('a[href*="pemetaan"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = new FormData();
+        const cpmkData = {};
+        
+        document.querySelectorAll('.cpmk-row').forEach(row => {
+            const cpmkNumber = row.dataset.cpmk;
+            const narasi = row.querySelector('input[name^="cpmk["]').value;
+            cpmkData[cpmkNumber] = { narasi: narasi, sub: {} };
+            
+            // Collect sub CPMK data
+            const subWrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
+            const subInputs = subWrapper.querySelectorAll('input');
+            subInputs.forEach(input => {
+                const subNumber = input.name.match(/\[sub\]\[(\d+)\]/)[1];
+                cpmkData[cpmkNumber].sub[subNumber] = input.value;
+            });
+        });
+        
+        formData.append('cpmk', JSON.stringify(cpmkData));
+        
+        // Save to session
+        fetch('<?= base_url('portofolio-form/saveCPMKToSession') ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
+            }
+        });
+    });
 </script>
 
 <?= $this->include('backend/partials/footer') ?>

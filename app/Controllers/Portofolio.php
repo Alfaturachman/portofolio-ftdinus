@@ -284,6 +284,21 @@ class Portofolio extends BaseController
         ]);
     }
 
+    public function saveCPMKToSession() {
+        $cpmkData = $this->request->getPost('cpmk');
+        
+        // Store in session
+        session()->set('cpmk_data', $cpmkData);
+        
+        // Return success response
+        return $this->response->setJSON(['success' => true]);
+    }
+    
+    public function getCPMKFromSession() {
+        $cpmkData = session()->get('cpmk_data');
+        return $this->response->setJSON($cpmkData ?? []);
+    }
+
     public function rancangan_asesmen(): string
     {
         return view('backend/form-portofolio/rancangan-asesmen');
