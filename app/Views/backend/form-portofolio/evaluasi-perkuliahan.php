@@ -189,12 +189,12 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <!-- <a class="btn btn-primary" href="<?= base_url('portofolio-form/') ?>">
+                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/') ?>">
+                                Simpan <i class="ti ti-download"></i>
+                            </a>
+                            <!-- <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a> -->
-                            <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            </button> -->
                         </div>
                     </form>
                 </div>

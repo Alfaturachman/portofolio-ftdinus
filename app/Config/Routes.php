@@ -8,24 +8,43 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->get('/', 'Dashboard::index');
 
-$routes->get('portofolio-form/view-pdf', 'Portofolio::view_pdf');
+// Rute untuk autentikasi (login, register, logout)
+$routes->group('auth', function ($routes) {
+    // Rute GET
+    $routes->get('login', 'Auth::login');
+    // $routes->get('register', 'Auth::register');
+
+    // Rute POST
+    $routes->post('process-login', 'Auth::processLogin');
+    $routes->post('process-register', 'Auth::processRegister');
+
+    // Rute logout
+    $routes->get('logout', 'Auth::logout');
+});
+
+// Rute untuk form portofolio
+$routes->group('portofolio-form', function ($routes) {
+    // Rute GET
+    $routes->get('/', 'Portofolio::index');
+    $routes->get('view-pdf', 'Portofolio::view_pdf');
+    $routes->get('upload-rps', 'Portofolio::upload_rps');
+    $routes->get('info-matkul', 'Portofolio::info_matkul');
+    $routes->get('cpl-pi', 'Portofolio::cpl_pi');
+    $routes->get('cpmk-subcpmk', 'Portofolio::cpmk_subcpmk');
+    $routes->get('pemetaan', 'Portofolio::pemetaan');
+    $routes->get('rancangan-asesmen', 'Portofolio::rancangan_asesmen');
+    $routes->get('pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
+    $routes->get('hasil-asesmen', 'Portofolio::hasil_asesmen');
+    $routes->get('evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
+
+    // Rute POST
+    $routes->post('save-upload-rps', 'Portofolio::saveUploadRps');
+    $routes->post('saveInfoMatkul', 'Portofolio::saveInfoMatkul');
+    $routes->post('saveTopikPerkuliahan', 'Portofolio::saveTopikPerkuliahan');
+
+    $routes->post('saveCPMKToSession', 'Portofolio::saveCPMKToSession');
+    $routes->get('getCPMKFromSession', 'Portofolio::getCPMKFromSession');
+});
+
+// Rute untuk mengakses file PDF yang diupload
 $routes->get('uploads/temp/(:segment)', 'Portofolio::view_uploaded_pdf/$1');
-
-$routes->get('portofolio-form', 'Portofolio::index');
-$routes->get('portofolio-form/upload-rps', 'Portofolio::upload_rps');
-$routes->get('portofolio-form/info-matkul', 'Portofolio::info_matkul');
-$routes->get('portofolio-form/topik-perkuliahan', 'Portofolio::topik_perkuliahan');
-$routes->get('portofolio-form/cpl-pi', 'Portofolio::cpl_pi');
-$routes->get('portofolio-form/cpmk-subcpmk', 'Portofolio::cpmk_subcpmk');
-$routes->get('portofolio-form/pemetaan', 'Portofolio::pemetaan');
-$routes->get('portofolio-form/rancangan-asesmen', 'Portofolio::rancangan_asesmen');
-$routes->get('portofolio-form/pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
-$routes->get('portofolio-form/hasil-asesmen', 'Portofolio::hasil_asesmen');
-$routes->get('portofolio-form/evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
-
-$routes->post('portofolio-form/saveCPMKToSession', 'Portofolio::saveCPMKToSession');
-$routes->get('portofolio-form/getCPMKFromSession', 'Portofolio::getCPMKFromSession');
-
-$routes->post('portofolio-form/save-upload-rps', 'Portofolio::saveUploadRps');
-$routes->post('portofolio/saveInfoMatkul', 'Portofolio::saveInfoMatkul');
-$routes->post('portofolio/saveTopikPerkuliahan', 'Portofolio::saveTopikPerkuliahan');

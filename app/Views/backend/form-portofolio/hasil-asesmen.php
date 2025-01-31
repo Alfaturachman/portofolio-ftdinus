@@ -208,7 +208,7 @@
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/evaluasi-perkuliahan') ?>">
-                                Simpan <i class="ti ti-download"></i>
+                                Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a>
                             <!-- <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>

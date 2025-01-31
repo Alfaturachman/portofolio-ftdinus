@@ -136,7 +136,7 @@
                             </div>
                             <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
-                        
+
                         <div class="step-line"></div>
 
                         <!-- Evaluasi Perkuliahan -->
@@ -213,6 +213,24 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Pesan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                <!-- Pesan akan dimasukkan di sini -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.getElementById('rps_file').addEventListener('change', function() {
         const fileInput = this;
@@ -221,7 +239,7 @@
 
         // Cek apakah file dipilih
         if (fileInput.files.length === 0) {
-            alert('Harap pilih file untuk diupload.');
+            showModal('Harap pilih file untuk diupload.');
             return;
         }
 
@@ -233,18 +251,26 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('File berhasil diupload.');
+                    showModal('File berhasil diupload.');
                     // Refresh halaman setelah berhasil upload
                     location.reload();
                 } else {
-                    alert('Gagal mengupload file: ' + data.message);
+                    showModal('Gagal mengupload file: ' + data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat mengupload file.');
+                showModal('Terjadi kesalahan saat mengupload file.');
             });
     });
+
+    // Fungsi untuk menampilkan modal dengan pesan
+    function showModal(message) {
+        const modalMessage = document.getElementById('modalMessage');
+        modalMessage.textContent = message; // Set pesan ke dalam modal
+        const modal = new bootstrap.Modal(document.getElementById('messageModal')); // Inisialisasi modal
+        modal.show(); // Tampilkan modal
+    }
 </script>
 
 <?= $this->include('backend/partials/footer') ?>
