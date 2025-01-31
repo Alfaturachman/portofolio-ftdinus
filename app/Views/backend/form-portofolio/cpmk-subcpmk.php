@@ -376,7 +376,7 @@
                             <input type="text" class="form-control" placeholder="Narasi Sub CPMK ${subCpmkCounter}" 
                                 name="cpmk[${cpmkNumber}][sub][${subCpmkCounter}]" value="${subNarasi}">
                         </div>
-                        <div class="col">
+                        <div class="col-auto">
                             <button class="btn btn-sm btn-danger" onclick="removeSubCPMK(this, ${cpmkNumber})">
                                 <i class="ti ti-trash"></i> Hapus
                             </button>
