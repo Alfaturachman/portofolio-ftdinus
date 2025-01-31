@@ -164,7 +164,7 @@
                         </div>
                     </div>
 
-                    <form action="<?= base_url('portofolio/saveInfoMatkul') ?>" method="post">
+                    <form action="<?= base_url('portofolio-form/saveInfoMatkul') ?>" method="post">
                         <?= csrf_field(); ?>
                         <?php if (!empty($pdfUrl)): ?>
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
