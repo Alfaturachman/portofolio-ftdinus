@@ -295,19 +295,43 @@ class Portofolio extends BaseController
         ]);
     }
 
-    public function saveCPMKToSession() {
-        $cpmkData = $this->request->getPost('cpmk');
+    public function saveCPMKToSession()
+    {
+        $json = $this->request->getJSON();
+        $cpmkData = $json->cpmk ?? null;
+        $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
         
-        // Store in session
-        session()->set('cpmk_data', $cpmkData);
+        if ($cpmkData) {
+            // Convert to array if it's an object
+            $cpmkArray = json_decode(json_encode($cpmkData), true);
+            
+            // Store in session
+            session()->set('cpmk_data', [
+                'cpmk' => $cpmkArray,
+                'globalSubCpmkCounter' => $globalSubCpmkCounter
+            ]);
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data CPMK berhasil disimpan'
+            ]);
+        }
         
-        // Return success response
-        return $this->response->setJSON(['success' => true]);
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Data CPMK tidak valid'
+        ]);
     }
-    
-    public function getCPMKFromSession() {
-        $cpmkData = session()->get('cpmk_data');
-        return $this->response->setJSON($cpmkData ?? []);
+
+    public function getCPMKFromSession()
+    {
+        $sessionData = session()->get('cpmk_data');
+        
+        if ($sessionData === null) {
+            return $this->response->setJSON([]);
+        }
+        
+        return $this->response->setJSON($sessionData);
     }
 
     public function rancangan_asesmen(): string
