@@ -12,7 +12,7 @@ $routes->get('/', 'Dashboard::index');
 $routes->group('auth', function ($routes) {
     // Rute GET
     $routes->get('login', 'Auth::login');
-    $routes->get('register', 'Auth::register');
+    // $routes->get('register', 'Auth::register');
 
     // Rute POST
     $routes->post('process-login', 'Auth::processLogin');
