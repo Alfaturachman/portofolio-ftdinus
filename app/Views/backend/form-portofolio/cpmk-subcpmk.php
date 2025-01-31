@@ -367,9 +367,9 @@
                     const subRow = `
                     <div class="row g-2 align-items-center mb-2">
                         <div class="col-auto sub-cpmk-label">
-                            <strong>
+                            <strong class="d-flex align-items-center gap-2">
                                 Sub CPMK 
-                                <input type="text" class="form-control" style="width: 70px;" name="no_cpmk[${cpmkNumber}][sub][${subCpmkCounter}]" value="${subCpmkCounter}">
+                                <input type="text" class="form-control" style="width: 60px;" name="no_cpmk[${cpmkNumber}][sub][${subCpmkCounter}]" value="${subCpmkCounter}">
                             </strong>
                         </div>
                         <div class="col">
