@@ -325,15 +325,15 @@
                 const cpmkId = wrapper.id.replace('subCpmkWrapper', '');
                 const numberInput = row.querySelector('input[name^="no_cpmk"]');
                 const narasiInput = row.querySelector('input[name^="cpmk"]');
-                
+
                 // Update the number input value
                 numberInput.value = newCounter;
                 numberInput.setAttribute('name', `no_cpmk[${cpmkId}][sub][${newCounter}]`);
-                
+
                 // Update the narasi input attributes
                 narasiInput.setAttribute('placeholder', `Narasi Sub CPMK ${newCounter}`);
                 narasiInput.setAttribute('name', `cpmk[${cpmkId}][sub][${newCounter}]`);
-                
+
                 newCounter++;
             });
         });
@@ -350,13 +350,13 @@
         document.querySelectorAll('.cpmk-row').forEach(row => {
             const cpmkNumber = row.dataset.cpmk;
             const narasi = row.querySelector('input[name^="cpmk["]').value;
-            
+
             cpmkData[cpmkNumber] = {
                 narasi: narasi,
                 sub: {},
                 sub_numbers: {} // Add storage for sub-CPMK numbers
             };
-            
+
             // Get sub-CPMK data for this CPMK
             const subWrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
             if (subWrapper) {
@@ -364,7 +364,7 @@
                 subRows.forEach(subRow => {
                     const numberInput = subRow.querySelector('input[name^="no_cpmk["]');
                     const narasiInput = subRow.querySelector('input[name^="cpmk["]');
-                    
+
                     if (numberInput && narasiInput) {
                         const subNumber = numberInput.value;
                         cpmkData[cpmkNumber].sub[subNumber] = narasiInput.value;
@@ -376,28 +376,28 @@
 
         // Send data to server
         fetch('<?= base_url('portofolio-form/saveCPMKToSession') ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ 
-                cpmk: cpmkData,
-                globalSubCpmkCounter: globalSubCpmkCounter // Save the global counter
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    cpmk: cpmkData,
+                    globalSubCpmkCounter: globalSubCpmkCounter // Save the global counter
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
-            } else {
-                alert('Gagal menyimpan data CPMK. Silakan coba lagi.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data.');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
+                } else {
+                    alert('Gagal menyimpan data CPMK. Silakan coba lagi.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data.');
+            });
     });
 
     // Load CPMK data from session
@@ -405,7 +405,7 @@
         const tbody = document.getElementById('cpmkTableBody');
         tbody.innerHTML = '';
         let maxSubCounter = 0;
-        
+
         if (!data || !data.cpmk || Object.keys(data.cpmk).length === 0) {
             addCPMK();
             return;
@@ -426,7 +426,7 @@
                     <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkNumber}"></div>
                 </td>
             </tr>`;
-            
+
             tbody.insertAdjacentHTML('beforeend', newRow);
 
             // Add sub-CPMKs if they exist
@@ -435,7 +435,7 @@
                 Object.entries(cpmkInfo.sub).forEach(([subNumber, subNarasi]) => {
                     const actualSubNumber = cpmkInfo.sub_numbers[subNumber] || subNumber;
                     maxSubCounter = Math.max(maxSubCounter, parseInt(actualSubNumber));
-                    
+
                     const subRow = `
                     <div class="row g-2 align-items-center mb-2">
                         <div class="col-auto sub-cpmk-label">

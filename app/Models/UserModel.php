@@ -10,23 +10,23 @@ class UserModel extends Model
     protected $primaryKey = 'id';
 
     // Field yang boleh diisi
-    protected $allowedFields = ['username', 'email', 'password'];
+    protected $allowedFields = ['username', 'password'];
 
     // Otomatis mengisi timestamp (created_at dan updated_at)
     protected $useTimestamps = true;
+    protected $createdField  = 'ins_time';
+    protected $updatedField  = 'upd_time';
+    protected $dateFormat    = 'datetime';
 
-    // Format penyimpanan tanggal
-    protected $dateFormat = 'datetime';
-
-    // Hash password sebelum disimpan ke database
-    public function hashPassword($password)
+    // Fungsi untuk enkripsi password
+    public function encryptPassword($password)
     {
-        return password_hash($password, PASSWORD_DEFAULT);
+        return sha1('jksdhf832746aiH{}{()&(*&(*' . md5($password) . 'HdfevgyDDw{}{}{;;*766&*&*');
     }
 
-    // Verifikasi password
-    public function verifyPassword($inputPassword, $hashedPassword)
+    // Fungsi untuk verifikasi password
+    public function verifyPassword($inputPassword, $storedPassword)
     {
-        return password_verify($inputPassword, $hashedPassword);
+        return $this->encryptPassword($inputPassword) === $storedPassword;
     }
 }

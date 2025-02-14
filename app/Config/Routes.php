@@ -8,19 +8,17 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->get('/', 'Dashboard::index');
 
-// Rute untuk autentikasi (login, register, logout)
-$routes->group('auth', function ($routes) {
+// Rute untuk autentikasi (login)
+$routes->group('login', function ($routes) {
     // Rute GET
-    $routes->get('login', 'Auth::login');
-    // $routes->get('register', 'Auth::register');
+    $routes->get('/', 'Auth::login');
 
     // Rute POST
     $routes->post('process-login', 'Auth::processLogin');
-    $routes->post('process-register', 'Auth::processRegister');
-
-    // Rute logout
-    $routes->get('logout', 'Auth::logout');
 });
+
+// Rute untuk autentikasi (logout)
+$routes->get('logout', 'Auth::logout');
 
 // Rute untuk form portofolio
 $routes->group('portofolio-form', function ($routes) {

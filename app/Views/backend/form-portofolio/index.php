@@ -19,7 +19,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        
+
                         <div class="d-flex justify-content-start mb-3">
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/upload-rps') ?>">
                                 Tambah Portofolio
