@@ -17,31 +17,31 @@ class Profile extends BaseController
 
     public function index()
     {
-        $userId = session()->get('user')['id'] ?? null;
+        $userId = session()->get('user')['id_user'] ?? null;
 
-        if (!$userId) {
+        if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        $profile = $this->profileModel->where('user_id', $userId)->first();
+        $profile = $this->profileModel->where('id', $userId)->first();
 
         return view('backend/profile/index', ['profile' => $profile]);
     }
 
     public function edit()
     {
-        $userId = session()->get('user')['id'] ?? null;
+        $userId = session()->get('user')['id_user'] ?? null;
         if (!$userId) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        $profile = $this->profileModel->where('user_id', $userId)->first();
+        $profile = $this->profileModel->where('id', $userId)->first();
         return view('backend/profile/edit', ['profile' => $profile]);
     }
 
     public function update()
     {
-        $userId = session()->get('user')['id'] ?? null;
+        $userId = session()->get('user')['id_user'] ?? null;
         if (!$userId) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
@@ -56,7 +56,7 @@ class Profile extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $this->profileModel->where('user_id', $userId)->set([
+        $this->profileModel->where('id', $userId)->set([
             'name'  => $this->request->getPost('name'),
             'email' => $this->request->getPost('email'),
             'phone' => $this->request->getPost('phone'),

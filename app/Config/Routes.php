@@ -8,7 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->get('/', 'Dashboard::index');
 
-// Rute untuk autentikasi (login)
+// Rute autentikasi login
 $routes->group('login', function ($routes) {
     // Rute GET
     $routes->get('/', 'Auth::login');
@@ -17,10 +17,13 @@ $routes->group('login', function ($routes) {
     $routes->post('process-login', 'Auth::processLogin');
 });
 
-// Rute untuk autentikasi (logout)
+// Rute profile
+$routes->get('profile', 'Profile::index');
+
+// Rute autentikasi logout
 $routes->get('logout', 'Auth::logout');
 
-// Rute untuk form portofolio
+// Rute form portofolio
 $routes->group('portofolio-form', function ($routes) {
     // Rute GET
     $routes->get('/', 'Portofolio::index');

@@ -57,8 +57,14 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('error', 'Password salah');
         }
 
-        // Simpan data user ke session HANYA jika password benar
-        session()->set('user', $user);
+        // Session User
+        session()->set('UserSession', [
+            'logged_in'     => true,
+            'id_user'       => $user['id'],
+            'username'      => $user['username'],
+            'id_staf'      => $user['id_staf']
+        ]);
+
         log_message('debug', 'User session set: ' . print_r($user, true));
         return redirect()->to('/');
     }

@@ -8,6 +8,10 @@ class Portofolio extends BaseController
 {
     public function index(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         return view('backend/form-portofolio/index');
     }
 
@@ -78,6 +82,10 @@ class Portofolio extends BaseController
 
     public function info_matkul(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         // Data API dalam format JSON
         $apiResponse = '{
         "status": 1,
@@ -227,6 +235,10 @@ class Portofolio extends BaseController
 
     public function topik_perkuliahan(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         // Data tambahan dari session (jika ada)
         $topikPerkuliahan = session()->get('topik_perkuliahan') ?? [];
 
@@ -267,6 +279,10 @@ class Portofolio extends BaseController
 
     public function cpl_pi(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
@@ -277,6 +293,10 @@ class Portofolio extends BaseController
 
     public function cpmk_subcpmk(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
@@ -287,6 +307,10 @@ class Portofolio extends BaseController
 
     public function pemetaan(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
@@ -336,21 +360,37 @@ class Portofolio extends BaseController
 
     public function rancangan_asesmen(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         return view('backend/form-portofolio/rancangan-asesmen');
     }
 
     public function pelaksanaan_perkuliahan(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         return view('backend/form-portofolio/pelaksanaan-perkuliahan');
     }
 
     public function hasil_asesmen(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         return view('backend/form-portofolio/hasil-asesmen');
     }
 
     public function evaluasi_perkuliahan(): string
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+        
         return view('backend/form-portofolio/evaluasi-perkuliahan');
     }
 
