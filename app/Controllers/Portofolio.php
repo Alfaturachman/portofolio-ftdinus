@@ -15,8 +15,12 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/index');
     }
 
-    public function upload_rps(): string
+    public function upload_rps()
     {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
@@ -80,7 +84,7 @@ class Portofolio extends BaseController
         ]);
     }
 
-    public function info_matkul(): string
+    public function info_matkul()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -233,7 +237,7 @@ class Portofolio extends BaseController
         }
     }
 
-    public function topik_perkuliahan(): string
+    public function topik_perkuliahan()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -277,7 +281,7 @@ class Portofolio extends BaseController
         return redirect()->to('portofolio-form/cpl-pi');
     }
 
-    public function cpl_pi(): string
+    public function cpl_pi()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -291,7 +295,7 @@ class Portofolio extends BaseController
         ]);
     }
 
-    public function cpmk_subcpmk(): string
+    public function cpmk_subcpmk()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -305,7 +309,7 @@ class Portofolio extends BaseController
         ]);
     }
 
-    public function pemetaan(): string
+    public function pemetaan()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -324,23 +328,23 @@ class Portofolio extends BaseController
         $json = $this->request->getJSON();
         $cpmkData = $json->cpmk ?? null;
         $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
-        
+
         if ($cpmkData) {
             // Convert to array if it's an object
             $cpmkArray = json_decode(json_encode($cpmkData), true);
-            
+
             // Store in session
             session()->set('cpmk_data', [
                 'cpmk' => $cpmkArray,
                 'globalSubCpmkCounter' => $globalSubCpmkCounter
             ]);
-            
+
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Data CPMK berhasil disimpan'
             ]);
         }
-        
+
         return $this->response->setJSON([
             'success' => false,
             'message' => 'Data CPMK tidak valid'
@@ -350,15 +354,15 @@ class Portofolio extends BaseController
     public function getCPMKFromSession()
     {
         $sessionData = session()->get('cpmk_data');
-        
+
         if ($sessionData === null) {
             return $this->response->setJSON([]);
         }
-        
+
         return $this->response->setJSON($sessionData);
     }
 
-    public function rancangan_asesmen(): string
+    public function rancangan_asesmen()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -367,7 +371,7 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/rancangan-asesmen');
     }
 
-    public function pelaksanaan_perkuliahan(): string
+    public function pelaksanaan_perkuliahan()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -376,7 +380,7 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/pelaksanaan-perkuliahan');
     }
 
-    public function hasil_asesmen(): string
+    public function hasil_asesmen()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -385,12 +389,12 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/hasil-asesmen');
     }
 
-    public function evaluasi_perkuliahan(): string
+    public function evaluasi_perkuliahan()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
-        
+
         return view('backend/form-portofolio/evaluasi-perkuliahan');
     }
 
