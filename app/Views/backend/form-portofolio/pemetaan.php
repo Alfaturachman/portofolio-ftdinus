@@ -207,12 +207,13 @@
                                 <tbody>
                                     <?php 
                                     $cplPiData = session()->get('cpl_pi_data');
+                                    $cpmkData = session()->get('cpmk_data');
                                     $mappingData = session()->get('mapping_data') ?? [];
                                     
                                     if (empty($cplPiData) || empty($cpmkData['cpmk'])): 
                                     ?>
                                         <tr>
-                                            <td colspan="<?= $maxSubCpmk + 2 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
+                                            <td colspan="<?= $totalSubCpmk + 2 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($cplPiData as $cplNo => $cplData): ?>
@@ -233,11 +234,12 @@
                                                 <tr>
                                                     <td class="align-middle">
                                                         <strong>CPL <?= $cplNo ?></strong><br>
+                                                        <?= esc($cplData['narasi'] ?? '') ?>
                                                     </td>
                                                     <td>-</td>
-                                                    <?php for ($i = 1; $i <= $maxSubCpmk; $i++): ?>
+                                                    <?php foreach ($subCpmkNumbers as $subNo): ?>
                                                         <td class="text-center">-</td>
-                                                    <?php endfor; ?>
+                                                    <?php endforeach; ?>
                                                 </tr>
                                             <?php else: ?>
                                                 <?php foreach ($relatedCpmk as $cpmkNo => $cpmkInfo): ?>
@@ -245,34 +247,30 @@
                                                         <?php if ($isFirstRow): ?>
                                                             <td rowspan="<?= $rowspan ?>" class="align-middle">
                                                                 <strong>CPL <?= $cplNo ?></strong><br>
+                                                                <?= esc($cplData['narasi'] ?? '') ?>
                                                             </td>
                                                         <?php endif; ?>
                                                         
                                                         <td class="align-middle">
                                                             <strong>CPMK <?= $cpmkNo ?></strong><br>
                                                             <?= esc($cpmkInfo['narasi']) ?>
-                                                        </td>                                                        
-                                                        <?php for ($i = 0; $i < $totalSubCpmk; $i++): ?>
+                                                        </td>
+                                                        
+                                                        <?php foreach ($subCpmkNumbers as $subNo): ?>
                                                             <td class="text-center align-middle">
                                                                 <?php
-                                                                $currentSubNo = $subCpmkNumbers[$i];
                                                                 $isChecked = false;
-                                                                // Check if this sub-CPMK exists for this CPMK
-                                                                if (isset($cpmkInfo['sub'][$currentSubNo])) {
-                                                                    $isChecked = true;
-                                                                }
-                                                                // Also check existing mapping data
-                                                                if (isset($mappingData[$cplNo][$cpmkNo][$currentSubNo])) {
-                                                                    $isChecked = $mappingData[$cplNo][$cpmkNo][$currentSubNo];
+                                                                // Check if mapping exists in session data
+                                                                if (isset($mappingData->$cplNo->$cpmkNo->$subNo)) {
+                                                                    $isChecked = $mappingData->$cplNo->$cpmkNo->$subNo == 1;
                                                                 }
                                                                 ?>
                                                                 <input type="checkbox" 
                                                                     class="mapping-checkbox"
-                                                                    name="mapping[<?= $cplNo ?>][<?= $cpmkNo ?>][<?= $currentSubNo ?>]" 
-                                                                    value="1"
+                                                                    name="mapping[<?= $cplNo ?>][<?= $cpmkNo ?>][<?= $subNo ?>]" 
                                                                     <?= $isChecked ? 'checked' : '' ?>>
                                                             </td>
-                                                        <?php endfor; ?>
+                                                        <?php endforeach; ?>
                                                     </tr>
                                                     <?php $isFirstRow = false; ?>
                                                 <?php endforeach; ?>
@@ -283,16 +281,14 @@
                             </table>
                         </div>
 
+                        <!-- Replace the anchor tag with a submit button -->
                         <div class="d-flex justify-content-between pt-3">   
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/rancangan-asesmen') ?>">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -303,47 +299,85 @@
 
 <!-- Add JavaScript to handle checkbox changes -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.mapping-checkbox');
-    
-    function saveMappingData() {
-        const mappingData = {};
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('rpsForm');
+        const checkboxes = document.querySelectorAll('.mapping-checkbox');
         
+        // Save checkbox state when changed
         checkboxes.forEach(checkbox => {
-            const name = checkbox.getAttribute('name');
-            const matches = name.match(/mapping\[(\d+)\]\[(\d+)\]\[(\d+)\]/);
-            
-            if (matches) {
-                const [, cpl, cpmk, subCpmk] = matches;
-                
-                if (!mappingData[cpl]) mappingData[cpl] = {};
-                if (!mappingData[cpl][cpmk]) mappingData[cpl][cpmk] = {};
-                
-                mappingData[cpl][cpmk][subCpmk] = checkbox.checked ? 1 : 0;
-            }
+            checkbox.addEventListener('change', function() {
+                const mappingData = collectMappingData();
+                saveMappingToSession(mappingData);
+            });
         });
         
-        fetch('<?= base_url('portofolio/saveMappingToSession') ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ mapping: mappingData })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                console.error('Failed to save mapping data');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', saveMappingData);
+        function collectMappingData() {
+            const mappingData = {};
+            
+            checkboxes.forEach(checkbox => {
+                const name = checkbox.getAttribute('name');
+                const matches = name.match(/mapping\[(\d+)\]\[(\d+)\]\[(\d+)\]/);
+                
+                if (matches) {
+                    const [, cpl, cpmk, subCpmk] = matches;
+                    
+                    if (!mappingData[cpl]) mappingData[cpl] = {};
+                    if (!mappingData[cpl][cpmk]) mappingData[cpl][cpmk] = {};
+                    
+                    mappingData[cpl][cpmk][subCpmk] = checkbox.checked ? 1 : 0;
+                }
+            });
+            
+            return mappingData;
+        }
+        
+        function saveMappingToSession(mappingData) {
+            fetch('<?= base_url('portofolio/saveMappingToSession') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ mapping: mappingData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Failed to save mapping data');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const mappingData = collectMappingData();
+            
+            fetch('<?= base_url('portofolio/saveMappingToSession') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ mapping: mappingData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '<?= base_url('portofolio-form/rancangan-asesmen') ?>';
+                } else {
+                    alert('Gagal menyimpan data pemetaan. Silakan coba lagi.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+            });
+        });
     });
-});
 </script>
 
 <?= $this->include('backend/partials/footer') ?>

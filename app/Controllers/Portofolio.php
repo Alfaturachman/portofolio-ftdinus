@@ -358,6 +358,46 @@ class Portofolio extends BaseController
         ]);
     }
 
+    
+    public function saveCPMKToSession()
+    {
+        $json = $this->request->getJSON();
+        $cpmkData = $json->cpmk ?? null;
+        $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
+        
+        if ($cpmkData) {
+            // Convert to array if it's an object
+            $cpmkArray = json_decode(json_encode($cpmkData), true);
+            
+            // Store in session
+            session()->set('cpmk_data', [
+                'cpmk' => $cpmkArray,
+                'globalSubCpmkCounter' => $globalSubCpmkCounter
+            ]);
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data CPMK berhasil disimpan'
+            ]);
+        }
+        
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Data CPMK tidak valid'
+        ]);
+    }
+    
+    public function getCPMKFromSession()
+    {
+        $sessionData = session()->get('cpmk_data');
+        
+        if ($sessionData === null) {
+            return $this->response->setJSON([]);
+        }
+        
+        return $this->response->setJSON($sessionData);
+    }
+
     public function pemetaan()
     {
         if (!session()->get('UserSession.logged_in')) {
@@ -371,71 +411,48 @@ class Portofolio extends BaseController
             'pdfUrl' => $pdfUrl,
         ]);
     }
-
+    
     public function saveMappingToSession()
     {
-        $json = $this->request->getJSON();
-        $mappingData = $json->mapping ?? null;
+        try {
+            $json = $this->request->getJSON();
+            $mappingData = $json->mapping ?? null;
 
-        if ($mappingData) {
-            // Store in session
-            session()->set('mapping_data', $mappingData);
+            if ($mappingData) {
+                // Convert to object for consistent access
+                $mappingData = json_decode(json_encode($mappingData));
+                
+                // Store in session
+                session()->set('mapping_data', $mappingData);
+                
+                // Store the current progress
+                session()->set('current_progress', 'pemetaan');
 
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Data pemetaan berhasil disimpan'
+                ]);
+            }
+
+            throw new \Exception('Data pemetaan tidak valid');
+        } catch (\Exception $e) {
             return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Data pemetaan berhasil disimpan'
+                'success' => false,
+                'message' => $e->getMessage()
             ]);
         }
-
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => 'Data pemetaan tidak valid'
-        ]);
-    }
-
-    public function saveCPMKToSession()
-    {
-        $json = $this->request->getJSON();
-        $cpmkData = $json->cpmk ?? null;
-        $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
-
-        if ($cpmkData) {
-            // Convert to array if it's an object
-            $cpmkArray = json_decode(json_encode($cpmkData), true);
-
-            // Store in session
-            session()->set('cpmk_data', [
-                'cpmk' => $cpmkArray,
-                'globalSubCpmkCounter' => $globalSubCpmkCounter
-            ]);
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Data CPMK berhasil disimpan'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'success' => false,
-            'message' => 'Data CPMK tidak valid'
-        ]);
-    }
-
-    public function getCPMKFromSession()
-    {
-        $sessionData = session()->get('cpmk_data');
-
-        if ($sessionData === null) {
-            return $this->response->setJSON([]);
-        }
-
-        return $this->response->setJSON($sessionData);
     }
 
     public function rancangan_asesmen()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Check if mapping data exists in session
+        if (!session()->get('mapping_data')) {
+            return redirect()->to('/portofolio-form/pemetaan')
+                ->with('error', 'Silakan lengkapi pemetaan terlebih dahulu.');
         }
 
         return view('backend/form-portofolio/rancangan-asesmen');
