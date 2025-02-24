@@ -224,12 +224,12 @@
                 <strong>CPMK ${cpmkCounter}</strong>
                 <select class="form-select mt-2" name="cpmk[${cpmkCounter}][selectedCpl]" required>
                     <option value="">Pilih CPL</option>
-                    <?php 
-                    if(isset($cplPiData)):
-                        foreach($cplPiData as $cplNo => $cplData): 
+                    <?php
+                    if (isset($cplPiData)):
+                        foreach ($cplPiData as $cplNo => $cplData):
                     ?>
                         <option value="<?= $cplNo ?>">CPL <?= $cplNo ?> - <?= substr($cplData['cpl_indo'], 0, 100) ?>...</option>
-                    <?php 
+                    <?php
                         endforeach;
                     endif;
                     ?>
@@ -383,7 +383,7 @@
                 subWrapper.querySelectorAll('.row').forEach(subRow => {
                     const subNumber = subRow.querySelector('input[name^="no_cpmk["]').value;
                     const subNarasi = subRow.querySelector('input[name^="cpmk["][name*="sub"]').value;
-                    
+
                     if (subNumber && subNarasi) {
                         cpmkData[cpmkNumber].sub[subNumber] = subNarasi;
                     }
@@ -393,28 +393,28 @@
 
         // Send data to server
         fetch('<?= base_url('portofolio-form/saveCPMKToSession') ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({
-                cpmk: cpmkData,
-                globalSubCpmkCounter: globalSubCpmkCounter
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    cpmk: cpmkData,
+                    globalSubCpmkCounter: globalSubCpmkCounter
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
-            } else {
-                alert('Gagal menyimpan data CPMK. Silakan coba lagi.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data.');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
+                } else {
+                    alert('Gagal menyimpan data CPMK. Silakan coba lagi.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data.');
+            });
     });
 
     // Function to load CPMK data from session
@@ -438,14 +438,14 @@
                     <strong>CPMK ${cpmkNumber}</strong>
                     <select class="form-select mt-2" name="cpmk[${cpmkNumber}][selectedCpl]" required>
                         <option value="">Pilih CPL</option>
-                        <?php 
-                        if(isset($cplPiData)):
-                            foreach($cplPiData as $cplNo => $cplData): 
+                        <?php
+                        if (isset($cplPiData)):
+                            foreach ($cplPiData as $cplNo => $cplData):
                         ?>
                             <option value="<?= $cplNo ?>" ${cpmkInfo.selectedCpl == '<?= $cplNo ?>' ? 'selected' : ''}>
                                 CPL <?= $cplNo ?> - <?= substr($cplData['cpl_indo'], 0, 100) ?>...
                             </option>
-                        <?php 
+                        <?php
                             endforeach;
                         endif;
                         ?>

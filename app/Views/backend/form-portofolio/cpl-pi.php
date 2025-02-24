@@ -136,7 +136,7 @@
                             </div>
                             <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
-                        
+
                         <div class="step-line"></div>
 
                         <!-- Evaluasi Perkuliahan -->
