@@ -175,21 +175,34 @@
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead class="text-white" style="background-color: #0f4c92;">
-                                    <tr class="align-middle text-center">
-                                        <th style="width: 20%" rowspan="2">CPL</th>
-                                        <th style="width: 30%" rowspan="2">CPMK</th>
-                                        <?php 
-                                        $cpmkData = session()->get('cpmk_data');
-                                        $maxSubCpmk = isset($cpmkData['globalSubCpmkCounter']) ? 
-                                            ($cpmkData['globalSubCpmkCounter'] - 1) : 0;
-                                        ?>
-                                        <th colspan="<?= $maxSubCpmk ?>">Sub CPMK</th>
-                                    </tr>
-                                    <tr class="text-center">
-                                        <?php for ($i = 1; $i <= $maxSubCpmk; $i++): ?>
-                                            <th><?= $i ?></th>
-                                        <?php endfor; ?>
-                                    </tr>
+                                <tr class="align-middle text-center">
+                                    <th style="width: 20%" rowspan="2">CPL</th>
+                                    <th style="width: 30%" rowspan="2">CPMK</th>
+                                    <?php 
+                                    $cpmkData = session()->get('cpmk_data');
+                                    // Get an array of all unique sub CPMK numbers
+                                    $subCpmkNumbers = [];
+                                    if (isset($cpmkData['cpmk'])) {
+                                        foreach ($cpmkData['cpmk'] as $cpmk) {
+                                            if (isset($cpmk['sub'])) {
+                                                foreach ($cpmk['sub'] as $subNo => $subData) {
+                                                    if (!in_array($subNo, $subCpmkNumbers)) {
+                                                        $subCpmkNumbers[] = $subNo;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        sort($subCpmkNumbers); // Sort the numbers in ascending order
+                                    }
+                                    $totalSubCpmk = count($subCpmkNumbers);
+                                    ?>
+                                    <th colspan="<?= $totalSubCpmk ?>">Sub CPMK</th>
+                                </tr>
+                                <tr class="text-center">
+                                    <?php foreach ($subCpmkNumbers as $subNo): ?>
+                                        <th><?= $subNo ?></th>
+                                    <?php endforeach; ?>
+                                </tr>
                                 </thead>
                                 <tbody>
                                     <?php 
@@ -238,24 +251,24 @@
                                                         <td class="align-middle">
                                                             <strong>CPMK <?= $cpmkNo ?></strong><br>
                                                             <?= esc($cpmkInfo['narasi']) ?>
-                                                        </td>
-                                                        
-                                                        <?php for ($i = 1; $i <= $maxSubCpmk; $i++): ?>
+                                                        </td>                                                        
+                                                        <?php for ($i = 0; $i < $totalSubCpmk; $i++): ?>
                                                             <td class="text-center align-middle">
                                                                 <?php
+                                                                $currentSubNo = $subCpmkNumbers[$i];
                                                                 $isChecked = false;
                                                                 // Check if this sub-CPMK exists for this CPMK
-                                                                if (isset($cpmkInfo['sub'][$i])) {
+                                                                if (isset($cpmkInfo['sub'][$currentSubNo])) {
                                                                     $isChecked = true;
                                                                 }
                                                                 // Also check existing mapping data
-                                                                if (isset($mappingData[$cplNo][$cpmkNo][$i])) {
-                                                                    $isChecked = $mappingData[$cplNo][$cpmkNo][$i];
+                                                                if (isset($mappingData[$cplNo][$cpmkNo][$currentSubNo])) {
+                                                                    $isChecked = $mappingData[$cplNo][$cpmkNo][$currentSubNo];
                                                                 }
                                                                 ?>
                                                                 <input type="checkbox" 
                                                                     class="mapping-checkbox"
-                                                                    name="mapping[<?= $cplNo ?>][<?= $cpmkNo ?>][<?= $i ?>]" 
+                                                                    name="mapping[<?= $cplNo ?>][<?= $cpmkNo ?>][<?= $currentSubNo ?>]" 
                                                                     value="1"
                                                                     <?= $isChecked ? 'checked' : '' ?>>
                                                             </td>
