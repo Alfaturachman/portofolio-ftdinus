@@ -136,7 +136,7 @@
                             </div>
                             <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
-                        
+
                         <div class="step-line"></div>
 
                         <!-- Evaluasi Perkuliahan -->
@@ -178,32 +178,29 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td rowspan="3" style="white-space: nowrap;"><strong>CPL 1</strong></td>
-                                    <td rowspan="3">Mampu menguasai konsep dasar...</td>
-                                    <td>Mengidentifikasi masalah dasar ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menerapkan metode analisis ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menyampaikan hasil analisis secara tertulis ...</td>
-                                </tr>
-
-                                <tr>
-                                    <td rowspan="4" style="white-space: nowrap;"><strong>CPL 2</strong></td>
-                                    <td rowspan="4">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                    <td>Berkomunikasi secara efektif dalam tim ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menyusun laporan sesuai standar ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Menggunakan teknologi untuk kolaborasi ...</td>
-                                </tr>
-                                <tr>
-                                    <td>Memahami etika komunikasi profesional ...</td>
-                                </tr>
+                                <?php if (empty($cplPiData)): ?>
+                                    <tr>
+                                        <td colspan="3" class="text-center">Tidak ada data CPL dan PI untuk mata kuliah ini.</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($cplPiData as $cplNo => $cplData): ?>
+                                        <?php $rowCount = max(count($cplData['pi_list']), 1); ?>
+                                        <tr>
+                                            <td rowspan="<?= $rowCount ?>" style="white-space: nowrap;"><strong>CPL <?= $cplNo ?></strong></td>
+                                            <td rowspan="<?= $rowCount ?>"><?= esc($cplData['cpl_indo']) ?></td>
+                                            <?php if (!empty($cplData['pi_list'])): ?>
+                                                <td><?= esc($cplData['pi_list'][0]) ?></td>
+                                            <?php else: ?>
+                                                <td>-</td>
+                                            <?php endif; ?>
+                                        </tr>
+                                        <?php for ($i = 1; $i < count($cplData['pi_list']); $i++): ?>
+                                            <tr>
+                                                <td><?= esc($cplData['pi_list'][$i]) ?></td>
+                                            </tr>
+                                        <?php endfor; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-between pt-3">

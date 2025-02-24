@@ -157,7 +157,7 @@
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
+                    <div class="d-block align-items-center justify-content-center mb-5">
                         <h4 class="fw-bolder mb-3">Rancangan Asesmen</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengisi rancangan asesmen di bawah sebelum melanjutkan!
@@ -165,6 +165,80 @@
                     </div>
 
                     <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                        <h5 class="fw-bolder mb-3">Rancangan Jadwal Assesmen</h5>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered">
+                                <thead class="text-white" style="background-color: #0f4c92;">
+                                    <tr class="align-middle text-center">
+                                        <th>CPMK</th>
+                                        <th>Sub CPMK</th>
+                                        <th>TUGAS</th>
+                                        <th>UTS</th>
+                                        <th>UAS</th>
+                                    </tr>
+                                </thead>
+                                <tr>
+                                    <td class="align-middle" rowspan="2">CPMK 1</td>
+                                    <td>Sub CPMK 1</td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle">Sub CPMK 2</td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle">CPMK 2</td>
+                                    <td>Sub CPMK 3</td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle" rowspan="2">CPMK 3</td>
+                                    <td>Sub CPMK 4</td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle">Sub CPMK 5</td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle">CPMK 4</td>
+                                    <td>Sub CPMK 6</td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle" rowspan="3">CPMK n</td>
+                                    <td>Sub CPMK 5</td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle">Sub CPMK 6</td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                </tr>
+                                <tr>
+                                    <td class="align-middle">Sub CPMK n</td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox"></td>
+                                    <td class="text-center"><input type="checkbox" checked></td>
+                                </tr>
+                            </table>
+                        </div>
+
                         <!-- Tugas -->
                         <h5 class="fw-bolder mb-3">1. Tugas</h5>
                         <div class="form-group mb-4">

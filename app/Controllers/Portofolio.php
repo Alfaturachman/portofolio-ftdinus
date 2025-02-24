@@ -106,22 +106,22 @@ class Portofolio extends BaseController
             },
             "mataKuliah": [
                 {
-                    "nama_mk": "Pemrograman Web",
-                    "kode_mk": "IF123",
+                    "nama_mk": "ALGORITMA DAN PEMROGRAMAN",
+                    "kode_mk": "E113205",
                     "kelompok_mk": "Wajib",
                     "fakultas": "Fakultas Teknik",
-                    "progdi": "Teknik Informatika",
+                    "progdi": "Teknik Elektro",
                     "sks_teori": 3,
-                    "sks_praktik": 1
+                    "sks_praktik": 0
                 },
                 {
-                    "nama_mk": "Basis Data",
-                    "kode_mk": "IF124",
-                    "kelompok_mk": "Wajib",
+                    "nama_mk": "ANALISIS KELAYAKAN PROYEK",
+                    "kode_mk": "E1144907",
+                    "kelompok_mk": "pilihan",
                     "fakultas": "Fakultas Teknik",
-                    "progdi": "Teknik Informatika",
-                    "sks_teori": 2,
-                    "sks_praktik": 2
+                    "progdi": "Teknik Elektro",
+                    "sks_teori": 3,
+                    "sks_praktik": 0
                 }
             ]
         }
@@ -140,17 +140,17 @@ class Portofolio extends BaseController
                 [
                     'fakultas' => 'Teknik',
                     'progdi' => 'Teknik Elektro',
-                    'nama_mk' => 'Sistem Robotika',
-                    'kode_mk' => 'E1144902',
+                    'nama_mk' => 'ALJABAR LINIER',
+                    'kode_mk' => 'E1142001',
                     'kelompok_mk' => '01',
-                    'sks_teori' => 1,
-                    'sks_praktik' => 2
+                    'sks_teori' => 3,
+                    'sks_praktik' => 0
                 ],
                 [
                     'fakultas' => 'Teknik',
-                    'progdi' => 'Teknik Industri',
-                    'nama_mk' => 'Matematika Quantum',
-                    'kode_mk' => 'E1282576',
+                    'progdi' => 'Teknik Elektro',
+                    'nama_mk' => 'ANALISIS KELAYAKAN PROYEK',
+                    'kode_mk' => 'E1144907',
                     'kelompok_mk' => '02',
                     'sks_teori' => 2,
                     'sks_praktik' => 1
@@ -287,12 +287,57 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Get kode_matkul from session
+        $infoMatkul = session()->get('info_matkul');
+        $kodeMatkul = $infoMatkul['kode_mk'] ?? '';
+
+        // Create model instance
+        $db = \Config\Database::connect();
+
+        // Query to get CPL and PI data
+        $query = $db->table('cpl_pi')
+            ->where('kode_matkul', $kodeMatkul)
+            ->orderBy('no_cpl', 'ASC')
+            ->orderBy('no_pi', 'ASC')
+            ->get();
+
+        // Process the results into a structured array
+        $cplPiData = [];
+        foreach ($query->getResultArray() as $row) {
+            $cplNo = $row['no_cpl'];
+            if (!isset($cplPiData[$cplNo])) {
+                $cplPiData[$cplNo] = [
+                    'cpl_indo' => $row['cpl_indo'],
+                    'pi_list' => []
+                ];
+            }
+            if (!empty($row['isi_pi'])) {
+                $cplPiData[$cplNo]['pi_list'][] = $row['isi_pi'];
+            }
+        }
+
+        // Store CPL-PI data in session
+        session()->set('cpl_pi_data', $cplPiData);
+
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/form-portofolio/cpl-pi', [
             'pdfUrl' => $pdfUrl,
+            'cplPiData' => $cplPiData
         ]);
+    }
+
+    // Add new method to get CPL-PI data from session
+    public function getCplPiFromSession()
+    {
+        $sessionData = session()->get('cpl_pi_data');
+
+        if ($sessionData === null) {
+            return $this->response->setJSON([]);
+        }
+
+        return $this->response->setJSON($sessionData);
     }
 
     public function cpmk_subcpmk()
@@ -301,11 +346,15 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Cek apakah ada file yang disimpan di session
+        // Get CPL-PI data from session
+        $cplPiData = session()->get('cpl_pi_data') ?? [];
+
+        // Get PDF URL from session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/form-portofolio/cpmk-subcpmk', [
             'pdfUrl' => $pdfUrl,
+            'cplPiData' => $cplPiData  // Pass CPL data to the view
         ]);
     }
 
@@ -320,6 +369,27 @@ class Portofolio extends BaseController
 
         return view('backend/form-portofolio/pemetaan', [
             'pdfUrl' => $pdfUrl,
+        ]);
+    }
+
+    public function saveMappingToSession()
+    {
+        $json = $this->request->getJSON();
+        $mappingData = $json->mapping ?? null;
+
+        if ($mappingData) {
+            // Store in session
+            session()->set('mapping_data', $mappingData);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data pemetaan berhasil disimpan'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Data pemetaan tidak valid'
         ]);
     }
 

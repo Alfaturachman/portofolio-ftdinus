@@ -171,89 +171,106 @@
                             </div>
                         <?php else: ?>
                         <?php endif; ?>
+                        <!-- Inside the table-responsive div -->
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead class="text-white" style="background-color: #0f4c92;">
                                     <tr class="align-middle text-center">
                                         <th style="width: 20%" rowspan="2">CPL</th>
                                         <th style="width: 30%" rowspan="2">CPMK</th>
-                                        <th colspan="5">Sub CPMK</th>
+                                        <?php 
+                                        $cpmkData = session()->get('cpmk_data');
+                                        $maxSubCpmk = isset($cpmkData['globalSubCpmkCounter']) ? 
+                                            ($cpmkData['globalSubCpmkCounter'] - 1) : 0;
+                                        ?>
+                                        <th colspan="<?= $maxSubCpmk ?>">Sub CPMK</th>
                                     </tr>
                                     <tr class="text-center">
-                                        <th>1</th>
-                                        <th>2</th>
-                                        <th>3</th>
-                                        <th>4</th>
-                                        <th>5</th>
+                                        <?php for ($i = 1; $i <= $maxSubCpmk; $i++): ?>
+                                            <th><?= $i ?></th>
+                                        <?php endfor; ?>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- CPL 1 -->
-                                    <tr>
-                                        <td rowspan="3" class="align-middle"><strong>CPL 1</strong></td>
-                                        <td>Mengidentifikasi masalah dasar ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_1[]" value="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Menerapkan metode analisis ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_2[]" value="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Menyampaikan hasil analisis secara tertulis ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_3[]" value="5"></td>
-                                    </tr>
-
-                                    <!-- CPL 2 -->
-                                    <tr>
-                                        <td rowspan="4" class="align-middle"><strong>CPL 2</strong></td>
-                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_4[]" value="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_5[]" value="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_6[]" value="5"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="align-middle">Memiliki kemampuan untuk berkomunikasi ...</td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="1"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="2"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="3"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="4"></td>
-                                        <td class="text-center align-middle"><input type="checkbox" name="sub_cpmk_7[]" value="5"></td>
-                                    </tr>
+                                    <?php 
+                                    $cplPiData = session()->get('cpl_pi_data');
+                                    $mappingData = session()->get('mapping_data') ?? [];
+                                    
+                                    if (empty($cplPiData) || empty($cpmkData['cpmk'])): 
+                                    ?>
+                                        <tr>
+                                            <td colspan="<?= $maxSubCpmk + 2 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($cplPiData as $cplNo => $cplData): ?>
+                                            <?php 
+                                            // Get CPMK data for this CPL from session
+                                            $relatedCpmk = [];
+                                            foreach ($cpmkData['cpmk'] as $cpmkNo => $cpmkInfo) {
+                                                if (isset($cpmkInfo['selectedCpl']) && $cpmkInfo['selectedCpl'] == $cplNo) {
+                                                    $relatedCpmk[$cpmkNo] = $cpmkInfo;
+                                                }
+                                            }
+                                            
+                                            $rowspan = max(count($relatedCpmk), 1);
+                                            $isFirstRow = true;
+                                            ?>
+                                            
+                                            <?php if (empty($relatedCpmk)): ?>
+                                                <tr>
+                                                    <td class="align-middle">
+                                                        <strong>CPL <?= $cplNo ?></strong><br>
+                                                    </td>
+                                                    <td>-</td>
+                                                    <?php for ($i = 1; $i <= $maxSubCpmk; $i++): ?>
+                                                        <td class="text-center">-</td>
+                                                    <?php endfor; ?>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php foreach ($relatedCpmk as $cpmkNo => $cpmkInfo): ?>
+                                                    <tr>
+                                                        <?php if ($isFirstRow): ?>
+                                                            <td rowspan="<?= $rowspan ?>" class="align-middle">
+                                                                <strong>CPL <?= $cplNo ?></strong><br>
+                                                            </td>
+                                                        <?php endif; ?>
+                                                        
+                                                        <td class="align-middle">
+                                                            <strong>CPMK <?= $cpmkNo ?></strong><br>
+                                                            <?= esc($cpmkInfo['narasi']) ?>
+                                                        </td>
+                                                        
+                                                        <?php for ($i = 1; $i <= $maxSubCpmk; $i++): ?>
+                                                            <td class="text-center align-middle">
+                                                                <?php
+                                                                $isChecked = false;
+                                                                // Check if this sub-CPMK exists for this CPMK
+                                                                if (isset($cpmkInfo['sub'][$i])) {
+                                                                    $isChecked = true;
+                                                                }
+                                                                // Also check existing mapping data
+                                                                if (isset($mappingData[$cplNo][$cpmkNo][$i])) {
+                                                                    $isChecked = $mappingData[$cplNo][$cpmkNo][$i];
+                                                                }
+                                                                ?>
+                                                                <input type="checkbox" 
+                                                                    class="mapping-checkbox"
+                                                                    name="mapping[<?= $cplNo ?>][<?= $cpmkNo ?>][<?= $i ?>]" 
+                                                                    value="1"
+                                                                    <?= $isChecked ? 'checked' : '' ?>>
+                                                            </td>
+                                                        <?php endfor; ?>
+                                                    </tr>
+                                                    <?php $isFirstRow = false; ?>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
 
-                        <div class="d-flex justify-content-between pt-3">
+                        <div class="d-flex justify-content-between pt-3">   
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
@@ -270,5 +287,50 @@
         </div>
     </div>
 </div>
+
+<!-- Add JavaScript to handle checkbox changes -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.mapping-checkbox');
+    
+    function saveMappingData() {
+        const mappingData = {};
+        
+        checkboxes.forEach(checkbox => {
+            const name = checkbox.getAttribute('name');
+            const matches = name.match(/mapping\[(\d+)\]\[(\d+)\]\[(\d+)\]/);
+            
+            if (matches) {
+                const [, cpl, cpmk, subCpmk] = matches;
+                
+                if (!mappingData[cpl]) mappingData[cpl] = {};
+                if (!mappingData[cpl][cpmk]) mappingData[cpl][cpmk] = {};
+                
+                mappingData[cpl][cpmk][subCpmk] = checkbox.checked ? 1 : 0;
+            }
+        });
+        
+        fetch('<?= base_url('portofolio/saveMappingToSession') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ mapping: mappingData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Failed to save mapping data');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', saveMappingData);
+    });
+});
+</script>
 
 <?= $this->include('backend/partials/footer') ?>
