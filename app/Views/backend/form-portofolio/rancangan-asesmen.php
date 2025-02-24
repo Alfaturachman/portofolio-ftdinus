@@ -164,7 +164,7 @@
                         </div>
                     </div>
 
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                    <form id="rpsForm" action="<?= base_url('portofolio-form/saveAssessmentToSession') ?>" method="post">
                         <h5 class="fw-bolder mb-3">Rancangan Jadwal Assesmen</h5>
                         <div class="table-responsive mb-3">
                             <table class="table table-bordered">
@@ -177,65 +177,84 @@
                                         <th>UAS</th>
                                     </tr>
                                 </thead>
-                                <tr>
-                                    <td class="align-middle" rowspan="2">CPMK 1</td>
-                                    <td>Sub CPMK 1</td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">Sub CPMK 2</td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">CPMK 2</td>
-                                    <td>Sub CPMK 3</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle" rowspan="2">CPMK 3</td>
-                                    <td>Sub CPMK 4</td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">Sub CPMK 5</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">CPMK 4</td>
-                                    <td>Sub CPMK 6</td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle" rowspan="3">CPMK n</td>
-                                    <td>Sub CPMK 5</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">Sub CPMK 6</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                </tr>
-                                <tr>
-                                    <td class="align-middle">Sub CPMK n</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                    <td class="text-center"><input type="checkbox" checked></td>
-                                </tr>
+                                <tbody>
+                                    <?php
+                                    $mappingData = session()->get('mapping_data');
+                                    $cpmkData = session()->get('cpmk_data');
+                                    $assessmentData = session()->get('assessment_data') ?? [];
+
+                                    if ($mappingData && $cpmkData):
+                                        $currentCpmk = null;
+                                        $rowspanCount = [];
+
+                                        // Calculate rowspan for each CPMK
+                                        foreach ($mappingData as $cplNo => $cplMapping) {
+                                            foreach ($cplMapping as $cpmkNo => $subCpmks) {
+                                                if (!isset($rowspanCount[$cpmkNo])) {
+                                                    $rowspanCount[$cpmkNo] = 0;
+                                                }
+                                                foreach ($subCpmks as $subNo => $isChecked) {
+                                                    if ($isChecked) {
+                                                        $rowspanCount[$cpmkNo]++;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // Display the table rows
+                                        foreach ($mappingData as $cplNo => $cplMapping):
+                                            foreach ($cplMapping as $cpmkNo => $subCpmks):
+                                                $firstRow = true;
+                                                foreach ($subCpmks as $subNo => $isChecked):
+                                                    if ($isChecked):
+                                                        ?>
+                                                        <tr>
+                                                            <?php if ($firstRow && $rowspanCount[$cpmkNo] > 0): ?>
+                                                                <td class="align-middle" rowspan="<?= $rowspanCount[$cpmkNo] ?>">
+                                                                    <strong>CPMK <?= $cpmkNo ?></strong>
+                                                                    <?php if (isset($cpmkData['cpmk'][$cpmkNo]['narasi'])): ?>
+                                                                        <br><?= esc($cpmkData['cpmk'][$cpmkNo]['narasi']) ?>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                            <?php endif; ?>
+                                                            <td class="align-middle">
+                                                                <strong>Sub CPMK <?= $subNo ?></strong>
+                                                                <?php if (isset($cpmkData['cpmk'][$cpmkNo]['sub'][$subNo]['narasi'])): ?>
+                                                                    <br><?= esc($cpmkData['cpmk'][$cpmkNo]['sub'][$subNo]['narasi']) ?>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <input type="checkbox" 
+                                                                    class="assessment-checkbox" 
+                                                                    name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][tugas]"
+                                                                    <?= isset($assessmentData[$cpmkNo][$subNo]['tugas']) && $assessmentData[$cpmkNo][$subNo]['tugas'] ? 'checked' : '' ?>>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <input type="checkbox" 
+                                                                    class="assessment-checkbox" 
+                                                                    name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][uts]"
+                                                                    <?= isset($assessmentData[$cpmkNo][$subNo]['uts']) && $assessmentData[$cpmkNo][$subNo]['uts'] ? 'checked' : '' ?>>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <input type="checkbox" 
+                                                                    class="assessment-checkbox" 
+                                                                    name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][uas]"
+                                                                    <?= isset($assessmentData[$cpmkNo][$subNo]['uas']) && $assessmentData[$cpmkNo][$subNo]['uas'] ? 'checked' : '' ?>>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                        $firstRow = false;
+                                                    endif;
+                                                endforeach;
+                                            endforeach;
+                                        endforeach;
+                                    else:
+                                    ?>
+                                        <tr>
+                                            <td colspan="5" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
                             </table>
                         </div>
 
@@ -276,12 +295,9 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>">
+                            <button type="submit" class="btn btn-primary">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -289,5 +305,86 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('rpsForm');
+    const checkboxes = document.querySelectorAll('.assessment-checkbox');
+
+    // Save checkbox state when changed
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const assessmentData = collectAssessmentData();
+            saveAssessmentToSession(assessmentData);
+        });
+    });
+
+    function collectAssessmentData() {
+        const assessmentData = {};
+
+        checkboxes.forEach(checkbox => {
+            const name = checkbox.getAttribute('name');
+            const matches = name.match(/assessment\[(\d+)\]\[(\d+)\]\[(\w+)\]/);
+
+            if (matches) {
+                const [, cpmk, subCpmk, type] = matches;
+
+                if (!assessmentData[cpmk]) assessmentData[cpmk] = {};
+                if (!assessmentData[cpmk][subCpmk]) assessmentData[cpmk][subCpmk] = {};
+
+                assessmentData[cpmk][subCpmk][type] = checkbox.checked;
+            }
+        });
+
+        return assessmentData;
+    }
+
+    function saveAssessmentToSession(assessmentData) {
+        fetch('<?= base_url('portofolio-form/saveAssessmentToSession') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ assessment: assessmentData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Failed to save assessment data:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const assessmentData = collectAssessmentData();
+
+        fetch('<?= base_url('portofolio-form/saveAssessmentToSession') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ assessment: assessmentData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>';
+            } else {
+                alert('Gagal menyimpan data asesmen: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyimpan data asesmen.');
+        });
+    });
+});
+</script>
 
 <?= $this->include('backend/partials/footer') ?>

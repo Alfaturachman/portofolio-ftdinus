@@ -452,6 +452,31 @@ class Portofolio extends BaseController
         return view('backend/form-portofolio/rancangan-asesmen');
     }
 
+    public function saveAssessmentToSession()
+    {
+        try {
+            $json = $this->request->getJSON();
+            $assessmentData = $json->assessment ?? null;
+
+            if (!$assessmentData) {
+                throw new \Exception('Data asesmen kosong atau tidak valid.');
+            }
+
+            session()->set('assessment_data', $assessmentData);
+            session()->set('current_progress', 'assessment');
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data asesmen berhasil disimpan'
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function pelaksanaan_perkuliahan()
     {
         if (!session()->get('UserSession.logged_in')) {
