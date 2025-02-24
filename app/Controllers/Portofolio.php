@@ -358,43 +358,43 @@ class Portofolio extends BaseController
         ]);
     }
 
-    
+
     public function saveCPMKToSession()
     {
         $json = $this->request->getJSON();
         $cpmkData = $json->cpmk ?? null;
         $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
-        
+
         if ($cpmkData) {
             // Convert to array if it's an object
             $cpmkArray = json_decode(json_encode($cpmkData), true);
-            
+
             // Store in session
             session()->set('cpmk_data', [
                 'cpmk' => $cpmkArray,
                 'globalSubCpmkCounter' => $globalSubCpmkCounter
             ]);
-            
+
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Data CPMK berhasil disimpan'
             ]);
         }
-        
+
         return $this->response->setJSON([
             'success' => false,
             'message' => 'Data CPMK tidak valid'
         ]);
     }
-    
+
     public function getCPMKFromSession()
     {
         $sessionData = session()->get('cpmk_data');
-        
+
         if ($sessionData === null) {
             return $this->response->setJSON([]);
         }
-        
+
         return $this->response->setJSON($sessionData);
     }
 
@@ -411,30 +411,24 @@ class Portofolio extends BaseController
             'pdfUrl' => $pdfUrl,
         ]);
     }
-    
+
     public function saveMappingToSession()
     {
         try {
             $json = $this->request->getJSON();
             $mappingData = $json->mapping ?? null;
 
-            if ($mappingData) {
-                // Convert to object for consistent access
-                $mappingData = json_decode(json_encode($mappingData));
-                
-                // Store in session
-                session()->set('mapping_data', $mappingData);
-                
-                // Store the current progress
-                session()->set('current_progress', 'pemetaan');
-
-                return $this->response->setJSON([
-                    'success' => true,
-                    'message' => 'Data pemetaan berhasil disimpan'
-                ]);
+            if (!$mappingData || empty((array)$mappingData)) {
+                throw new \Exception('Data pemetaan kosong atau tidak valid.');
             }
 
-            throw new \Exception('Data pemetaan tidak valid');
+            session()->set('mapping_data', $mappingData);
+            session()->set('current_progress', 'pemetaan');
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data pemetaan berhasil disimpan'
+            ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false,

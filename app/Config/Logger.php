@@ -38,7 +38,10 @@ class Logger extends BaseConfig
      *
      * @var int|list<int>
      */
-    public $threshold = (ENVIRONMENT === 'development') ? 4 : 9;
+    // public $threshold = (ENVIRONMENT === 'development') ? 4 : 9;
+    public $threshold = 7; // Catat semua level log
+    public $path = WRITEPATH . 'logs/'; // Lokasi default
+
 
     /**
      * --------------------------------------------------------------------------

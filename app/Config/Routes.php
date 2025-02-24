@@ -45,6 +45,8 @@ $routes->group('portofolio-form', function ($routes) {
 
     $routes->post('saveCPMKToSession', 'Portofolio::saveCPMKToSession');
     $routes->get('getCPMKFromSession', 'Portofolio::getCPMKFromSession');
+
+    $routes->post('saveMappingToSession', 'Portofolio::saveMappingToSession');
 });
 
 // Rute untuk mengakses file PDF yang diupload
