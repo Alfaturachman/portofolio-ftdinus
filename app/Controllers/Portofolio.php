@@ -423,7 +423,6 @@ class Portofolio extends BaseController
             }
 
             session()->set('mapping_data', $mappingData);
-            session()->set('current_progress', 'pemetaan');
 
             return $this->response->setJSON([
                 'success' => true,
