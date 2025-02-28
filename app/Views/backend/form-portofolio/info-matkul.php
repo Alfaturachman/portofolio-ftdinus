@@ -185,10 +185,11 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Replace the select and script sections in the view -->
                         <div class="form-group mb-3">
                             <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
                             <select class="form-select" id="nama_mk" name="nama_mk" required>
-                                <option value="">Pilih Mata Kuliah</option>
+                                <option value="" hidden>Pilih Mata Kuliah</option>
                                 <?php foreach ($mataKuliah as $mk): ?>
                                     <option value="<?= htmlspecialchars($mk['nama_mk']) ?>"
                                         data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
@@ -247,6 +248,14 @@
     </div>
 
     <script>
+        // Clear all fields on page load if no mata kuliah is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedOption = document.getElementById('nama_mk');
+            if (!selectedOption.value) {
+                clearFields();
+            }
+        });
+
         document.getElementById('nama_mk').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             if (selectedOption.value) {
@@ -259,14 +268,21 @@
                 document.getElementById('progdi').value = selectedOption.getAttribute('data-progdi') || '';
             } else {
                 // Kosongkan field jika tidak ada yang dipilih
-                document.getElementById('kode_mk').value = '';
-                document.getElementById('kelompok_mk').value = '';
-                document.getElementById('sks_teori').value = '';
-                document.getElementById('sks_praktik').value = '';
-                document.getElementById('fakultas').value = '';
-                document.getElementById('progdi').value = '';
+                clearFields();
             }
         });
+
+        // Function to clear all fields
+        function clearFields() {
+            document.getElementById('kode_mk').value = '';
+            document.getElementById('kelompok_mk').value = '';
+            document.getElementById('sks_teori').value = '';
+            document.getElementById('sks_praktik').value = '';
+            document.getElementById('fakultas').value = '';
+            document.getElementById('progdi').value = '';
+            document.getElementById('mk_prasyarat').value = '';
+            document.getElementById('topik_mk').value = '';
+        }
     </script>
 </div>
 

@@ -164,7 +164,7 @@
                         </div>
                     </div>
 
-                    <form id="rpsForm" action="<?= base_url('portofolio-form/saveAssessmentToSession') ?>" method="post">
+                    <form id="rpsForm" enctype="multipart/form-data">
                         <h5 class="fw-bolder mb-3">Rancangan Jadwal Assesmen</h5>
                         <div class="table-responsive mb-3">
                             <table class="table table-bordered">
@@ -182,6 +182,11 @@
                                     $mappingData = session()->get('mapping_data');
                                     $cpmkData = session()->get('cpmk_data');
                                     $assessmentData = session()->get('assessment_data') ?? [];
+
+                                    // Convert assessment data to array if it's not already an array
+                                    if (is_object($assessmentData)) {
+                                        $assessmentData = json_decode(json_encode($assessmentData), true);
+                                    }
 
                                     if ($mappingData && $cpmkData):
                                         $currentCpmk = null;
@@ -223,6 +228,7 @@
                                                                     <br><?= esc($cpmkData['cpmk'][$cpmkNo]['sub'][$subNo]['narasi']) ?>
                                                                 <?php endif; ?>
                                                             </td>
+                                                            <!-- Modified checkbox input fields in the table -->
                                                             <td class="text-center">
                                                                 <input type="checkbox" 
                                                                     class="assessment-checkbox" 
@@ -262,10 +268,37 @@
                         <h5 class="fw-bolder mb-3">1. Tugas</h5>
                         <div class="form-group mb-4">
                             <label for="soal_tugas" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_tugas']) ? 'required' : '' ?>>
+                                <?php if(isset(session()->get('assessment_files')['soal_tugas'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if(isset(session()->get('assessment_files')['soal_tugas'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_tugas']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_tugas']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            
                             <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
-                            <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_tugas']) ? 'required' : '' ?>>
+                                <?php if(isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if(isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_tugas']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_tugas']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
@@ -273,10 +306,37 @@
                         <h5 class="fw-bolder mb-3">2. Ujian Tengah Semester</h5>
                         <div class="form-group mb-4">
                             <label for="soal_uts" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_uts']) ? 'required' : '' ?>>
+                                <?php if(isset(session()->get('assessment_files')['soal_uts'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if(isset(session()->get('assessment_files')['soal_uts'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uts']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uts']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            
                             <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
-                            <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_uts']) ? 'required' : '' ?>>
+                                <?php if(isset(session()->get('assessment_files')['rubrik_uts'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if(isset(session()->get('assessment_files')['rubrik_uts'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uts']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uts']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
@@ -284,10 +344,37 @@
                         <h5 class="fw-bolder mb-3">3. Ujian Akhir Semester</h5>
                         <div class="form-group mb-4">
                             <label for="soal_uas" class="form-label">Soal</label>
-                            <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_uas']) ? 'required' : '' ?>>
+                                <?php if(isset(session()->get('assessment_files')['soal_uas'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if(isset(session()->get('assessment_files')['soal_uas'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uas']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uas']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            
                             <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
-                            <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_uas']) ? 'required' : '' ?>>
+                                <?php if(isset(session()->get('assessment_files')['rubrik_uas'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if(isset(session()->get('assessment_files')['rubrik_uas'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uas']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uas']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
@@ -295,9 +382,14 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            <div>
+                                <button type="submit" id="submitBtn" class="btn btn-success me-2">
+                                    <i class="ti ti-device-floppy"></i> Simpan
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -319,6 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Function to collect assessment data from checkboxes
     function collectAssessmentData() {
         const assessmentData = {};
 
@@ -339,6 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return assessmentData;
     }
 
+    // Function to save assessment data to session via AJAX
     function saveAssessmentToSession(assessmentData) {
         fetch('<?= base_url('portofolio-form/saveAssessmentToSession') ?>', {
             method: 'POST',
@@ -358,18 +452,45 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         });
     }
-
+    
+    // Modify the form submit event
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // Create FormData object for file uploads
+        const formData = new FormData();
+        
+        // Add checkbox assessment data
         const assessmentData = collectAssessmentData();
+        formData.append('assessment_data', JSON.stringify(assessmentData));
+        
+        // Add file data
+        const fileInputs = [
+            'soal_tugas', 'rubrik_tugas',
+            'soal_uts', 'rubrik_uts',
+            'soal_uas', 'rubrik_uas'
+        ];
+        
+        // Add all files to formData
+        let filesChanged = false;
+        
+        fileInputs.forEach(inputName => {
+            const fileInput = document.getElementById(inputName);
+            if (fileInput.files.length > 0) {
+                formData.append(inputName, fileInput.files[0]);
+                filesChanged = true;
+            }
+        });
 
-        fetch('<?= base_url('portofolio-form/saveAssessmentToSession') ?>', {
+        // Add a flag to indicate if files were changed
+        formData.append('files_changed', filesChanged);
+
+        fetch('<?= base_url('portofolio-form/saveAssessmentWithFiles') ?>', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ assessment: assessmentData })
+            body: formData
         })
         .then(response => response.json())
         .then(data => {

@@ -47,6 +47,11 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->get('getCPMKFromSession', 'Portofolio::getCPMKFromSession');
 
     $routes->post('saveMappingToSession', 'Portofolio::saveMappingToSession');
+    $routes->post('saveAssessmentToSession', 'Portofolio::saveAssessmentToSession');
+    $routes->post('saveAssessmentWithFiles', 'Portofolio::saveAssessmentWithFiles');
+    $routes->post('pelaksanaan_perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
+    $routes->post('savePelaksanaanPerkuliahan', 'Portofolio::savePelaksanaanPerkuliahan');
+    $routes->post('saveHasilAsesmen', 'Portofolio::saveHasilAsesmen');
 });
 
 // Rute untuk mengakses file PDF yang diupload
