@@ -162,44 +162,119 @@
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengupload hasil asesmen di bawah sebelum melanjutkan!
                         </div>
+                        <div id="successAlert" class="alert alert-success" style="display: none;" role="alert">
+                            Data hasil asesmen berhasil disimpan!
+                        </div>
+                        <div id="errorAlert" class="alert alert-danger" style="display: none;" role="alert">
+                            Terjadi kesalahan saat menyimpan data!
+                        </div>
                     </div>
 
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                    <form id="hasilAsesmenForm" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+
                         <!-- Tugas -->
                         <h5 class="fw-bolder mb-3">1. Hasil Tugas</h5>
                         <div class="form-group mb-4">
-                            <label for="jawaban_tugas" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control mb-2" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" required>
+                            <label for="jawaban_tugas" class="form-label">Jawaban</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['jawaban_tugas']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_tugas'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_tugas'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['jawaban_tugas']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['jawaban_tugas']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*contoh jawaban benar, jawaban sedang, jawaban salah</p>
                         </div>
 
                         <!-- Ujian Tengah Semester -->
                         <h5 class="fw-bolder mb-3">2. Hasil Ujian Tengah Semester</h5>
                         <div class="form-group mb-4">
-                            <label for="jawaban_uts" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control mb-2" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" required>
+                            <label for="jawaban_uts" class="form-label">Jawaban</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['jawaban_uts']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uts'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uts'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['jawaban_uts']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['jawaban_uts']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*contoh jawaban benar, jawaban sedang, jawaban salah</p>
                         </div>
 
                         <!-- Ujian Akhir Semester -->
                         <h5 class="fw-bolder mb-3">3. Hasil Ujian Akhir Semester</h5>
                         <div class="form-group mb-4">
-                            <label for="jawaban_uas" class="form-label mt-2">Jawaban</label>
-                            <input type="file" class="form-control mb-2" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" required>
+                            <label for="jawaban_uas" class="form-label">Jawaban</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['jawaban_uas']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uas'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uas'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['jawaban_uas']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['jawaban_uas']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*contoh jawaban benar, jawaban sedang, jawaban salah</p>
                         </div>
 
-                        <!-- 4.	Nilai Mata Kuliah -->
+                        <!-- 4. Nilai Mata Kuliah -->
                         <h5 class="fw-bolder mb-3">4. Nilai Mata Kuliah</h5>
                         <div class="form-group mb-4">
-                            <input type="file" class="form-control mb-2" id="nilai_mata_kuliah" name="nilai_mata_kuliah" accept="application/pdf">
+                            <label for="nilai_mata_kuliah" class="form-label">Upload File</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="nilai_mata_kuliah" name="nilai_mata_kuliah" accept="application/pdf">
+                                <?php if (isset(session()->get('hasil_asesmen_files')['nilai_mata_kuliah'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['nilai_mata_kuliah'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['nilai_mata_kuliah']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['nilai_mata_kuliah']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*opsional</p>
                         </div>
 
-                        <!-- 5.	Nilai Mata Kuliah -->
+                        <!-- 5. Nilai CPMK -->
                         <h5 class="fw-bolder mb-3">5. Nilai CPMK</h5>
                         <div class="form-group mb-4">
-                            <input type="file" class="form-control mb-2" id="nilai_cpmk" name="nilai_cpmk" accept="application/pdf" required>
+                            <label for="nilai_cpmk" class="form-label">Upload File</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="nilai_cpmk" name="nilai_cpmk" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['nilai_cpmk']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['nilai_cpmk'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['nilai_cpmk'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['nilai_cpmk']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['nilai_cpmk']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*wajib diisi</p>
                         </div>
 
@@ -207,128 +282,11 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/evaluasi-perkuliahan') ?>">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Nilai CPMK -->
-    <div class="row d-none">
-        <div class="col d-flex align-items-stretch">
-            <div class="card w-100">
-                <div class="card-body">
-                    <div class="d-block align-items-center justify-content-center mb-4">
-                        <h4 class="fw-bolder mb-3">Nilai Capaian Pembelajaran Mata Kuliah</h4>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi nilai CPMK di bawah sebelum melanjutkan!
-                        </div>
-                    </div>
-
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
-                        <!-- Tabel Header -->
-                        <table class="table mb-4">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Fakultas</th>
-                                    <th class="text-end">:</th>
-                                    <th>Fakultas Teknik</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Progdi</th>
-                                    <th class="text-end">:</th>
-                                    <th>Teknik Elektro - S1</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Kode Mata Kuliah</th>
-                                    <th class="text-end">:</th>
-                                    <th>E1144902</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Nama Mata Kuliah</th>
-                                    <th class="text-end">:</th>
-                                    <th>Sistem Robotika</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Kelompok</th>
-                                    <th class="text-end">:</th>
-                                    <th>01</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Jenis Mata Kuliah</th>
-                                    <th class="text-end">:</th>
-                                    <th>Teori</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Semester</th>
-                                    <th class="text-end">:</th>
-                                    <th>Genap</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Tahun Akademik</th>
-                                    <th class="text-end">:</th>
-                                    <th>2024/2025</th>
-                                </tr>
-                                <tr>
-                                    <th class="text-start" style="width: 350px;">Nama Dosen</th>
-                                    <th class="text-end">:</th>
-                                    <th>Arga Dwi Pambudi, M.T.</th>
-                                </tr>
-                            </thead>
-                        </table>
-
-                        <!-- Tabel Data Mahasiswa -->
-                        <table class="table table-bordered">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>No</th>
-                                    <th>NIM</th>
-                                    <th>Nama</th>
-                                    <th>CPMK 1</th>
-                                    <th>CPMK 2</th>
-                                    <th>CPMK 3</th>
-                                    <th>CPMK 4</th>
-                                    <th>CPMK 5</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>123456</td>
-                                    <td>Ahmad Zaki</td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>789012</td>
-                                    <td>Rina Amalia</td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                    <td><input type="checkbox"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            <div>
+                                <button type="submit" id="submitBtn" class="btn btn-primary">
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -336,5 +294,62 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('hasilAsesmenForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Hide any previous alerts
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+
+            // Create FormData object
+            const formData = new FormData(form);
+
+            // Disable submit button to prevent multiple submissions
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Menyimpan...';
+
+            // Send AJAX request
+            fetch('<?= base_url('portofolio-form/saveHasilAsesmen') ?>', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert(data.message);
+                        console.error('Failed to save assessment data:', data.message);
+                    }
+                })
+                .catch(error => {
+                    // Show error message
+                    errorAlert.textContent = 'Terjadi kesalahan saat menyimpan data.';
+                    errorAlert.style.display = 'block';
+
+                    // Scroll to top to see the alert
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan';
+                });
+        });
+    });
+</script>
 
 <?= $this->include('backend/partials/footer') ?>

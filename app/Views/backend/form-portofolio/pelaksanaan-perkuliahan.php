@@ -162,14 +162,34 @@
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan untuk mengupload pelaksanaan perkuliahan di bawah sebelum melanjutkan!
                         </div>
+                        <div id="successAlert" class="alert alert-success" style="display: none;" role="alert">
+                            Data pelaksanaan perkuliahan berhasil disimpan!
+                        </div>
+                        <div id="errorAlert" class="alert alert-danger" style="display: none;" role="alert">
+                            Terjadi kesalahan saat menyimpan data!
+                        </div>
                     </div>
 
-                    <form id="rpsForm" action="<?= base_url('form/submit') ?>" method="post" enctype="multipart/form-data">
+                    <form id="pelaksanaanForm" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
                         <!-- Kontrak Kuliah -->
                         <h5 class="fw-bolder mb-3">1. Kontrak Kuliah</h5>
                         <div class="form-group mb-4">
                             <label for="kontrak_kuliah" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="kontrak_kuliah" name="kontrak_kuliah" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="kontrak_kuliah" name="kontrak_kuliah" accept="application/pdf" <?= !isset(session()->get('pelaksanaan_files')['kontrak_kuliah']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('pelaksanaan_files')['kontrak_kuliah'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('pelaksanaan_files')['kontrak_kuliah'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('pelaksanaan_files')['kontrak_kuliah']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('pelaksanaan_files')['kontrak_kuliah']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
@@ -177,7 +197,20 @@
                         <h5 class="fw-bolder mb-3">2. Realisasi Mengajar</h5>
                         <div class="form-group mb-4">
                             <label for="realisasi_mengajar" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="realisasi_mengajar" name="realisasi_mengajar" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="realisasi_mengajar" name="realisasi_mengajar" accept="application/pdf" <?= !isset(session()->get('pelaksanaan_files')['realisasi_mengajar']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('pelaksanaan_files')['realisasi_mengajar'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('pelaksanaan_files')['realisasi_mengajar'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('pelaksanaan_files')['realisasi_mengajar']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('pelaksanaan_files')['realisasi_mengajar']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
@@ -185,7 +218,20 @@
                         <h5 class="fw-bolder mb-3">3. Kehadiran Mahasiswa</h5>
                         <div class="form-group mb-4">
                             <label for="kehadiran_mahasiswa" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="kehadiran_mahasiswa" name="kehadiran_mahasiswa" accept="application/pdf" required>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="kehadiran_mahasiswa" name="kehadiran_mahasiswa" accept="application/pdf" <?= !isset(session()->get('pelaksanaan_files')['kehadiran_mahasiswa']) ? 'required' : '' ?>>
+                                <?php if (isset(session()->get('pelaksanaan_files')['kehadiran_mahasiswa'])): ?>
+                                    <span class="input-group-text bg-success text-white">
+                                        <i class="ti ti-check"></i> File Terunggah
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (isset(session()->get('pelaksanaan_files')['kehadiran_mahasiswa'])): ?>
+                                <div class="mt-2">
+                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('pelaksanaan_files')['kehadiran_mahasiswa']['name']) ?></span>
+                                    <p class="text-muted small">Ukuran: <?= round(session()->get('pelaksanaan_files')['kehadiran_mahasiswa']['size'] / 1024, 2) ?> KB</p>
+                                </div>
+                            <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                         </div>
 
@@ -193,12 +239,11 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/rancangan-asesmen') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            <div>
+                                <button type="submit" id="submitBtn" class="btn btn-primary">
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -206,5 +251,62 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('pelaksanaanForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Hide any previous alerts
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+
+            // Create FormData object
+            const formData = new FormData(form);
+
+            // Disable submit button to prevent multiple submissions
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Menyimpan...';
+
+            // Send AJAX request
+            fetch('<?= base_url('portofolio-form/savePelaksanaanPerkuliahan') ?>', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert(data.message);
+                        console.error('Failed to save assessment data:', data.message);
+                    }
+                })
+                .catch(error => {
+                    // Show error message
+                    errorAlert.textContent = 'Terjadi kesalahan saat menyimpan data.';
+                    errorAlert.style.display = 'block';
+
+                    // Scroll to top to see the alert
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan';
+                });
+        });
+    });
+</script>
 
 <?= $this->include('backend/partials/footer') ?>
