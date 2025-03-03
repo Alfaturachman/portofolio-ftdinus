@@ -39,7 +39,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->get('evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
 
     // Rute POST
-    $routes->post('save-upload-rps', 'Portofolio::saveUploadRps');
+    $routes->post('saveUploadRps', 'Portofolio::saveUploadRps');
     $routes->post('saveInfoMatkul', 'Portofolio::saveInfoMatkul');
     $routes->post('saveTopikPerkuliahan', 'Portofolio::saveTopikPerkuliahan');
 
@@ -53,6 +53,8 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->post('savePelaksanaanPerkuliahan', 'Portofolio::savePelaksanaanPerkuliahan');
     $routes->post('saveHasilAsesmen', 'Portofolio::saveHasilAsesmen');
     $routes->post('saveEvaluasiPerkuliahan', 'Portofolio::saveEvaluasiPerkuliahan');
+
+    $routes->post('save-portofolio', 'Portofolio::savePortofolio');
 });
 
 // Rute untuk mengakses file PDF yang diupload

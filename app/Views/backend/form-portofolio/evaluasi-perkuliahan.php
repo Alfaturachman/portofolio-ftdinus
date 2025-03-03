@@ -201,6 +201,35 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Pesan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                <!-- Pesan akan dimasukkan di sini -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if (session()->getFlashdata('success')): ?>
+            var modalMessage = document.getElementById('modalMessage');
+            modalMessage.innerHTML = "<?= session()->getFlashdata('success') ?>";
+            var messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+            messageModal.show();
+        <?php endif; ?>
+    });
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -216,7 +245,20 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = data.redirect;
+                    // Buat form tersembunyi untuk submit ke save-portofolio
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = data.redirect;
+
+                    // Tambahkan CSRF token jika diperlukan
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '<?= csrf_token() ?>'; // Nama token CSRF
+                    csrfToken.value = '<?= csrf_hash() ?>'; // Nilai token CSRF
+                    form.appendChild(csrfToken);
+
+                    document.body.appendChild(form);
+                    form.submit(); // Kirim form secara otomatis
                 } else {
                     alert(data.message);
                     console.error('Failed to save assessment data:', data.message);
@@ -303,6 +345,5 @@
     const ctx = document.getElementById('cpmkChart').getContext('2d');
     const cpmkChart = new Chart(ctx, config);
 </script>
-
 
 <?= $this->include('backend/partials/footer') ?>

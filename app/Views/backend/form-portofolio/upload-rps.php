@@ -178,8 +178,13 @@
                         <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
                     <?php endif; ?>
 
-                    <form id="rpsForm" action="<?= base_url('portofolio-form/save-upload-rps') ?>" method="post" enctype="multipart/form-data">
+                    <form id="rpsForm" action="<?= base_url('portofolio-form/saveUploadRps') ?>" method="post" enctype="multipart/form-data">
                         <?php if (!empty($pdfUrl)): ?>
+                            <div class="form-group mb-2">
+                                <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
+                                <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            </div>
                         <?php else: ?>
                             <div class="form-group mb-2">
                                 <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
@@ -244,7 +249,7 @@
         }
 
         // AJAX Request
-        fetch('<?= base_url('portofolio-form/save-upload-rps') ?>', {
+        fetch('<?= base_url('portofolio-form/saveUploadRps') ?>', {
                 method: 'POST',
                 body: formData,
             })

@@ -444,7 +444,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = data.redirect;
+                        console.error('Success to save assessment data:', data.message);
                     } else {
                         alert(data.message);
                         console.error('Failed to save assessment data:', data.message);

@@ -3,6 +3,16 @@
 namespace App\Controllers;
 
 use GuzzleHttp\Client;
+use App\Models\PortofolioModel;
+use App\Models\CplModel;
+use App\Models\PiModel;
+use App\Models\CpmkModel;
+use App\Models\SubCpmkModel;
+use App\Models\MappingCpmkPiModel;
+use App\Models\RancanganAsesmenModel;
+use App\Models\RancanganAsesmenFileModel;
+use App\Models\EvaluasiPerkuliahanModel;
+use App\Models\RpsModel;
 
 class Portofolio extends BaseController
 {
@@ -408,8 +418,7 @@ class Portofolio extends BaseController
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data asesmen berhasil disimpan',
-                'redirect' => site_url('portofolio-form/pelaksanaan-perkuliahan')
+                'message' => 'Data asesmen berhasil disimpan'
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -486,7 +495,8 @@ class Portofolio extends BaseController
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data asesmen dan file berhasil disimpan'
+                'message' => 'Data asesmen dan file berhasil disimpan',
+                'redirect' => site_url('portofolio-form/pelaksanaan-perkuliahan')
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -684,13 +694,163 @@ class Portofolio extends BaseController
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Data evaluasi perkuliahan berhasil disimpan',
-                'redirect' => site_url('portofolio-form')
+                'redirect' => site_url('portofolio-form/save-portofolio')
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+    }
+
+    public function savePortofolio()
+    {
+        $session = session();
+        $sessionData = $session->get();
+
+        // Simpan data ke tabel portofolio
+        $portofolioModel = new PortofolioModel();
+        $portofolioData = [
+            'id_user' => $sessionData['UserSession']['id_user'],
+            'kode_mk' => $sessionData['info_matkul']['kode_mk'],
+            'nama_mk' => $sessionData['info_matkul']['nama_mk'],
+            'npp' => $sessionData['UserSession']['username']
+        ];
+        $portofolioId = $portofolioModel->insert($portofolioData);
+
+        // Simpan data ke tabel Rps
+        $rpsModel = new RpsModel();
+        $evaluasiPerkuliahanData = [
+            'id_porto' => $portofolioId,
+            'file_rps' => $sessionData['uploaded_rps']
+        ];
+        $rpsModel->insert($evaluasiPerkuliahanData);
+
+        // Simpan data ke tabel cpl
+        $cplModel = new CplModel();
+        foreach ($sessionData['cpl_pi_data'] as $noCpl => $cpl) {
+            $cplData = [
+                'id_porto' => $portofolioId,
+                'no_cpl' => $noCpl,
+                'isi_cpl' => $cpl['cpl_indo']
+            ];
+            $cplId = $cplModel->insert($cplData);
+
+            // Simpan data ke tabel pi
+            $piModel = new PiModel();
+            foreach ($cpl['pi_list'] as $noPi => $pi) {
+                if ($pi !== "\N") {
+                    $piData = [
+                        'id_cpl' => $cplId,
+                        'no_pi' => $noPi + 1,
+                        'isi_ikcp' => $pi
+                    ];
+                    $piModel->insert($piData);
+                }
+            }
+        }
+
+        // Simpan data ke tabel cpmk
+        $cpmkModel = new CpmkModel();
+        foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
+            $cpmkData = [
+                'id_porto' => $portofolioId,
+                'no_cpmk' => $cpmk['selectedCpl'],
+                'isi_cpmk' => $cpmk['narasi']
+            ];
+            $cpmkId = $cpmkModel->insert($cpmkData);
+
+            // Simpan data ke tabel sub_cpmk
+            $subCpmkModel = new SubCpmkModel();
+            foreach ($cpmk['sub'] as $noSubCpmk => $subCpmk) {
+                $subCpmkData = [
+                    'id_porto' => $portofolioId,
+                    'no_scpmk' => $noSubCpmk,
+                    'isi_scmpk' => $subCpmk
+                ];
+                $subCpmkModel->insert($subCpmkData);
+            }
+        }
+
+        // Convert stdClass objects to arrays
+        $mappingDataArray = json_decode(json_encode($sessionData['mapping_data']), true);
+        // Simpan data ke tabel mapping_cpmk_pi
+        $mappingCpmkPiModel = new MappingCpmkPiModel();
+        foreach ($mappingDataArray as $cpmkId => $mapping) {
+            foreach ($mapping as $piId => $nilai) {
+                if (is_array($nilai)) {
+                    // If nilai is still an array, get the first value
+                    $nilaiValue = reset($nilai);
+                } else {
+                    $nilaiValue = $nilai;
+                }
+
+                $mappingData = [
+                    'id_cpmk' => $cpmkId,
+                    'id_pi' => $piId,
+                    'nilai' => $nilaiValue
+                ];
+                $mappingCpmkPiModel->insert($mappingData);
+            }
+        }
+
+        // Simpan data ke tabel rancangan_asesmen
+        $rancanganAsesmenModel = new RancanganAsesmenModel();
+        foreach ($sessionData['assessment_data'] as $cpmkId => $assessment) {
+            foreach ($assessment as $piId => $kategori) {
+                // Create a new assessment record for each CPMK
+                $rancanganAsesmenData = [
+                    'id_cpmk' => $cpmkId,
+                    'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
+                    'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
+                    'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
+                ];
+                $rancanganAsesmenModel->insert($rancanganAsesmenData);
+            }
+        }
+
+        // Simpan data ke tabel rancangan_asesmen_file
+        $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
+        foreach ($sessionData['assessment_files'] as $kategori => $file) {
+            $rancanganAsesmenFileData = [
+                'id_asesmen' => $portofolioId, // Asumsi id_asesmen adalah id_porto
+                'kategori' => ucfirst(str_replace('soal_', '', $kategori)),
+                'kategori_file' => 'Soal',
+                'nama_file' => $file['name']
+            ];
+            $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+        }
+
+        // Simpan data ke tabel evaluasi_perkuliahan
+        $evaluasiPerkuliahanModel = new EvaluasiPerkuliahanModel();
+        $evaluasiPerkuliahanData = [
+            'id_porto' => $portofolioId,
+            'isi_evaluasi' => $sessionData['evaluasi_perkuliahan']
+        ];
+        $evaluasiPerkuliahanModel->insert($evaluasiPerkuliahanData);
+
+        // Clear session data except user session
+        $this->clearSessionExceptUser();
+
+        return redirect()->to('/portofolio-form')->with('success', 'Portofolio berhasil disimpan.');
+    }
+
+    public function clearSessionExceptUser()
+    {
+        $session = session();
+
+        // Keep user session data
+        $userSession = isset($_SESSION['UserSession']) ? $_SESSION['UserSession'] : null;
+
+        // Get all session keys
+        $allKeys = array_keys($_SESSION);
+
+        // Remove all keys except UserSession
+        foreach ($allKeys as $key) {
+            if ($key !== 'UserSession') {
+                $session->remove($key);
+            }
         }
     }
 

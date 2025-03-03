@@ -192,9 +192,6 @@
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/pemetaan') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
                         </div>
                     </form>
                 </div>
