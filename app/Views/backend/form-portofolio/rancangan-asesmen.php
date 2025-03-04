@@ -212,7 +212,7 @@
                                                 $firstRow = true;
                                                 foreach ($subCpmks as $subNo => $isChecked):
                                                     if ($isChecked):
-                                                        ?>
+                                    ?>
                                                         <tr>
                                                             <?php if ($firstRow && $rowspanCount[$cpmkNo] > 0): ?>
                                                                 <td class="align-middle" rowspan="<?= $rowspanCount[$cpmkNo] ?>">
@@ -224,32 +224,32 @@
                                                             </td>
                                                             <!-- Modified checkbox input fields in the table -->
                                                             <td class="text-center">
-                                                                <input type="checkbox" 
-                                                                    class="assessment-checkbox" 
+                                                                <input type="checkbox"
+                                                                    class="assessment-checkbox"
                                                                     name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][tugas]"
                                                                     <?= isset($assessmentData[$cpmkNo][$subNo]['tugas']) && $assessmentData[$cpmkNo][$subNo]['tugas'] ? 'checked' : '' ?>>
                                                             </td>
                                                             <td class="text-center">
-                                                                <input type="checkbox" 
-                                                                    class="assessment-checkbox" 
+                                                                <input type="checkbox"
+                                                                    class="assessment-checkbox"
                                                                     name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][uts]"
                                                                     <?= isset($assessmentData[$cpmkNo][$subNo]['uts']) && $assessmentData[$cpmkNo][$subNo]['uts'] ? 'checked' : '' ?>>
                                                             </td>
                                                             <td class="text-center">
-                                                                <input type="checkbox" 
-                                                                    class="assessment-checkbox" 
+                                                                <input type="checkbox"
+                                                                    class="assessment-checkbox"
                                                                     name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][uas]"
                                                                     <?= isset($assessmentData[$cpmkNo][$subNo]['uas']) && $assessmentData[$cpmkNo][$subNo]['uas'] ? 'checked' : '' ?>>
                                                             </td>
                                                         </tr>
-                                                        <?php
+                                        <?php
                                                         $firstRow = false;
                                                     endif;
                                                 endforeach;
                                             endforeach;
                                         endforeach;
                                     else:
-                                    ?>
+                                        ?>
                                         <tr>
                                             <td colspan="5" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
                                         </tr>
@@ -264,30 +264,30 @@
                             <label for="soal_tugas" class="form-label">Soal</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_tugas']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('assessment_files')['soal_tugas'])): ?>
+                                <?php if (isset(session()->get('assessment_files')['soal_tugas'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('assessment_files')['soal_tugas'])): ?>
+                            <?php if (isset(session()->get('assessment_files')['soal_tugas'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_tugas']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_tugas']['size'] / 1024, 2) ?> KB</p>
                                 </div>
                             <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
-                            
+
                             <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_tugas']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
+                                <?php if (isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
+                            <?php if (isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_tugas']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_tugas']['size'] / 1024, 2) ?> KB</p>
@@ -302,30 +302,30 @@
                             <label for="soal_uts" class="form-label">Soal</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_uts']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('assessment_files')['soal_uts'])): ?>
+                                <?php if (isset(session()->get('assessment_files')['soal_uts'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('assessment_files')['soal_uts'])): ?>
+                            <?php if (isset(session()->get('assessment_files')['soal_uts'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uts']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uts']['size'] / 1024, 2) ?> KB</p>
                                 </div>
                             <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
-                            
+
                             <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_uts']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('assessment_files')['rubrik_uts'])): ?>
+                                <?php if (isset(session()->get('assessment_files')['rubrik_uts'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('assessment_files')['rubrik_uts'])): ?>
+                            <?php if (isset(session()->get('assessment_files')['rubrik_uts'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uts']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uts']['size'] / 1024, 2) ?> KB</p>
@@ -340,30 +340,30 @@
                             <label for="soal_uas" class="form-label">Soal</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_uas']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('assessment_files')['soal_uas'])): ?>
+                                <?php if (isset(session()->get('assessment_files')['soal_uas'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('assessment_files')['soal_uas'])): ?>
+                            <?php if (isset(session()->get('assessment_files')['soal_uas'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uas']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uas']['size'] / 1024, 2) ?> KB</p>
                                 </div>
                             <?php endif; ?>
                             <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
-                            
+
                             <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_uas']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('assessment_files')['rubrik_uas'])): ?>
+                                <?php if (isset(session()->get('assessment_files')['rubrik_uas'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('assessment_files')['rubrik_uas'])): ?>
+                            <?php if (isset(session()->get('assessment_files')['rubrik_uas'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uas']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uas']['size'] / 1024, 2) ?> KB</p>
@@ -377,10 +377,7 @@
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <div>
-                                <button type="submit" id="submitBtn" class="btn btn-success me-2">
-                                    <i class="ti ti-device-floppy"></i> Simpan
-                                </button>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" id="submitBtn" class="btn btn-primary">
                                     Selanjutnya <i class="ti ti-arrow-right"></i>
                                 </button>
                             </div>
@@ -393,113 +390,118 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('rpsForm');
-    const checkboxes = document.querySelectorAll('.assessment-checkbox');
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('rpsForm');
+        const checkboxes = document.querySelectorAll('.assessment-checkbox');
 
-    // Save checkbox state when changed
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const assessmentData = collectAssessmentData();
-            saveAssessmentToSession(assessmentData);
-        });
-    });
-
-    // Function to collect assessment data from checkboxes
-    function collectAssessmentData() {
-        const assessmentData = {};
-
+        // Save checkbox state when changed
         checkboxes.forEach(checkbox => {
-            const name = checkbox.getAttribute('name');
-            const matches = name.match(/assessment\[(\d+)\]\[(\d+)\]\[(\w+)\]/);
-
-            if (matches) {
-                const [, cpmk, subCpmk, type] = matches;
-
-                if (!assessmentData[cpmk]) assessmentData[cpmk] = {};
-                if (!assessmentData[cpmk][subCpmk]) assessmentData[cpmk][subCpmk] = {};
-
-                assessmentData[cpmk][subCpmk][type] = checkbox.checked;
-            }
+            checkbox.addEventListener('change', function() {
+                const assessmentData = collectAssessmentData();
+                saveAssessmentToSession(assessmentData);
+            });
         });
 
-        return assessmentData;
-    }
+        // Function to collect assessment data from checkboxes
+        function collectAssessmentData() {
+            const assessmentData = {};
 
-    // Function to save assessment data to session via AJAX
-    function saveAssessmentToSession(assessmentData) {
-        fetch('<?= base_url('portofolio-form/saveAssessmentToSession') ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ assessment: assessmentData })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                console.error('Failed to save assessment data:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-    
-    // Modify the form submit event
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Create FormData object for file uploads
-        const formData = new FormData();
-        
-        // Add checkbox assessment data
-        const assessmentData = collectAssessmentData();
-        formData.append('assessment_data', JSON.stringify(assessmentData));
-        
-        // Add file data
-        const fileInputs = [
-            'soal_tugas', 'rubrik_tugas',
-            'soal_uts', 'rubrik_uts',
-            'soal_uas', 'rubrik_uas'
-        ];
-        
-        // Add all files to formData
-        let filesChanged = false;
-        
-        fileInputs.forEach(inputName => {
-            const fileInput = document.getElementById(inputName);
-            if (fileInput.files.length > 0) {
-                formData.append(inputName, fileInput.files[0]);
-                filesChanged = true;
-            }
-        });
+            checkboxes.forEach(checkbox => {
+                const name = checkbox.getAttribute('name');
+                const matches = name.match(/assessment\[(\d+)\]\[(\d+)\]\[(\w+)\]/);
 
-        // Add a flag to indicate if files were changed
-        formData.append('files_changed', filesChanged);
+                if (matches) {
+                    const [, cpmk, subCpmk, type] = matches;
 
-        fetch('<?= base_url('portofolio-form/saveAssessmentWithFiles') ?>', {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>';
-            } else {
-                alert('Gagal menyimpan data asesmen: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menyimpan data asesmen.');
+                    if (!assessmentData[cpmk]) assessmentData[cpmk] = {};
+                    if (!assessmentData[cpmk][subCpmk]) assessmentData[cpmk][subCpmk] = {};
+
+                    assessmentData[cpmk][subCpmk][type] = checkbox.checked;
+                }
+            });
+
+            return assessmentData;
+        }
+
+        // Function to save assessment data to session via AJAX
+        function saveAssessmentToSession(assessmentData) {
+            fetch('<?= base_url('portofolio-form/saveAssessmentToSession') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        assessment: assessmentData
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.error('Success to save assessment data:', data.message);
+                    } else {
+                        alert(data.message);
+                        console.error('Failed to save assessment data:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Modify the form submit event
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Create FormData object for file uploads
+            const formData = new FormData();
+
+            // Add checkbox assessment data
+            const assessmentData = collectAssessmentData();
+            formData.append('assessment_data', JSON.stringify(assessmentData));
+
+            // Add file data
+            const fileInputs = [
+                'soal_tugas', 'rubrik_tugas',
+                'soal_uts', 'rubrik_uts',
+                'soal_uas', 'rubrik_uas'
+            ];
+
+            // Add all files to formData
+            let filesChanged = false;
+
+            fileInputs.forEach(inputName => {
+                const fileInput = document.getElementById(inputName);
+                if (fileInput.files.length > 0) {
+                    formData.append(inputName, fileInput.files[0]);
+                    filesChanged = true;
+                }
+            });
+
+            // Add a flag to indicate if files were changed
+            formData.append('files_changed', filesChanged);
+
+            fetch('<?= base_url('portofolio-form/saveAssessmentWithFiles') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>';
+                    } else {
+                        alert('Gagal menyimpan data asesmen: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat menyimpan data asesmen.');
+                });
         });
     });
-});
 </script>
 
 <?= $this->include('backend/partials/footer') ?>

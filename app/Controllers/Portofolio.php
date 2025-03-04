@@ -3,10 +3,23 @@
 namespace App\Controllers;
 
 use GuzzleHttp\Client;
+use App\Models\PiModel;
+use App\Models\CplModel;
+use App\Models\RpsModel;
+use App\Models\CpmkModel;
+use App\Models\SubCpmkModel;
+use App\Models\PortofolioModel;
+use App\Models\HasilAsesmenModel;
+use App\Models\MappingCpmkPiModel;
+use App\Models\IdentitasMatkulModel;
+use App\Models\RancanganAsesmenModel;
+use App\Models\EvaluasiPerkuliahanModel;
+use App\Models\RancanganAsesmenFileModel;
+use App\Models\PelaksanaanPerkuliahanModel;
 
 class Portofolio extends BaseController
 {
-    public function index(): string
+    public function index()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -45,9 +58,8 @@ class Portofolio extends BaseController
 
     public function saveUploadRps()
     {
-        $validation = \Config\Services::validation();
-
         // Validasi file upload
+        $validation = \Config\Services::validation();
         $validation->setRules([
             'rps_file' => [
                 'label' => 'RPS File',
@@ -368,7 +380,6 @@ class Portofolio extends BaseController
             }
 
             session()->set('mapping_data', $mappingData);
-            session()->set('current_progress', 'pemetaan');
 
             return $this->response->setJSON([
                 'success' => true,
@@ -407,9 +418,9 @@ class Portofolio extends BaseController
                 throw new \Exception('Data asesmen kosong atau tidak valid.');
             }
 
-            // Convert the data to a more predictable format (array)
+            // Convert the data to an array
             $assessmentArray = json_decode(json_encode($assessmentData), true);
-            
+
             session()->set('assessment_data', $assessmentArray);
             session()->set('current_progress', 'assessment');
 
@@ -430,17 +441,17 @@ class Portofolio extends BaseController
         try {
             // Get assessment data from form
             $assessmentData = json_decode($this->request->getPost('assessment_data'), true);
-            
+
             if (!$assessmentData) {
                 throw new \Exception('Data asesmen kosong atau tidak valid.');
             }
-            
+
             // Save assessment data to session
             session()->set('assessment_data', $assessmentData);
-            
+
             // Check if files were changed
             $filesChanged = $this->request->getPost('files_changed') === 'true';
-            
+
             // If files haven't changed, we can keep the existing files in session
             if (!$filesChanged) {
                 session()->set('current_progress', 'assessment');
@@ -449,31 +460,34 @@ class Portofolio extends BaseController
                     'message' => 'Data asesmen berhasil disimpan'
                 ]);
             }
-            
+
             // Process file uploads
             $uploadedFiles = session()->get('assessment_files') ?? [];
             $fileFields = [
-                'soal_tugas', 'rubrik_tugas',
-                'soal_uts', 'rubrik_uts',
-                'soal_uas', 'rubrik_uas'
+                'soal_tugas',
+                'rubrik_tugas',
+                'soal_uts',
+                'rubrik_uts',
+                'soal_uas',
+                'rubrik_uas'
             ];
-            
+
             // Create upload directory if it doesn't exist
             $uploadDir = WRITEPATH . 'uploads/assessment/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
-            
+
             foreach ($fileFields as $field) {
                 $file = $this->request->getFile($field);
-                
+
                 if ($file && $file->isValid() && !$file->hasMoved()) {
                     // Generate a new filename
                     $newName = $field . '_' . uniqid() . '.pdf';
-                    
+
                     // Move the file to the upload directory
                     $file->move($uploadDir, $newName);
-                    
+
                     // Store file information in session
                     $uploadedFiles[$field] = [
                         'name' => $file->getClientName(),
@@ -482,14 +496,15 @@ class Portofolio extends BaseController
                     ];
                 }
             }
-            
+
             // Save file data to session
             session()->set('assessment_files', $uploadedFiles);
             session()->set('current_progress', 'assessment');
-            
+
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data asesmen dan file berhasil disimpan'
+                'message' => 'Data asesmen dan file berhasil disimpan',
+                'redirect' => site_url('portofolio-form/pelaksanaan-perkuliahan')
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -516,6 +531,8 @@ class Portofolio extends BaseController
 
     public function savePelaksanaanPerkuliahan()
     {
+        log_message('debug', 'savePelaksanaanPerkuliahan function called');
+
         try {
             // Process file uploads
             $uploadedFiles = session()->get('pelaksanaan_files') ?? [];
@@ -524,23 +541,23 @@ class Portofolio extends BaseController
                 'realisasi_mengajar',
                 'kehadiran_mahasiswa'
             ];
-            
+
             // Create upload directory if it doesn't exist
             $uploadDir = WRITEPATH . 'uploads/pelaksanaan/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
-            
+
             foreach ($fileFields as $field) {
                 $file = $this->request->getFile($field);
-                
+
                 if ($file && $file->isValid() && !$file->hasMoved()) {
                     // Generate a new filename
                     $newName = $field . '_' . uniqid() . '.pdf';
-                    
+
                     // Move the file to the upload directory
                     $file->move($uploadDir, $newName);
-                    
+
                     // Store file information in session
                     $uploadedFiles[$field] = [
                         'name' => $file->getClientName(),
@@ -549,14 +566,15 @@ class Portofolio extends BaseController
                     ];
                 }
             }
-            
+
             // Save file data to session
             session()->set('pelaksanaan_files', $uploadedFiles);
             session()->set('current_progress', 'pelaksanaan');
-            
+
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data pelaksanaan perkuliahan berhasil disimpan'
+                'message' => 'Data pelaksanaan perkuliahan berhasil disimpan',
+                'redirect' => site_url('portofolio-form/hasil-asesmen')
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -593,28 +611,28 @@ class Portofolio extends BaseController
                 'nilai_mata_kuliah',
                 'nilai_cpmk'
             ];
-            
+
             // Create upload directory if it doesn't exist
             $uploadDir = WRITEPATH . 'uploads/hasil_asesmen/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
-            
+
             foreach ($fileFields as $field) {
                 $file = $this->request->getFile($field);
-                
+
                 // Skip optional file if not provided
                 if ($field === 'nilai_mata_kuliah' && (!$file || $file->getError() === 4)) {
                     continue;
                 }
-                
+
                 if ($file && $file->isValid() && !$file->hasMoved()) {
                     // Generate a new filename
                     $newName = $field . '_' . uniqid() . '.pdf';
-                    
+
                     // Move the file to the upload directory
                     $file->move($uploadDir, $newName);
-                    
+
                     // Store file information in session
                     $uploadedFiles[$field] = [
                         'name' => $file->getClientName(),
@@ -623,14 +641,15 @@ class Portofolio extends BaseController
                     ];
                 }
             }
-            
+
             // Save file data to session
             session()->set('hasil_asesmen_files', $uploadedFiles);
             session()->set('current_progress', 'hasil_asesmen');
-            
+
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data hasil asesmen berhasil disimpan'
+                'message' => 'Data hasil asesmen berhasil disimpan',
+                'redirect' => site_url('portofolio-form/evaluasi-perkuliahan')
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -652,7 +671,273 @@ class Portofolio extends BaseController
                 ->with('error', 'Silakan lengkapi hasil asesmen terlebih dahulu.');
         }
 
-        return view('backend/form-portofolio/evaluasi-perkuliahan');
+        // Ambil data evaluasi dari session
+        $evaluasi_perkuliahan = session()->get('evaluasi_perkuliahan') ?? '';
+
+        return view('backend/form-portofolio/evaluasi-perkuliahan', [
+            'evaluasi_perkuliahan' => $evaluasi_perkuliahan
+        ]);
+    }
+
+    public function saveEvaluasiPerkuliahan()
+    {
+        try {
+            $validation = \Config\Services::validation();
+            $validation->setRules([
+                'evaluasi' => 'required'
+            ]);
+
+            if (!$this->validate($validation->getRules())) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Evaluasi perkuliahan wajib diisi.'
+                ]);
+            }
+
+            // Ambil data dari form
+            $evaluasi = $this->request->getPost('evaluasi');
+
+            // Simpan ke session
+            session()->set('evaluasi_perkuliahan', $evaluasi);
+            session()->set('current_progress', 'evaluasi_perkuliahan');
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data evaluasi perkuliahan berhasil disimpan',
+                'redirect' => site_url('portofolio-form/save-portofolio')
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function savePortofolio()
+    {
+        $session = session();
+        $sessionData = $session->get();
+
+        // Simpan data ke tabel portofolio
+        $portofolioModel = new PortofolioModel();
+        $portofolioData = [
+            'id_user' => $sessionData['UserSession']['id_user'],
+            'kode_mk' => $sessionData['info_matkul']['kode_mk'],
+            'nama_mk' => $sessionData['info_matkul']['nama_mk'],
+            'npp' => $sessionData['UserSession']['username']
+        ];
+        $portofolioId = $portofolioModel->insert($portofolioData);
+
+        // Simpan data ke tabel Rps
+        $rpsModel = new RpsModel();
+        $evaluasiPerkuliahanData = [
+            'id_porto' => $portofolioId,
+            'file_rps' => $sessionData['uploaded_rps']
+        ];
+        $rpsModel->insert($evaluasiPerkuliahanData);
+
+        // Simpan data ke tabel identitas matkul
+        $identitasMatkulModel = new IdentitasMatkulModel();
+        $identitasMatkulData = [
+            'id_porto' => $portofolioId,
+            'prasyarat_mk' => $sessionData['info_matkul']['mk_prasyarat'],
+            'topik_perkuliahan' => $sessionData['info_matkul']['topik_mk']
+        ];
+        $identitasMatkulModel->insert($identitasMatkulData);
+
+        // Simpan data ke tabel cpl
+        $cplModel = new CplModel();
+        foreach ($sessionData['cpl_pi_data'] as $noCpl => $cpl) {
+            $cplData = [
+                'id_porto' => $portofolioId,
+                'no_cpl' => $noCpl,
+                'isi_cpl' => $cpl['cpl_indo']
+            ];
+            $cplId = $cplModel->insert($cplData);
+
+            // Simpan data ke tabel pi
+            $piModel = new PiModel();
+            foreach ($cpl['pi_list'] as $noPi => $pi) {
+                if ($pi !== "\N") {
+                    $piData = [
+                        'id_cpl' => $cplId,
+                        'no_pi' => $noPi + 1,
+                        'isi_ikcp' => $pi
+                    ];
+                    $piModel->insert($piData);
+                }
+            }
+        }
+
+        // Simpan data ke tabel cpmk
+        $cpmkModel = new CpmkModel();
+        foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
+            $cpmkData = [
+                'id_porto' => $portofolioId,
+                'no_cpmk' => $cpmk['selectedCpl'],
+                'isi_cpmk' => $cpmk['narasi']
+            ];
+            $cpmkId = $cpmkModel->insert($cpmkData);
+
+            // Simpan data ke tabel sub_cpmk
+            $subCpmkModel = new SubCpmkModel();
+            foreach ($cpmk['sub'] as $noSubCpmk => $subCpmk) {
+                $subCpmkData = [
+                    'id_porto' => $portofolioId,
+                    'no_scpmk' => $noSubCpmk,
+                    'isi_scmpk' => $subCpmk
+                ];
+                $subCpmkModel->insert($subCpmkData);
+            }
+        }
+
+        // Convert stdClass objects to arrays
+        $mappingDataArray = json_decode(json_encode($sessionData['mapping_data']), true);
+
+        // Simpan data ke tabel mapping cpmk pi
+        $mappingCpmkPiModel = new MappingCpmkPiModel();
+        foreach ($mappingDataArray as $cpmkId => $mapping) {
+            foreach ($mapping as $piId => $nilai) {
+                if (is_array($nilai)) {
+                    // If nilai is still an array, get the first value
+                    $nilaiValue = reset($nilai);
+                } else {
+                    $nilaiValue = $nilai;
+                }
+
+                $mappingData = [
+                    'id_cpmk' => $cpmkId,
+                    'id_pi' => $piId,
+                    'nilai' => $nilaiValue
+                ];
+                $mappingCpmkPiModel->insert($mappingData);
+            }
+        }
+
+        // Simpan data ke tabel rancangan_asesmen
+        $rancanganAsesmenModel = new RancanganAsesmenModel();
+        foreach ($sessionData['assessment_data'] as $cpmkId => $assessment) {
+            foreach ($assessment as $piId => $kategori) {
+                // Create a new assessment record for each CPMK
+                $rancanganAsesmenData = [
+                    'id_cpmk' => $cpmkId,
+                    'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
+                    'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
+                    'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
+                ];
+                $rancanganAsesmenModel->insert($rancanganAsesmenData);
+            }
+        }
+
+        // Simpan data ke tabel rancangan asesmen file
+        $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
+        foreach ($sessionData['assessment_files'] as $kategori => $file) {
+            // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
+            if (strpos($kategori, 'soal_') === 0) {
+                $kategoriFile = 'Soal';
+            } elseif (strpos($kategori, 'rubrik_') === 0) {
+                $kategoriFile = 'Rubrik';
+            } else {
+                $kategoriFile = 'Lainnya';
+            }
+
+            // Kategori berdasarkan suffix
+            if (strpos($kategori, '_tugas') !== false) {
+                $kategoriAsesmen = 'Tugas';
+            } elseif (strpos($kategori, '_uts') !== false) {
+                $kategoriAsesmen = 'UTS';
+            } elseif (strpos($kategori, '_uas') !== false) {
+                $kategoriAsesmen = 'UAS';
+            } else {
+                $kategoriAsesmen = 'Lainnya';
+            }
+
+            $rancanganAsesmenFileData = [
+                'id_asesmen' => $portofolioId,
+                'kategori' => $kategoriAsesmen,
+                'kategori_file' => $kategoriFile,
+                'file_pdf' => $file['path']
+            ];
+            $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+        }
+
+        // Simpan data ke tabel pelaksanaan perkuliahan
+        $pelaksanaanModel = new PelaksanaanPerkuliahanModel();
+        $sessionFiles = session()->get('pelaksanaan_files');
+        if (is_string($sessionFiles)) {
+            $sessionFiles = unserialize($sessionFiles);
+        }
+        $pelaksanaanData = [
+            'id_porto' => $portofolioId,
+            'file_kontrak' => isset($sessionFiles['kontrak_kuliah']) ? $sessionFiles['kontrak_kuliah']['path'] : null,
+            'file_realisasi' => isset($sessionFiles['realisasi_mengajar']) ? $sessionFiles['realisasi_mengajar']['path'] : null,
+            'file_kehadiran' => isset($sessionFiles['kehadiran_mahasiswa']) ? $sessionFiles['kehadiran_mahasiswa']['path'] : null
+        ];
+        $pelaksanaanModel->insert($pelaksanaanData);
+
+        // Simpan data ke tabel hasil asesmen
+        $hasilAsesmenModel = new HasilAsesmenModel();
+        $sessionFiles = session()->get('hasil_asesmen_files');
+        if (is_string($sessionFiles)) {
+            $sessionFiles = unserialize($sessionFiles);
+        }
+        $hasilAsesmenData = [
+            'id_porto' => $portofolioId,
+            'file_tugas' => isset($sessionFiles['jawaban_tugas']) ? $sessionFiles['jawaban_tugas']['path'] : null,
+            'file_uts' => isset($sessionFiles['jawaban_uts']) ? $sessionFiles['jawaban_uts']['path'] : null,
+            'file_uas' => isset($sessionFiles['jawaban_uas']) ? $sessionFiles['jawaban_uas']['path'] : null,
+            'file_nilai_mk' => isset($sessionFiles['nilai_mata_kuliah']) ? $sessionFiles['nilai_mata_kuliah']['path'] : null,
+            'file_nilai_cpmk' => isset($sessionFiles['nilai_cpmk']) ? $sessionFiles['nilai_cpmk']['path'] : null
+        ];
+        $hasilAsesmenModel->insert($hasilAsesmenData);
+
+        // Simpan data ke tabel hasil asesmen
+        $hasilAsesmenModel = new HasilAsesmenModel();
+        $sessionFiles = session()->get('hasil_asesmen_files');
+        if (is_string($sessionFiles)) {
+            $sessionFiles = unserialize($sessionFiles);
+        }
+        $hasilAsesmenData = [
+            'id_porto' => $portofolioId,
+            'file_tugas' => isset($sessionFiles['jawaban_tugas']) ? $sessionFiles['jawaban_tugas']['path'] : null,
+            'file_uts' => isset($sessionFiles['jawaban_uts']) ? $sessionFiles['jawaban_uts']['path'] : null,
+            'file_uas' => isset($sessionFiles['jawaban_uas']) ? $sessionFiles['jawaban_uas']['path'] : null,
+            'file_nilai_mk' => isset($sessionFiles['nilai_mata_kuliah']) ? $sessionFiles['nilai_mata_kuliah']['path'] : null,
+            'file_nilai_cpmk' => isset($sessionFiles['nilai_cpmk']) ? $sessionFiles['nilai_cpmk']['path'] : null
+        ];
+        $hasilAsesmenModel->insert($hasilAsesmenData);
+
+        // Simpan data ke tabel evaluasi perkuliahan
+        $evaluasiPerkuliahanModel = new EvaluasiPerkuliahanModel();
+        $evaluasiPerkuliahanData = [
+            'id_porto' => $portofolioId,
+            'isi_evaluasi' => $sessionData['evaluasi_perkuliahan']
+        ];
+        $evaluasiPerkuliahanModel->insert($evaluasiPerkuliahanData);
+
+        // Clear session data except user session
+        $this->clearSessionExceptUser();
+
+        return redirect()->to('/portofolio-form')->with('success', 'Portofolio berhasil disimpan.');
+    }
+
+    public function clearSessionExceptUser()
+    {
+        $session = session();
+
+        // Keep user session data
+        $userSession = isset($_SESSION['UserSession']) ? $_SESSION['UserSession'] : null;
+
+        // Get all session keys
+        $allKeys = array_keys($_SESSION);
+
+        // Remove all keys except UserSession
+        foreach ($allKeys as $key) {
+            if ($key !== 'UserSession') {
+                $session->remove($key);
+            }
+        }
     }
 
     public function deleteSession()

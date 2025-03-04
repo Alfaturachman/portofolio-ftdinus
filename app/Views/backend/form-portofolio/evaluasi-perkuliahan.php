@@ -174,27 +174,25 @@
                         <canvas id="cpmkChart" width="400" height="200"></canvas>
                     </div>
 
-                    <form id="topicForm" action="<?= base_url('portofolio/saveTopikPerkuliahan') ?>" method="post">
+                    <form id="topicForm" action="<?= base_url('portofolio-form/saveEvaluasiPerkuliahan') ?>" method="post">
                         <?php if (!empty($pdfUrl)): ?>
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
                                 <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
                             </div>
-                        <?php else: ?>
                         <?php endif; ?>
+
                         <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Evaluasi Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan evaluasi perkuliahan"><?= isset($topikPerkuliahan['topik_mk']) ? $topikPerkuliahan['topik_mk'] : '' ?></textarea>
+                            <label for="evaluasi" class="form-label">Evaluasi Perkuliahan</label>
+                            <textarea class="form-control" id="evaluasi" name="evaluasi" rows="3" placeholder="Masukkan evaluasi perkuliahan"><?= esc($evaluasi_perkuliahan) ?></textarea>
                         </div>
+
                         <div class="d-flex justify-content-between pt-3">
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/hasil-asesmen') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/') ?>">
+                            <button type="submit" class="btn btn-primary">
                                 Simpan <i class="ti ti-download"></i>
-                            </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -203,7 +201,72 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Pesan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                <!-- Pesan akan dimasukkan di sini -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if (session()->getFlashdata('success')): ?>
+            var modalMessage = document.getElementById('modalMessage');
+            modalMessage.innerHTML = "<?= session()->getFlashdata('success') ?>";
+            var messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+            messageModal.show();
+        <?php endif; ?>
+    });
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.getElementById("topicForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Mencegah reload halaman
+
+        let formData = new FormData(this);
+
+        fetch("<?= base_url('portofolio-form/saveEvaluasiPerkuliahan') ?>", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Buat form tersembunyi untuk submit ke save-portofolio
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = data.redirect;
+
+                    // Tambahkan CSRF token jika diperlukan
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '<?= csrf_token() ?>'; // Nama token CSRF
+                    csrfToken.value = '<?= csrf_hash() ?>'; // Nilai token CSRF
+                    form.appendChild(csrfToken);
+
+                    document.body.appendChild(form);
+                    form.submit(); // Kirim form secara otomatis
+                } else {
+                    alert(data.message);
+                    console.error('Failed to save assessment data:', data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+    });
+</script>
 
 <script>
     const data = {
@@ -282,6 +345,5 @@
     const ctx = document.getElementById('cpmkChart').getContext('2d');
     const cpmkChart = new Chart(ctx, config);
 </script>
-
 
 <?= $this->include('backend/partials/footer') ?>

@@ -172,20 +172,20 @@
 
                     <form id="hasilAsesmenForm" method="post" enctype="multipart/form-data">
                         <?= csrf_field() ?>
-                        
+
                         <!-- Tugas -->
                         <h5 class="fw-bolder mb-3">1. Hasil Tugas</h5>
                         <div class="form-group mb-4">
                             <label for="jawaban_tugas" class="form-label">Jawaban</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="jawaban_tugas" name="jawaban_tugas" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['jawaban_tugas']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('hasil_asesmen_files')['jawaban_tugas'])): ?>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_tugas'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('hasil_asesmen_files')['jawaban_tugas'])): ?>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_tugas'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['jawaban_tugas']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['jawaban_tugas']['size'] / 1024, 2) ?> KB</p>
@@ -200,13 +200,13 @@
                             <label for="jawaban_uts" class="form-label">Jawaban</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="jawaban_uts" name="jawaban_uts" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['jawaban_uts']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('hasil_asesmen_files')['jawaban_uts'])): ?>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uts'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('hasil_asesmen_files')['jawaban_uts'])): ?>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uts'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['jawaban_uts']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['jawaban_uts']['size'] / 1024, 2) ?> KB</p>
@@ -221,13 +221,13 @@
                             <label for="jawaban_uas" class="form-label">Jawaban</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="jawaban_uas" name="jawaban_uas" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['jawaban_uas']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('hasil_asesmen_files')['jawaban_uas'])): ?>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uas'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('hasil_asesmen_files')['jawaban_uas'])): ?>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['jawaban_uas'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['jawaban_uas']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['jawaban_uas']['size'] / 1024, 2) ?> KB</p>
@@ -242,13 +242,13 @@
                             <label for="nilai_mata_kuliah" class="form-label">Upload File</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="nilai_mata_kuliah" name="nilai_mata_kuliah" accept="application/pdf">
-                                <?php if(isset(session()->get('hasil_asesmen_files')['nilai_mata_kuliah'])): ?>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['nilai_mata_kuliah'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('hasil_asesmen_files')['nilai_mata_kuliah'])): ?>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['nilai_mata_kuliah'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['nilai_mata_kuliah']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['nilai_mata_kuliah']['size'] / 1024, 2) ?> KB</p>
@@ -263,13 +263,13 @@
                             <label for="nilai_cpmk" class="form-label">Upload File</label>
                             <div class="input-group">
                                 <input type="file" class="form-control" id="nilai_cpmk" name="nilai_cpmk" accept="application/pdf" <?= !isset(session()->get('hasil_asesmen_files')['nilai_cpmk']) ? 'required' : '' ?>>
-                                <?php if(isset(session()->get('hasil_asesmen_files')['nilai_cpmk'])): ?>
+                                <?php if (isset(session()->get('hasil_asesmen_files')['nilai_cpmk'])): ?>
                                     <span class="input-group-text bg-success text-white">
                                         <i class="ti ti-check"></i> File Terunggah
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <?php if(isset(session()->get('hasil_asesmen_files')['nilai_cpmk'])): ?>
+                            <?php if (isset(session()->get('hasil_asesmen_files')['nilai_cpmk'])): ?>
                                 <div class="mt-2">
                                     <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('hasil_asesmen_files')['nilai_cpmk']['name']) ?></span>
                                     <p class="text-muted small">Ukuran: <?= round(session()->get('hasil_asesmen_files')['nilai_cpmk']['size'] / 1024, 2) ?> KB</p>
@@ -283,12 +283,9 @@
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <div>
-                                <button type="submit" id="submitBtn" class="btn btn-success me-2">
-                                    <i class="ti ti-device-floppy"></i> Simpan
-                                </button>
-                                <a id="nextBtn" class="btn btn-primary" href="<?= base_url('portofolio-form/evaluasi-perkuliahan') ?>">
+                                <button type="submit" id="submitBtn" class="btn btn-primary">
                                     Selanjutnya <i class="ti ti-arrow-right"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -302,75 +299,55 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('hasilAsesmenForm');
         const submitBtn = document.getElementById('submitBtn');
-        const nextBtn = document.getElementById('nextBtn');
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
-        
-        // Check if we have data in session
-        <?php if(null === session()->get('hasil_asesmen_files') || empty(session()->get('hasil_asesmen_files'))): ?>
-            nextBtn.style.display = 'none';
-        <?php endif; ?>
-        
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             // Hide any previous alerts
             successAlert.style.display = 'none';
             errorAlert.style.display = 'none';
-            
+
             // Create FormData object
             const formData = new FormData(form);
-            
+
             // Disable submit button to prevent multiple submissions
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Menyimpan...';
-            
+
             // Send AJAX request
             fetch('<?= base_url('portofolio-form/saveHasilAsesmen') ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    successAlert.textContent = data.message;
-                    successAlert.style.display = 'block';
-                    
-                    // Show next button
-                    nextBtn.style.display = 'inline-block';
-                    
-                    // Scroll to top to see the alert
-                    window.scrollTo({top: 0, behavior: 'smooth'});
-                    
-                    // Reload page after successful save to show updated file info
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert(data.message);
+                        console.error('Failed to save assessment data:', data.message);
+                    }
+                })
+                .catch(error => {
                     // Show error message
-                    errorAlert.textContent = data.message;
+                    errorAlert.textContent = 'Terjadi kesalahan saat menyimpan data.';
                     errorAlert.style.display = 'block';
-                    
+
                     // Scroll to top to see the alert
-                    window.scrollTo({top: 0, behavior: 'smooth'});
-                }
-            })
-            .catch(error => {
-                // Show error message
-                errorAlert.textContent = 'Terjadi kesalahan saat menyimpan data.';
-                errorAlert.style.display = 'block';
-                
-                // Scroll to top to see the alert
-                window.scrollTo({top: 0, behavior: 'smooth'});
-                
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                // Re-enable submit button
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan';
-            });
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan';
+                });
         });
     });
 </script>
