@@ -37,6 +37,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->get('pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
     $routes->get('hasil-asesmen', 'Portofolio::hasil_asesmen');
     $routes->get('evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
+    $routes->get('tes-cetak', 'Portofolio::tes_cetak');
 
     // Rute POST
     $routes->post('save-upload-rps', 'Portofolio::saveUploadRps');

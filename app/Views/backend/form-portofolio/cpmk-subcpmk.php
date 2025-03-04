@@ -245,11 +245,11 @@
         </tr>
         <tr>
             <td colspan="3">
+                <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkCounter}">
+                </div>
                 <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkCounter})">
                     Tambah Sub CPMK
                 </button>
-                <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkCounter}">
-                </div>
             </td>
         </tr>`;
         tbody.insertAdjacentHTML('beforeend', newRow);
@@ -462,10 +462,10 @@
             </tr>
             <tr>
                 <td colspan="3">
+                    <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkNumber}"></div>
                     <button class="btn btn-sm btn-primary mb-3" onclick="addSubCPMK(${cpmkNumber})">
                         Tambah Sub CPMK
                     </button>
-                    <div class="sub-cpmk-wrapper" id="subCpmkWrapper${cpmkNumber}"></div>
                 </td>
             </tr>`;
 

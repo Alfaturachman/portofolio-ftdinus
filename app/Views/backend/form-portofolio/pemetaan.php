@@ -246,14 +246,12 @@
                                                     <tr>
                                                         <?php if ($isFirstRow): ?>
                                                             <td rowspan="<?= $rowspan ?>" class="align-middle">
-                                                                <strong>CPL <?= $cplNo ?></strong><br>
-                                                                <?= esc($cplData['narasi'] ?? '') ?>
+                                                                <strong>CPL <?= $cplNo ?></strong>
                                                             </td>
                                                         <?php endif; ?>
 
                                                         <td class="align-middle">
-                                                            <strong>CPMK <?= $cpmkNo ?></strong><br>
-                                                            <?= esc($cpmkInfo['narasi']) ?>
+                                                            <strong>CPMK <?= $cpmkNo ?></strong>
                                                         </td>
 
                                                         <?php foreach ($subCpmkNumbers as $subNo): ?>

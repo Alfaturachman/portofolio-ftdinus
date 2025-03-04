@@ -217,16 +217,10 @@
                                                             <?php if ($firstRow && $rowspanCount[$cpmkNo] > 0): ?>
                                                                 <td class="align-middle" rowspan="<?= $rowspanCount[$cpmkNo] ?>">
                                                                     <strong>CPMK <?= $cpmkNo ?></strong>
-                                                                    <?php if (isset($cpmkData['cpmk'][$cpmkNo]['narasi'])): ?>
-                                                                        <br><?= esc($cpmkData['cpmk'][$cpmkNo]['narasi']) ?>
-                                                                    <?php endif; ?>
                                                                 </td>
                                                             <?php endif; ?>
                                                             <td class="align-middle">
                                                                 <strong>Sub CPMK <?= $subNo ?></strong>
-                                                                <?php if (isset($cpmkData['cpmk'][$cpmkNo]['sub'][$subNo]['narasi'])): ?>
-                                                                    <br><?= esc($cpmkData['cpmk'][$cpmkNo]['sub'][$subNo]['narasi']) ?>
-                                                                <?php endif; ?>
                                                             </td>
                                                             <!-- Modified checkbox input fields in the table -->
                                                             <td class="text-center">

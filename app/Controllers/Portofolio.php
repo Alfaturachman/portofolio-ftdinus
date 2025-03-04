@@ -90,12 +90,17 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Get data from database
+        // Get user NPP from session
+        $npp = session()->get('UserSession.username');
+
+        // Get data from database with joined tables
         $db = \Config\Database::connect();
-        $mataKuliahData = $db->table('info_matkul')
-            ->select('matakuliah as nama_mk, kode_matkul as kode_mk, kelp_matkul as kelompok_mk, 
-                    fakultas, prodi as progdi, teori as sks_teori, praktek as sks_praktik')
-            ->groupBy(['kode_matkul', 'matakuliah', 'kelp_matkul', 'fakultas', 'prodi', 'teori', 'praktek'])
+        $mataKuliahData = $db->table('matkul_diampu md')
+            ->select('md.matkul as nama_mk, md.kode_matkul as kode_mk, im.kelp_matkul as kelompok_mk, 
+                    im.fakultas, im.prodi as progdi, im.teori as sks_teori, im.praktek as sks_praktik')
+            ->join('info_matkul im', 'md.kode_matkul = im.kode_matkul', 'left')
+            ->where('md.npp', $npp)
+            ->groupBy(['md.kode_matkul', 'md.matkul', 'im.kelp_matkul', 'im.fakultas', 'im.prodi', 'im.teori', 'im.praktek'])
             ->get()
             ->getResultArray();
 
@@ -655,5 +660,10 @@ class Portofolio extends BaseController
         session()->remove('info_matkul');
         log_message('info', 'Session info_matkul telah dihapus.');
         return redirect()->to('portofolio-form/');
+    }
+
+    public function tes_cetak()
+    {
+        return view('backend/pdf/test-cetak');
     }
 }

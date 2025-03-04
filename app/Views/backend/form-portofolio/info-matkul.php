@@ -246,44 +246,58 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Clear all fields on page load if no mata kuliah is selected
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectedOption = document.getElementById('nama_mk');
-            if (!selectedOption.value) {
-                clearFields();
-            }
-        });
-
-        document.getElementById('nama_mk').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption.value) {
-                // Mengisi field berdasarkan atribut data pada option
-                document.getElementById('kode_mk').value = selectedOption.getAttribute('data-kode_mk') || '';
-                document.getElementById('kelompok_mk').value = selectedOption.getAttribute('data-kelompok_mk') || '';
-                document.getElementById('sks_teori').value = selectedOption.getAttribute('data-sks_teori') || '';
-                document.getElementById('sks_praktik').value = selectedOption.getAttribute('data-sks_praktik') || '';
-                document.getElementById('fakultas').value = selectedOption.getAttribute('data-fakultas') || '';
-                document.getElementById('progdi').value = selectedOption.getAttribute('data-progdi') || '';
-            } else {
-                // Kosongkan field jika tidak ada yang dipilih
-                clearFields();
-            }
-        });
-
-        // Function to clear all fields
-        function clearFields() {
-            document.getElementById('kode_mk').value = '';
-            document.getElementById('kelompok_mk').value = '';
-            document.getElementById('sks_teori').value = '';
-            document.getElementById('sks_praktik').value = '';
-            document.getElementById('fakultas').value = '';
-            document.getElementById('progdi').value = '';
-            document.getElementById('mk_prasyarat').value = '';
-            document.getElementById('topik_mk').value = '';
-        }
-    </script>
 </div>
+
+<script>
+    // Initialize Select2 for searchable dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#nama_mk').select2({
+                placeholder: 'Pilih Mata Kuliah',
+                width: '100%',
+                allowClear: true
+            });
+        });
+
+        const selectedOption = document.getElementById('nama_mk');
+        if (!selectedOption.value) {
+            clearFields();
+        }
+    });
+
+    document.getElementById('nama_mk').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            // Mengisi field berdasarkan atribut data pada option
+            document.getElementById('kode_mk').value = selectedOption.getAttribute('data-kode_mk') || '';
+            document.getElementById('kelompok_mk').value = selectedOption.getAttribute('data-kelompok_mk') || '';
+            document.getElementById('sks_teori').value = selectedOption.getAttribute('data-sks_teori') || '';
+            document.getElementById('sks_praktik').value = selectedOption.getAttribute('data-sks_praktik') || '';
+            document.getElementById('fakultas').value = selectedOption.getAttribute('data-fakultas') || '';
+            document.getElementById('progdi').value = selectedOption.getAttribute('data-progdi') || '';
+        } else {
+            // Kosongkan field jika tidak ada yang dipilih
+            clearFields();
+        }
+    });
+
+    // Function to clear all fields
+    function clearFields() {
+        document.getElementById('kode_mk').value = '';
+        document.getElementById('kelompok_mk').value = '';
+        document.getElementById('sks_teori').value = '';
+        document.getElementById('sks_praktik').value = '';
+        document.getElementById('fakultas').value = '';
+        document.getElementById('progdi').value = '';
+        document.getElementById('mk_prasyarat').value = '';
+        document.getElementById('topik_mk').value = '';
+    }
+</script>
+
+<!-- Select2 CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <?= $this->include('backend/partials/footer') ?>
