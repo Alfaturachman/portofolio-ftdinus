@@ -161,7 +161,7 @@
                         <h4 class="fw-bolder mb-3">Upload RPS</h4>
                         <?php if (!empty($pdfUrl)): ?>
                             <div id="alert" class="alert alert-success" role="alert">
-                                Upload RPS sudah selesai, silahkan untuk ke tahap selanjutnya.
+                                Upload RPS sudah berhasil, silahkan untuk ke tahap selanjutnya.
                             </div>
                         <?php else: ?>
                             <div id="alert" class="alert alert-primary" role="alert">

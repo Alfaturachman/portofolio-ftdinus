@@ -4,9 +4,9 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class RancanganAsesmenFileModel extends Model
+class PelaksanaanPerkuliahanModel extends Model
 {
-    protected $table      = 'rancangan_asesmen_file';
+    protected $table      = 'pelaksanaan_perkuliahan';
     protected $primaryKey = 'id';
 
     protected $useAutoIncrement = true;
@@ -14,7 +14,12 @@ class RancanganAsesmenFileModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['id_asesmen', 'kategori', 'kategori_file', 'file_pdf'];
+    protected $allowedFields = [
+        'id_porto',
+        'file_kontrak',
+        'file_realisasi',
+        'file_kehadiran'
+    ];
 
     protected $useTimestamps = true;
     protected $createdField  = 'ins_time';
