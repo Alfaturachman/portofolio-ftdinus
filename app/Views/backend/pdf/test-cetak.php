@@ -4,346 +4,338 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portofolio Mata Kuliah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+        @page {
+            size: A4;
+            margin: 2cm;
         }
-
-        .container {
-            width: 100%;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        @media print {
+            body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+            }
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        header h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        header h2 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        header h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        header img.logo {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .table-of-contents {
-            margin-bottom: 20px;
-        }
-
-        .table-of-contents h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .table-of-contents ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .table-of-contents ul li {
-            margin-bottom: 5px;
-        }
-
-        .table-of-contents ul li a {
-            text-decoration: none;
-            color: #333;
-        }
-
-        section {
-            margin-bottom: 20px;
-        }
-
-        section h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        section h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        section p {
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
-
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+        table, th, td {
+            border: 1px solid black;
+            padding: 5px;
         }
-
-        table th {
-            background-color: #f4f4f4;
-        }
-
-        img.kontrak-kuliah, img.realisasi-mengajar, img.kehadiran-mahasiswa, img.hasil-tugas, img.hasil-uts, img.hasil-uas, img.nilai-mk, img.nilai-cpmk {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>PORTOFOLIO MATA KULIAH</h1>
-            <h2>NAMA MATA KULIAH</h2>
-            <h3>TAHUN AKADEMIK 20XX/20XX</h3>
-            <img src="media/image1.png" alt="Logo" class="logo">
-            <p>Dosen Pengampu: ....................</p>
-            <p>PROGRAM STUDI TEKNIK ELEKTRO</p>
-            <p>FAKULTAS TEKNIK UNIVERSITAS DIAN NUSWANTORO</p>
-        </header>
+<body class="">
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold mb-2">PORTOFOLIO MATA KULIAH</h1>
+        <h2 class="text-xl mb-4">NAMA MATA KULIAH</h2>
+        <h3 class="text-lg">TAHUN AKADEMIK 20XX/20XX</h3>
+    </div>
 
-        <section class="table-of-contents">
-            <h2>DAFTAR ISI</h2>
-            <ul>
-                <li><a href="#rencana-kegiatan">A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER</a></li>
-                <li><a href="#pelaksanaan-perkuliahan">B. PELAKSANAAN PERKULIAHAN</a></li>
-                <li><a href="#hasil-perkuliahan">C. HASIL PERKULIAHAN</a></li>
-                <li><a href="#evaluasi-perkuliahan">D. EVALUASI PERKULIAHAN</a></li>
-            </ul>
-        </section>
+    <div class="text-center mb-8">
+        <img src="/api/placeholder/180/180" alt="Logo" class="mx-auto mb-4">
+    </div>
 
-        <section id="rencana-kegiatan">
-            <h2>A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER</h2>
-            <h3>1. IDENTITAS MATA KULIAH (MK)</h3>
-            <p>Nama Mata Kuliah: ........................</p>
-            <p>Kode MK: ........................</p>
-            <p>Kelompok MK: ........................</p>
-            <p>SKS: .... T/ .... P</p>
-            <p>MK Prasyarat: ........................</p>
+    <div class="mb-8">
+        <p class="font-bold">Dosen Pengampu:</p>
+        <p>...........................................................</p>
+    </div>
 
-            <h3>2. TOPIK PERKULIAHAN</h3>
-            <p>...........................................................................</p>
+    <div class="text-center mb-8">
+        <p class="font-bold">PROGRAM STUDI TEKNIK ELEKTRO</p>
+        <p class="font-bold">FAKULTAS TEKNIK UNIVERSITAS DIAN NUSWANTORO</p>
+    </div>
 
-            <h3>3. CAPAIAN PEMBELAJARAN LULUSAN (CPL) & INDIKATOR KINERJA CAPAIAN PEMBELAJARAN (IKCP)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>CPL</th>
-                        <th>IKCP</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>CPL X</td>
-                        <td>X.1 ..................................................</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>X.2 ..................................................</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>X.3 ..................................................</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>X.n ..................................................</td>
-                    </tr>
-                    <tr>
-                        <td>CPL Y</td>
-                        <td>Y.1 ..................................................</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>Y.2 ..................................................</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>Y.m ..................................................</td>
-                    </tr>
-                </tbody>
-            </table>
+    <h2 class="text-xl font-bold mb-4">DAFTAR ISI</h2>
+    <ol class="list-decimal pl-8 mb-8">
+        <li>A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER
+            <ol class="list-decimal pl-8">
+                <li>Identitas Mata Kuliah (MK)</li>
+                <li>Topik Perkuliahan</li>
+                <li>Capaian Pembelajaran Lulusan (CPL) & Indikator Kinerja Capaian Pembelajaran (IKCP)</li>
+                <li>Capaian Pembelajaran Mata Kuliah (CPMK) dan Sub Capaian Pembelajaran Mata Kuliah (Sub CPMK)</li>
+                <li>Pemetaan CPL -- CPMK -- Sub CPMK</li>
+                <li>Dokumen Rencana Pembelajaran Semester (RPS)</li>
+                <li>Rancangan Asesmen
+                    <ol class="list-decimal pl-8">
+                        <li>Tugas</li>
+                        <li>Ujian Tengah Semester</li>
+                        <li>Ujian Akhir Semester</li>
+                    </ol>
+                </li>
+            </ol>
+        </li>
+        <li>B. PELAKSANAAN PERKULIAHAN
+            <ol class="list-decimal pl-8">
+                <li>Kontrak Kuliah</li>
+                <li>Realisasi Mengajar</li>
+                <li>Kehadiran Mahasiswa</li>
+            </ol>
+        </li>
+        <li>C. HASIL PERKULIAHAN
+            <ol class="list-decimal pl-8">
+                <li>Hasil Tugas</li>
+                <li>Hasil Ujian Tengah Semester</li>
+                <li>Hasil Ujian Akhir Semester</li>
+                <li>Nilai Mata Kuliah</li>
+                <li>Nilai CPMK</li>
+            </ol>
+        </li>
+        <li>D. EVALUASI PERKULIAHAN</li>
+    </ol>
 
-            <h3>4. CAPAIAN PEMBELAJARAN MATA KULIAH (CPMK) DAN SUB CAPAIAN PEMBELAJARAN MATA KULIAH (Sub CPMK)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>CPMK</th>
-                        <th>Deskripsi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>CPMK-1</td>
-                        <td>...........................................................................</td>
-                    </tr>
-                    <tr>
-                        <td>CPMK-2</td>
-                        <td>...........................................................................</td>
-                    </tr>
-                    <tr>
-                        <td>CPMK-3</td>
-                        <td>...........................................................................</td>
-                    </tr>
-                    <tr>
-                        <td>CPMK-4</td>
-                        <td>...........................................................................</td>
-                    </tr>
-                    <tr>
-                        <td>CPMK-n</td>
-                        <td>...........................................................................</td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="page-break"></div>
 
-            <h3>5. PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>CPL</th>
-                        <th>CPMK</th>
-                        <th>Sub CPMK</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2</td>
-                        <td>1</td>
-                        <td>V</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>2</td>
-                        <td>V</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>4</td>
-                        <td>V</td>
-                    </tr>
-                </tbody>
-            </table>
+    <h2 class="text-xl font-bold mb-4">A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER</h2>
 
-            <h3>6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
-            <p>Terlampir</p>
+    <h3 class="text-lg font-bold mb-2">IDENTITAS MATA KULIAH (MK)</h3>
+    <div class="mb-8">
+        <p>Nama Mata Kuliah : ...................................................................</p>
+        <p>Kode MK : ...................................................................</p>
+        <p>Kelompok MK : ...................................................................</p>
+        <p>SKS : .... T/ .... P</p>
+        <p>MK Prasyarat : ...................................................................</p>
+    </div>
 
-            <h3>7. RANCANGAN ASESMEN</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>CPMK</th>
-                        <th>Sub CPMK</th>
-                        <th>Tugas</th>
-                        <th>UTS</th>
-                        <th>UAS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>CPMK 1</td>
-                        <td>Sub CPMK 1</td>
-                        <td>V</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>CPMK 2</td>
-                        <td>Sub CPMK 3</td>
-                        <td></td>
-                        <td>V</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>CPMK 3</td>
-                        <td>Sub CPMK 4</td>
-                        <td>V</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>CPMK 4</td>
-                        <td>Sub CPMK 6</td>
-                        <td>V</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>CPMK n</td>
-                        <td>Sub CPMK 5</td>
-                        <td></td>
-                        <td></td>
-                        <td>V</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+    <h3 class="text-lg font-bold mb-2">TOPIK PERKULIAHAN</h3>
+    <p class="mb-8">...............................................................................................................................................................................................................................................................................................................................................................................................................................................................</p>
 
-        <section id="pelaksanaan-perkuliahan">
-            <h2>B. PELAKSANAAN PERKULIAHAN</h2>
-            <h3>1. KONTRAK KULIAH</h3>
-            <img src="media/image9.jpg" alt="Kontrak Kuliah" class="kontrak-kuliah">
+    <h3 class="text-lg font-bold mb-2">CAPAIAN PEMBELAJARAN LULUSAN (CPL) & INDIKATOR KINERJA CAPAIAN PEMBELAJARAN (IKCP)</h3>
+    <table class="mb-8">
+        <thead>
+            <tr>
+                <th>CPL</th>
+                <th>IKCP</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>CPL X ..................................................</td>
+                <td>
+                    X.1 ...........................................................<br>
+                    X.2 ...........................................................<br>
+                    X.3 ...........................................................<br>
+                    X.n ..........................................................
+                </td>
+            </tr>
+            <tr>
+                <td>CPL Y ..................................................</td>
+                <td>
+                    Y.1 ...........................................................<br>
+                    Y.2 ...........................................................<br>
+                    Y.m ..........................................................
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-            <h3>2. REALISASI MENGAJAR</h3>
-            <img src="media/image10.jpg" alt="Realisasi Mengajar 1" class="realisasi-mengajar">
-            <img src="media/image11.jpg" alt="Realisasi Mengajar 2" class="realisasi-mengajar">
+    <h3 class="text-lg font-bold mb-2">CAPAIAN PEMBELAJARAN MATA KULIAH (CPMK) DAN SUB CAPAIAN PEMBELAJARAN MATA KULIAH (Sub CPMK)</h3>
+    
+    <h4 class="font-bold mb-2">Tabel 2 Capaian Pembelajaran Mata Kuliah</h4>
+    <table class="mb-8">
+        <tbody>
+            <tr>
+                <td>CPMK-1 ............................................................................ (C3)</td>
+            </tr>
+            <tr>
+                <td>CPMK-2 ............................................................................ (C3)</td>
+            </tr>
+            <tr>
+                <td>CPMK-3 ............................................................................ (C3)</td>
+            </tr>
+            <tr>
+                <td>CPMK-4 ............................................................................ (C4)</td>
+            </tr>
+            <tr>
+                <td>CPMK-n ............................................................................ (TAXONOMY BLOOM X)</td>
+            </tr>
+        </tbody>
+    </table>
 
-            <h3>3. KEHADIRAN MAHASISWA</h3>
-            <img src="media/image12.png" alt="Kehadiran Mahasiswa" class="kehadiran-mahasiswa">
-        </section>
+    <h4 class="font-bold mb-2">Tabel 3 Sub Capaian Pembelajaran Mata Kuliah</h4>
+    <table class="mb-8">
+        <tbody>
+            <tr>
+                <td>SCPMK-1 ............................................................................ (C3)</td>
+            </tr>
+            <tr>
+                <td>SCPMK-2 ............................................................................ (C3)</td>
+            </tr>
+            <tr>
+                <td>SCPMK-3 ............................................................................ (C3)</td>
+            </tr>
+            <tr>
+                <td>SCPMK-4 ............................................................................ (C4)</td>
+            </tr>
+            <tr>
+                <td>SCPMK-5 ............................................................................ (TAXONOMY BLOOM X)</td>
+            </tr>
+            <tr>
+                <td>SCPMK-m ............................................................................ (TAXONOMY BLOOM X)</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <section id="hasil-perkuliahan">
-            <h2>C. HASIL PERKULIAHAN</h2>
-            <h3>1. HASIL TUGAS</h3>
-            <img src="media/image13.png" alt="Hasil Tugas" class="hasil-tugas">
+    <h3 class="text-lg font-bold mb-2">PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
+    <table class="mb-8">
+        <thead>
+            <tr>
+                <th rowspan="2">CPL</th>
+                <th rowspan="2">CPMK</th>
+                <th colspan="7">Sub CPMK</th>
+            </tr>
+            <tr>
+                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>n</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="2">2</td>
+                <td>1</td>
+                <td>V</td><td>V</td><td></td><td></td><td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td></td><td></td><td>V</td><td></td><td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td rowspan="2">4</td>
+                <td>2</td>
+                <td></td><td></td><td>V</td><td></td><td></td><td></td><td></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td></td><td></td><td></td><td>V</td><td>V</td><td></td><td></td>
+            </tr>
+            <tr>
+                <td rowspan="2">7</td>
+                <td>4</td>
+                <td></td><td></td><td></td><td></td><td></td><td>V</td><td></td>
+            </tr>
+            <tr>
+                <td>n</td>
+                <td></td><td></td><td></td><td></td><td>V</td><td>V</td><td>V</td>
+            </tr>
+        </tbody>
+    </table>
 
-            <h3>2. HASIL UJIAN TENGAH SEMESTER</h3>
-            <img src="media/image14.png" alt="Hasil UTS" class="hasil-uts">
+    <h3 class="text-lg font-bold mb-2">DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
+    <p class="mb-8">Terlampir</p>
 
-            <h3>3. HASIL UJIAN AKHIR SEMESTER</h3>
-            <img src="media/image15.jpeg" alt="Hasil UAS" class="hasil-uas">
+    <h3 class="text-lg font-bold mb-2">RANCANGAN ASESMEN</h3>
+    <table class="mb-8">
+        <thead>
+            <tr>
+                <th rowspan="2" colspan="2"></th>
+                <th colspan="3">Assessment</th>
+            </tr>
+            <tr>
+                <th>Tugas</th>
+                <th>UTS</th>
+                <th>UAS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="2">CPMK 1</td>
+                <td>Sub CPMK 1</td>
+                <td>V</td><td></td><td></td>
+            </tr>
+            <tr>
+                <td>Sub CPMK 2</td>
+                <td>V</td><td></td><td></td>
+            </tr>
+            <tr>
+                <td>CPMK 2</td>
+                <td>Sub CPMK 3</td>
+                <td></td><td>V</td><td></td>
+            </tr>            
+            <tr>
+                <td rowspan="2">CPMK 3</td>
+                <td>Sub CPMK 4</td>
+                <td>V</td><td></td><td></td>
+            </tr>
+            <tr>
+                <td>Sub CPMK 5</td>
+                <td></td><td>V</td><td></td>                
+            </tr>
+            <tr>
+                <td>CPMK 4</td>
+                <td>Sub CPMK 6</td>
+                <td>V</td><td></td><td></td>
+            </tr>
+            <tr>
+                <td rowspan="3">CPMK n</td>
+                <td>Sub CPMK 5</td>
+                <td></td><td></td><td>V</td>
+            </tr>
+            <tr>
+                <td>Sub CPMK 6</td>
+                <td></td><td></td><td>V</td>
+            </tr>
+            <tr>
+                <td>Sub CPMK n</td>
+                <td></td><td></td><td>V</td>
+            </tr>
+        </tbody>
+    </table>
 
-            <h3>4. NILAI MATA KULIAH</h3>
-            <img src="media/image16.png" alt="Nilai Mata Kuliah" class="nilai-mk">
+    <h3 class="text-lg font-bold mb-2">TUGAS</h3>
+    <p class="mb-8">Mengacu pada contoh rancangan jadwal pada tabel 5, maka dibuat lima rancangan tugas</p>
 
-            <h3>5. NILAI CPMK</h3>
-            <img src="media/image17.jpeg" alt="Nilai CPMK" class="nilai-cpmk">
-        </section>
+    <h3 class="text-lg font-bold mb-2">UJIAN TENGAH SEMESTER</h3>
+    <p class="mb-8"></p>
 
-        <section id="evaluasi-perkuliahan">
-            <h2>D. EVALUASI PERKULIAHAN</h2>
-            <p>.....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</p>
-            <p>Disusun Oleh</p>
-            <p>Dosen Koord/Pengampu MK</p>
-            <p>......................................</p>
-            <p>NPP: 0686.11.....................</p>
-        </section>
+    <h3 class="text-lg font-bold mb-2">UJIAN AKHIR SEMESTER</h3>
+    <p class="mb-8"></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="text-xl font-bold mb-4">B. PELAKSANAAN PERKULIAHAN</h2>
+
+    <h3 class="text-lg font-bold mb-2">KONTRAK KULIAH</h3>
+    <p class="mb-8"></p>
+
+    <h3 class="text-lg font-bold mb-2">REALISASI MENGAJAR</h3>
+    <p class="mb-8"></p>
+
+    <h3 class="text-lg font-bold mb-2">KEHADIRAN MAHASISWA</h3>
+    <p class="mb-8"></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="text-xl font-bold mb-4">C. HASIL PERKULIAHAN</h2>
+
+    <h3 class="text-lg font-bold mb-2">HASIL TUGAS</h3>
+    <p class="mb-8"></p>
+
+    <h3 class="text-lg font-bold mb-2">HASIL UJIAN TENGAH SEMESTER</h3>
+    <p class="mb-8"></p>
+
+    <h3 class="text-lg font-bold mb-2">HASIL UJIAN AKHIR SEMESTER</h3>
+    <p class="mb-8"></p>
+
+    <h3 class="text-lg font-bold mb-2">NILAI MATA KULIAH</h3>
+    <p class="mb-8"></p>
+
+    <h3 class="text-lg font-bold mb-2">NILAI CPMK</h3>
+    <p class="mb-8"></p>
+
+    <div class="page-break"></div>
+
+    <h2 class="text-xl font-bold mb-4">D. EVALUASI PERKULIAHAN</h2>
+    <p class="mb-8">....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</p>
+
+    <div class="mt-16 text-left">
+        <p>Disusun Oleh</p>
+        <p>Dosen Koord/Pengampu MK</p>
+        <p class="mt-12">.......................................</p>
+        <p>NPP: 0686.11.....................</p>
     </div>
 </body>
 </html>

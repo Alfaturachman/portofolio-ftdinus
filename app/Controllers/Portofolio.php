@@ -25,7 +25,23 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        return view('backend/form-portofolio/index');
+        // Get the current user's NPP from the session
+        $currentUserNPP = session()->get('UserSession.username');
+
+        $portofolioModel = new PortofolioModel();
+        $data['portofolios'] = $portofolioModel->getPortofolioWithUserDetails($currentUserNPP);
+
+        return view('backend/form-portofolio/index', $data);
+    }
+
+    public function edit($id)
+    {
+        // Tambahkan logika untuk mengedit portofolio
+    }
+
+    public function cetak($id)
+    {
+        // Tambahkan logika untuk mencetak portofolio
     }
 
     public function upload_rps()

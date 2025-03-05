@@ -13,13 +13,12 @@
         </div>
     </div>
 
-    <!-- CPMK & Sub CPMK -->
+    <!-- Portofolio Table -->
     <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-
                         <div class="d-flex justify-content-start mb-3">
                             <a class="btn btn-primary" href="<?= base_url('portofolio-form/upload-rps') ?>">
                                 Tambah Portofolio
@@ -34,33 +33,36 @@
                     <table class="table table-bordered">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 10%">No</th>
-                                <th style="width: 20%">Program Studi</th>
-                                <th style="width: 70%">Mata Kuliah</th>
-                                <th style="width: 30%">Aksi</th>
+                                <th style="width: 5%">No</th>
+                                <th style="width: 15%">Kode Mata Kuliah</th>
+                                <th style="width: 20%">Mata Kuliah</th>
+                                <th style="width: 20%">Dosen Pembuat</th>
+                                <th style="width: 15%">NPP Dosen</th>
+                                <th style="width: 15%">Waktu Terbuat</th>
+                                <th style="width: 10%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
+                            <?php $no = 1; foreach($portofolios as $portofolio): ?>
                             <tr>
-                                <td>1</td>
-                                <td><strong>Teknik Elektro</strong></td>
-                                <td><strong>Pemrograman Web</strong></td>
+                                <td><?= $no++ ?></td>
+                                <td><?= $portofolio['kode_mk'] ?></td>
+                                <td><?= $portofolio['nama_mk'] ?></td>
+                                <td><?= $portofolio['dosen_nama'] ?></td>
+                                <td><?= $portofolio['npp'] ?></td>
+                                <td><?= date('d M Y H:i', strtotime($portofolio['ins_time'])) ?></td>
                                 <td>
-                                    <a class="btn btn-primary" href="<?= base_url('detail-portofolio') ?>">
-                                        Detail
-                                    </a>
+                                    <div class="btn-group" role="group">
+                                        <a href="<?= base_url('portofolio/edit/'.$portofolio['id']) ?>" class="btn btn-sm btn-warning">
+                                            Edit
+                                        </a>
+                                        <a href="<?= base_url('portofolio/cetak/'.$portofolio['id']) ?>" class="btn btn-sm btn-primary">
+                                            Cetak
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><strong>Teknik Industri</strong></td>
-                                <td><strong>Basis Data</strong></td>
-                                <td>
-                                    <a class="btn btn-primary" href="<?= base_url('detail-portofolio') ?>">
-                                        Detail
-                                    </a>
-                                </td>
-                            </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
