@@ -60,3 +60,9 @@ $routes->group('portofolio-form', function ($routes) {
 
 // Rute untuk mengakses file PDF yang diupload
 $routes->get('uploads/temp/(:segment)', 'Portofolio::view_uploaded_pdf/$1');
+
+// Rute form portofolio
+$routes->group('portofolio-detail', function ($routes) {
+    // Rute GET
+    $routes->get('/', 'PortofolioDetail::index');
+});

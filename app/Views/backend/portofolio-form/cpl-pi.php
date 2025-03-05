@@ -67,21 +67,21 @@
                             <small class="d-block mt-2 step-label">Upload RPS</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-bookmark"></i>
                             </div>
                             <small class="d-block mt-2 step-label">Informasi Matkul</small>
                         </div>
 
-                        <div class="step-line"></div>
+                        <div class="step-line active"></div>
 
                         <!-- CPL & PI -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle">
+                            <div class="step-circle active">
                                 <i class="ti ti-bulb"></i>
                             </div>
                             <small class="d-block mt-2 step-label">CPL & PI</small>
@@ -152,64 +152,65 @@
         </div>
     </div>
 
-    <!-- Upload RPS -->
+    <!-- CPL & IKCP -->
     <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
-                        <h4 class="fw-bolder mb-3">Upload RPS</h4>
-                        <?php if (!empty($pdfUrl)): ?>
-                            <div id="alert" class="alert alert-success" role="alert">
-                                Upload RPS sudah berhasil, silahkan untuk ke tahap selanjutnya.
-                            </div>
-                        <?php else: ?>
-                            <div id="alert" class="alert alert-primary" role="alert">
-                                Silahkan untuk mengupload file RPS di bawah sebelum melanjutkan!
-                            </div>
-                        <?php endif; ?>
+                        <h4 class="fw-bolder mb-3">Capaian Pembelajaran Lulusan (CPL) & Performa Index (PI)</h4>
+                        <div id="alert" class="alert alert-primary" role="alert">
+                            Silahkan untuk mengisi CPL dan indikator kinerja di bawah sebelum melanjutkan!
+                        </div>
                     </div>
-
-                    <?php if (session()->getFlashdata('error')): ?>
-                        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
-                    <?php endif; ?>
-
-                    <?php if (session()->getFlashdata('success')): ?>
-                        <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
-                    <?php endif; ?>
-
-                    <form id="rpsForm" action="<?= base_url('portofolio-form/saveUploadRps') ?>" method="post" enctype="multipart/form-data">
-                        <?php if (!empty($pdfUrl)): ?>
-                            <div class="form-group mb-2">
-                                <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
-                                <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="form-group mb-2">
-                                <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
-                                <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf" required>
-                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
-                            </div>
-                        <?php endif; ?>
-
+                    <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
                         <?php if (!empty($pdfUrl)): ?>
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
                                 <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
                             </div>
                         <?php else: ?>
                         <?php endif; ?>
-
+                        <table class="table table-bordered">
+                            <thead class="text-white" style="background-color: #0f4c92;">
+                                <tr>
+                                    <th style="width: 30%" colspan="2">Capaian Pembelajaran Lulusan</th>
+                                    <th style="width: 60%">Performa Index</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($cplPiData)): ?>
+                                    <tr>
+                                        <td colspan="3" class="text-center">Tidak ada data CPL dan PI untuk mata kuliah ini.</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($cplPiData as $cplNo => $cplData): ?>
+                                        <?php $rowCount = max(count($cplData['pi_list']), 1); ?>
+                                        <tr>
+                                            <td rowspan="<?= $rowCount ?>" style="white-space: nowrap;"><strong>CPL <?= $cplNo ?></strong></td>
+                                            <td rowspan="<?= $rowCount ?>"><?= esc($cplData['cpl_indo']) ?></td>
+                                            <?php if (!empty($cplData['pi_list'])): ?>
+                                                <td><?= esc($cplData['pi_list'][0]) ?></td>
+                                            <?php else: ?>
+                                                <td>-</td>
+                                            <?php endif; ?>
+                                        </tr>
+                                        <?php for ($i = 1; $i < count($cplData['pi_list']); $i++): ?>
+                                            <tr>
+                                                <td><?= esc($cplData['pi_list'][$i]) ?></td>
+                                            </tr>
+                                        <?php endfor; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/info-matkul') ?>">
+                            <a class="btn btn-primary <?= empty($cplPiData) ? 'disabled' : '' ?>"
+                                href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a>
-                            <!-- <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button> -->
                         </div>
                     </form>
                 </div>
@@ -217,65 +218,5 @@
         </div>
     </div>
 </div>
-
-<!-- Modal -->
-<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="messageModalLabel">Pesan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="modalMessage">
-                <!-- Pesan akan dimasukkan di sini -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.getElementById('rps_file').addEventListener('change', function() {
-        const fileInput = this;
-        const formData = new FormData();
-        formData.append('rps_file', fileInput.files[0]);
-
-        // Cek apakah file dipilih
-        if (fileInput.files.length === 0) {
-            showModal('Harap pilih file untuk diupload.');
-            return;
-        }
-
-        // AJAX Request
-        fetch('<?= base_url('portofolio-form/saveUploadRps') ?>', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showModal('File berhasil diupload.');
-                    // Refresh halaman setelah berhasil upload
-                    location.reload();
-                } else {
-                    showModal('Gagal mengupload file: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showModal('Terjadi kesalahan saat mengupload file.');
-            });
-    });
-
-    // Fungsi untuk menampilkan modal dengan pesan
-    function showModal(message) {
-        const modalMessage = document.getElementById('modalMessage');
-        modalMessage.textContent = message; // Set pesan ke dalam modal
-        const modal = new bootstrap.Modal(document.getElementById('messageModal')); // Inisialisasi modal
-        modal.show(); // Tampilkan modal
-    }
-</script>
 
 <?= $this->include('backend/partials/footer') ?>

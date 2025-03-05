@@ -31,7 +31,7 @@ class Portofolio extends BaseController
         $portofolioModel = new PortofolioModel();
         $data['portofolios'] = $portofolioModel->getPortofolioWithUserDetails($currentUserNPP);
 
-        return view('backend/form-portofolio/index', $data);
+        return view('backend/portofolio-form/index', $data);
     }
 
     public function edit($id)
@@ -53,7 +53,7 @@ class Portofolio extends BaseController
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
-        return view('backend/form-portofolio/upload-rps', [
+        return view('backend/portofolio-form/upload-rps', [
             'pdfUrl' => $pdfUrl,
         ]);
     }
@@ -83,6 +83,19 @@ class Portofolio extends BaseController
             ],
         ]);
 
+        // Get the file directly from the request
+        $file = $this->request->getFile('rps_file');
+
+        // Check if file exists and is valid
+        if (!$file || !$file->isValid()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'File upload failed. Please check the file and try again.',
+                'error_details' => $file ? $file->getErrorString() : 'No file uploaded'
+            ]);
+        }
+
+        // Run validation
         if (!$validation->withRequest($this->request)->run()) {
             return $this->response->setJSON([
                 'success' => false,
@@ -91,24 +104,17 @@ class Portofolio extends BaseController
         }
 
         // Handle upload file
-        $file = $this->request->getFile('rps_file');
-        if ($file->isValid() && !$file->hasMoved()) {
-            $newName = time() . '_' . $file->getRandomName();
-            $file->move(WRITEPATH . 'uploads/temp', $newName);
+        $newName = time() . '_' . $file->getRandomName();
+        $file->move(WRITEPATH . 'uploads/temp', $newName);
 
-            // Simpan nama file ke session
-            session()->set('uploaded_rps', $newName);
+        // Simpan nama file ke session
+        session()->set('uploaded_rps', $newName);
 
-            // Return URL untuk iframe
-            return $this->response->setJSON([
-                'success' => true,
-                'pdfUrl' => base_url('view-pdf/' . $newName),
-            ]);
-        }
-
+        // Return URL untuk iframe
         return $this->response->setJSON([
-            'success' => false,
-            'message' => 'Gagal mengupload file.',
+            'success' => true,
+            'pdfUrl' => base_url('view-pdf/' . $newName),
+            'redirect' => site_url('portofolio-form/info-matkul')
         ]);
     }
 
@@ -139,7 +145,7 @@ class Portofolio extends BaseController
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
         // Kirim data ke view
-        return view('backend/form-portofolio/info-matkul', [
+        return view('backend/portofolio-form/info-matkul', [
             'mataKuliah' => $mataKuliahData,
             'infoMatkul' => $infoMatkul,
             'pdfUrl' => $pdfUrl,
@@ -210,50 +216,6 @@ class Portofolio extends BaseController
         }
     }
 
-    public function topik_perkuliahan()
-    {
-        if (!session()->get('UserSession.logged_in')) {
-            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
-        }
-
-        // Data tambahan dari session (jika ada)
-        $topikPerkuliahan = session()->get('topik_perkuliahan') ?? [];
-
-        // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
-
-        // Kirim data ke view
-        return view('backend/form-portofolio/topik-perkuliahan', [
-            'topikPerkuliahan' => $topikPerkuliahan,
-            'pdfUrl' => $pdfUrl,
-        ]);
-    }
-
-    public function saveTopikPerkuliahan()
-    {
-        $validation = \Config\Services::validation();
-        $validation->setRules([
-            'topik_mk' => 'required',
-        ]);
-
-        if (!$validation->withRequest($this->request)->run()) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
-        }
-
-        // Ambil data topik perkuliahan dari form
-        $topik = $this->request->getPost('topik_mk');
-
-        // Simpan data topik perkuliahan ke session
-        $data = array_merge(['topik_mk' => $topik]);
-
-        // Set data ke session
-        session()->set('topik_perkuliahan', $data);
-
-        log_message('info', 'Topik Perkuliahan disimpan ke session: ' . json_encode($data));
-
-        return redirect()->to('portofolio-form/cpl-pi');
-    }
-
     public function cpl_pi()
     {
         if (!session()->get('UserSession.logged_in')) {
@@ -295,7 +257,7 @@ class Portofolio extends BaseController
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
-        return view('backend/form-portofolio/cpl-pi', [
+        return view('backend/portofolio-form/cpl-pi', [
             'pdfUrl' => $pdfUrl,
             'cplPiData' => $cplPiData
         ]);
@@ -325,7 +287,7 @@ class Portofolio extends BaseController
         // Get PDF URL from session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
-        return view('backend/form-portofolio/cpmk-subcpmk', [
+        return view('backend/portofolio-form/cpmk-subcpmk', [
             'pdfUrl' => $pdfUrl,
             'cplPiData' => $cplPiData  // Pass CPL data to the view
         ]);
@@ -380,7 +342,7 @@ class Portofolio extends BaseController
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
-        return view('backend/form-portofolio/pemetaan', [
+        return view('backend/portofolio-form/pemetaan', [
             'pdfUrl' => $pdfUrl,
         ]);
     }
@@ -421,7 +383,7 @@ class Portofolio extends BaseController
                 ->with('error', 'Silakan lengkapi pemetaan terlebih dahulu.');
         }
 
-        return view('backend/form-portofolio/rancangan-asesmen');
+        return view('backend/portofolio-form/rancangan-asesmen');
     }
 
     public function saveAssessmentToSession()
@@ -542,7 +504,7 @@ class Portofolio extends BaseController
                 ->with('error', 'Silakan lengkapi rancangan asesmen terlebih dahulu.');
         }
 
-        return view('backend/form-portofolio/pelaksanaan-perkuliahan');
+        return view('backend/portofolio-form/pelaksanaan-perkuliahan');
     }
 
     public function savePelaksanaanPerkuliahan()
@@ -612,7 +574,7 @@ class Portofolio extends BaseController
                 ->with('error', 'Silakan lengkapi pelaksanaan perkuliahan terlebih dahulu.');
         }
 
-        return view('backend/form-portofolio/hasil-asesmen');
+        return view('backend/portofolio-form/hasil-asesmen');
     }
 
     public function saveHasilAsesmen()
@@ -690,7 +652,7 @@ class Portofolio extends BaseController
         // Ambil data evaluasi dari session
         $evaluasi_perkuliahan = session()->get('evaluasi_perkuliahan') ?? '';
 
-        return view('backend/form-portofolio/evaluasi-perkuliahan', [
+        return view('backend/portofolio-form/evaluasi-perkuliahan', [
             'evaluasi_perkuliahan' => $evaluasi_perkuliahan
         ]);
     }

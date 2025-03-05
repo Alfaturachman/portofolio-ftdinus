@@ -52,7 +52,8 @@
                                                         current_url() == base_url('portofolio-form/cpmk-subcpmk') ||
                                                         current_url() == base_url('portofolio-form/cetak') ||
                                                         current_url() == base_url('portofolio-form/upload-rps') ||
-                                                        current_url() == base_url('portofolio-form/rancangan-asesmen'))
+                                                        current_url() == base_url('portofolio-form/rancangan-asesmen') ||
+                                                        current_url() == base_url('portofolio-detail'))
                                                         ? 'active' : '' ?>"
                                 href="<?= base_url('portofolio-form') ?>"
                                 aria-expanded="false">
