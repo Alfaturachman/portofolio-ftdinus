@@ -43,25 +43,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $no = 1; foreach($portofolios as $portofolio): ?>
-                            <tr>
-                                <td><?= $no++ ?></td>
-                                <td><?= $portofolio['kode_mk'] ?></td>
-                                <td><?= $portofolio['nama_mk'] ?></td>
-                                <td><?= $portofolio['dosen_nama'] ?></td>
-                                <td><?= $portofolio['npp'] ?></td>
-                                <td><?= date('d M Y H:i', strtotime($portofolio['ins_time'])) ?></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="<?= base_url('portofolio/edit/'.$portofolio['id']) ?>" class="btn btn-sm btn-warning">
-                                            Edit
-                                        </a>
-                                        <a href="<?= base_url('portofolio/cetak/'.$portofolio['id']) ?>" class="btn btn-sm btn-primary">
-                                            Cetak
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
+                            <?php $no = 1;
+                            foreach ($portofolios as $portofolio): ?>
+                                <tr>
+                                    <td><?= $no++ ?></td>
+                                    <td><?= $portofolio['kode_mk'] ?></td>
+                                    <td><?= $portofolio['nama_mk'] ?></td>
+                                    <td><?= $portofolio['dosen_nama'] ?></td>
+                                    <td><?= $portofolio['npp'] ?></td>
+                                    <td><?= date('d M Y H:i', strtotime($portofolio['ins_time'])) ?></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="<?= base_url('portofolio/edit/' . $portofolio['id']) ?>" class="btn btn-sm btn-warning">
+                                                Edit
+                                            </a>
+                                            <a href="<?= base_url('portofolio/cetak/' . $portofolio['id']) ?>" class="btn btn-sm btn-primary">
+                                                Cetak
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>

@@ -19,4 +19,12 @@ class CpmkModel extends Model
     protected $useTimestamps = true;
     protected $createdField  = 'ins_time';
     protected $updatedField  = 'upd_time';
+
+    public function getCpmkByPortoId($idPorto)
+    {
+        return $this->select('id, no_cpmk, isi_cpmk')
+            ->where('id_porto', $idPorto)
+            ->orderBy('no_cpmk', 'ASC')
+            ->findAll();
+    }
 }
