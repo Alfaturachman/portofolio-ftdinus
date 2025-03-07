@@ -9,7 +9,7 @@
     <style>
         @page {
             size: A4;
-            margin: 2cm;
+            margin: 2cm 2cm 2cm 2cm;
         }
 
         @media print {
@@ -20,9 +20,28 @@
             }
         }
 
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .first-page {
+            text-align: center;
+        }
+
+        .first-page h4 {
+            font-weight: bold;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+        }
+
+        table tr th {
+            background-color: #0f4c92;
+            color: white;
+            border: #0f4c92;
         }
 
         table,
@@ -38,26 +57,30 @@
     </style>
 </head>
 
-<body class="">
-    <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold mb-2">PORTOFOLIO MATA KULIAH</h1>
-        <h2 class="text-xl mb-4">NAMA MATA KULIAH</h2>
-        <h3 class="text-lg">TAHUN AKADEMIK 20XX/20XX</h3>
+<body>
+    <div class="first-page" style="position: relative; min-height: 100vh; display: flex; flex-direction: column;">
+        <div>
+            <h1>PORTOFOLIO MATA KULIAH</h1>
+            <h2>NAMA MATA KULIAH</h2>
+            <h3>TAHUN AKADEMIK 20XX/20XX</h3>
+        </div>
+
+        <div>
+            <img src="/api/placeholder/180/180" alt="Logo" class="mx-auto mb-4">
+        </div>
+
+        <div>
+            <h4>Dosen Pengampu:</h4>
+            <p><?= $portofolioData['nama_dosen'] ?></p>
+        </div>
+
+        <div style="position: absolute; bottom: 0; width: 100%; text-align: center; margin-bottom: 2cm;">
+            <h4>PROGRAM STUDI TEKNIK ELEKTRO</h4>
+            <h4>FAKULTAS TEKNIK UNIVERSITAS DIAN NUSWANTORO</h4>
+        </div>
     </div>
 
-    <div class="text-center mb-8">
-        <img src="/api/placeholder/180/180" alt="Logo" class="mx-auto mb-4">
-    </div>
-
-    <div class="mb-8">
-        <p class="font-bold">Dosen Pengampu:</p>
-        <p><?= $portofolioData['nama_dosen'] ?></p>
-    </div>
-
-    <div class="text-center mb-8">
-        <p class="font-bold">PROGRAM STUDI TEKNIK ELEKTRO</p>
-        <p class="font-bold">FAKULTAS TEKNIK UNIVERSITAS DIAN NUSWANTORO</p>
-    </div>
+    <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">DAFTAR ISI</h2>
     <ol class="list-decimal pl-8 mb-8">
@@ -101,7 +124,7 @@
 
     <h2 class="text-xl font-bold mb-4">A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER</h2>
 
-    <h3 class="text-lg font-bold mb-2">IDENTITAS MATA KULIAH (MK)</h3>
+    <h3 class="text-lg font-bold mb-2">1. IDENTITAS MATA KULIAH (MK)</h3>
     <div class="mb-8">
         <p>Nama Mata Kuliah : <?= $portofolioData['nama_matkul'] ?></p>
         <p>Kode MK : <?= $portofolioData['kode_mk'] ?></p>
@@ -110,10 +133,10 @@
         <p>MK Prasyarat : <?= $portofolioData['prasyarat_mk'] ?></p>
     </div>
 
-    <h3 class="text-lg font-bold mb-2">TOPIK PERKULIAHAN</h3>
+    <h3 class="text-lg font-bold mb-2">2. TOPIK PERKULIAHAN</h3>
     <p class="mb-8"><?= $portofolioData['topik_perkuliahan'] ?></p>
 
-    <h3 class="text-lg font-bold mb-2">CAPAIAN PEMBELAJARAN LULUSAN (CPL) & INDIKATOR KINERJA CAPAIAN PEMBELAJARAN (IKCP)</h3>
+    <h3 class="text-lg font-bold mb-2">3. CAPAIAN PEMBELAJARAN LULUSAN (CPL) & INDIKATOR KINERJA CAPAIAN PEMBELAJARAN (IKCP)</h3>
     <table class="table table-bordered">
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr>
@@ -148,7 +171,7 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">CAPAIAN PEMBELAJARAN MATA KULIAH (CPMK) DAN SUB CAPAIAN PEMBELAJARAN MATA KULIAH (Sub CPMK)</h3>
+    <h3 class="text-lg font-bold mb-2">4. CAPAIAN PEMBELAJARAN MATA KULIAH (CPMK) DAN SUB CAPAIAN PEMBELAJARAN MATA KULIAH (Sub CPMK)</h3>
 
     <h4 class="font-bold mb-2">Tabel 2 Capaian Pembelajaran Mata Kuliah</h4>
     <table class="mb-8">
@@ -184,7 +207,7 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
+    <h3 class="text-lg font-bold mb-2">5. PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
     <table class="table table-bordered">
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr class="align-middle text-center">
@@ -228,10 +251,10 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
+    <h3 class="text-lg font-bold mb-2">6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
     <p class="mb-8">Terlampir</p>
 
-    <h3 class="text-lg font-bold mb-2">RANCANGAN ASESMEN</h3>
+    <h3 class="text-lg font-bold mb-2">7. RANCANGAN ASESMEN</h3>
     <table class="mb-8">
         <thead>
             <tr>
