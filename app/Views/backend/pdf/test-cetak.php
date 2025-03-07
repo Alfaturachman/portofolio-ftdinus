@@ -185,87 +185,46 @@
     </table>
 
     <h3 class="text-lg font-bold mb-2">PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
-    <table class="mb-8">
-        <thead>
-            <tr>
-                <th rowspan="2">CPL</th>
-                <th rowspan="2">CPMK</th>
-                <th colspan="7">Sub CPMK</th>
+    <table class="table table-bordered">
+        <thead class="text-white" style="background-color: #0f4c92;">
+            <tr class="align-middle text-center">
+                <th style="width: 30%" rowspan="2">CPMK</th>
+                <th colspan="<?= count($subCpmkNumbers) ?>">Sub CPMK</th>
             </tr>
-            <tr>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-                <th>4</th>
-                <th>5</th>
-                <th>6</th>
-                <th>n</th>
+            <tr class="text-center">
+                <?php foreach ($subCpmkNumbers as $subNo): ?>
+                    <th><?= $subNo ?></th>
+                <?php endforeach; ?>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td rowspan="2">2</td>
-                <td>1</td>
-                <td>V</td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td rowspan="2">4</td>
-                <td>2</td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td rowspan="2">7</td>
-                <td>4</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>n</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-                <td>V</td>
-                <td>V</td>
-            </tr>
+            <?php if (empty($cpmkData)): ?>
+                <tr>
+                    <td colspan="<?= count($subCpmkNumbers) + 1 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
+                </tr>
+            <?php else: ?>
+                <?php foreach ($cpmkData as $cpmk): ?>
+                    <tr>
+                        <td class="align-middle">
+                            <strong>CPMK <?= $cpmk['no_cpmk'] ?></strong><br>
+                            <?= esc($cpmk['isi_cpmk']) ?>
+                        </td>
+
+                        <?php foreach ($subCpmkData as $subCpmk): ?>
+                            <td class="text-center align-middle">
+                                <?php
+                                // Periksa apakah ada mapping untuk kombinasi ini
+                                $isChecked = false;
+                                if (isset($mappingData[$cpmk['id']][$subCpmk['id']]) && $mappingData[$cpmk['id']][$subCpmk['id']] == 1) {
+                                    $isChecked = true;
+                                }
+                                ?>
+                                <?= $isChecked ? '✓' : '-' ?>
+                            </td>
+                        <?php endforeach; ?>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </tbody>
     </table>
 

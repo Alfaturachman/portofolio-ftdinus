@@ -27,4 +27,16 @@ class SubCpmkModel extends Model
             ->orderBy('no_scpmk', 'ASC')
             ->findAll();
     }
+
+    public function getSubCpmkByCpmk($idPorto, $cpmkId)
+    {
+        // Untuk implementasi ini, kita perlu struktur tabel yang menghubungkan Sub-CPMK dengan CPMK
+        // Jika belum ada, Anda perlu merancang relasi antara Sub-CPMK dan CPMK terlebih dahulu
+        // Ini adalah contoh dasar dengan asumsi ada kolom id_cpmk di tabel sub_cpmk
+        return $this->select('id, no_scpmk, isi_scmpk')
+            ->where('id_porto', $idPorto)
+            ->where('id_cpmk', $cpmkId)
+            ->orderBy('no_scpmk', 'ASC')
+            ->findAll();
+    }
 }

@@ -20,6 +20,14 @@ class CplModel extends Model
     protected $createdField  = 'ins_time';
     protected $updatedField  = 'upd_time';
 
+    public function getCplByPortoId($idPorto)
+    {
+        return $this->select('id, no_cpl, isi_cpl')
+            ->where('id_porto', $idPorto)
+            ->orderBy('no_cpl', 'ASC')
+            ->findAll();
+    }
+
     public function getCplPiByPortoId($idPorto)
     {
         $result = [];

@@ -10,7 +10,7 @@ use App\Models\CpmkModel;
 use App\Models\SubCpmkModel;
 use App\Models\PortofolioModel;
 use App\Models\HasilAsesmenModel;
-use App\Models\MappingCpmkPiModel;
+use App\Models\MappingCpmkScpmkModel;
 use App\Models\IdentitasMatkulModel;
 use App\Models\RancanganAsesmenModel;
 use App\Models\EvaluasiPerkuliahanModel;
@@ -774,9 +774,9 @@ class Portofolio extends BaseController
         $mappingDataArray = json_decode(json_encode($sessionData['mapping_data']), true);
 
         // Simpan data ke tabel mapping cpmk pi
-        $mappingCpmkPiModel = new MappingCpmkPiModel();
+        $mappingCpmkPiModel = new MappingCpmkScpmkModel();
         foreach ($mappingDataArray as $cpmkId => $mapping) {
-            foreach ($mapping as $piId => $nilai) {
+            foreach ($mapping as $scpmkId => $nilai) {
                 if (is_array($nilai)) {
                     // If nilai is still an array, get the first value
                     $nilaiValue = reset($nilai);
@@ -786,7 +786,7 @@ class Portofolio extends BaseController
 
                 $mappingData = [
                     'id_cpmk' => $cpmkId,
-                    'id_pi' => $piId,
+                    'id_scpmk' => $scpmkId,
                     'nilai' => $nilaiValue
                 ];
                 $mappingCpmkPiModel->insert($mappingData);
@@ -796,7 +796,7 @@ class Portofolio extends BaseController
         // Simpan data ke tabel rancangan_asesmen
         $rancanganAsesmenModel = new RancanganAsesmenModel();
         foreach ($sessionData['assessment_data'] as $cpmkId => $assessment) {
-            foreach ($assessment as $piId => $kategori) {
+            foreach ($assessment as $scpmkId => $kategori) {
                 // Create a new assessment record for each CPMK
                 $rancanganAsesmenData = [
                     'id_cpmk' => $cpmkId,
