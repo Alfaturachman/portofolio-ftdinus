@@ -41,7 +41,6 @@
         table tr th {
             background-color: #0f4c92;
             color: white;
-            border: #0f4c92;
         }
 
         table,
@@ -212,37 +211,34 @@
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr class="align-middle text-center">
                 <th style="width: 30%" rowspan="2">CPMK</th>
-                <th colspan="<?= count($subCpmkNumbers) ?>">Sub CPMK</th>
+                <th colspan="<?= count($subCpmkData) ?>">Sub CPMK</th>
             </tr>
             <tr class="text-center">
-                <?php foreach ($subCpmkNumbers as $subNo): ?>
-                    <th><?= $subNo ?></th>
+                <?php foreach ($subCpmkData as $subCpmk): ?>
+                    <th><?= esc($subCpmk['no_scpmk']) ?></th>
                 <?php endforeach; ?>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($cpmkData)): ?>
                 <tr>
-                    <td colspan="<?= count($subCpmkNumbers) + 1 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
+                    <td colspan="<?= count($subCpmkData) + 1 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($cpmkData as $cpmk): ?>
                     <tr>
                         <td class="align-middle">
-                            <strong>CPMK <?= $cpmk['no_cpmk'] ?></strong><br>
+                            <strong>CPMK <?= esc($cpmk['no_cpmk']) ?></strong><br>
                             <?= esc($cpmk['isi_cpmk']) ?>
                         </td>
 
                         <?php foreach ($subCpmkData as $subCpmk): ?>
-                            <td class="text-center align-middle">
+                            <td style="text-align: center; vertical-align: middle;">
                                 <?php
-                                // Periksa apakah ada mapping untuk kombinasi ini
-                                $isChecked = false;
-                                if (isset($mappingData[$cpmk['id']][$subCpmk['id']]) && $mappingData[$cpmk['id']][$subCpmk['id']] == 1) {
-                                    $isChecked = true;
-                                }
+                                // Perbaikan disini
+                                $isChecked = isset($mappingData[$cpmk['id']][$subCpmk['id']]) ? 'v' : '-';
+                                echo $isChecked;
                                 ?>
-                                <?= $isChecked ? '✓' : '-' ?>
                             </td>
                         <?php endforeach; ?>
                     </tr>
@@ -254,133 +250,114 @@
     <h3 class="text-lg font-bold mb-2">6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
     <p class="mb-8">Terlampir</p>
 
+    <div class="page-break"></div>
+
     <h3 class="text-lg font-bold mb-2">7. RANCANGAN ASESMEN</h3>
-    <table class="mb-8">
-        <thead>
-            <tr>
-                <th rowspan="2" colspan="2"></th>
-                <th colspan="3">Assessment</th>
-            </tr>
-            <tr>
-                <th>Tugas</th>
+    <table class="table table-bordered">
+        <thead class="text-white" style="background-color: #0f4c92;">
+            <tr class="align-middle text-center">
+                <th>CPMK</th>
+                <th>Sub CPMK</th>
+                <th>TUGAS</th>
                 <th>UTS</th>
                 <th>UAS</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td rowspan="2">CPMK 1</td>
-                <td>Sub CPMK 1</td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>Sub CPMK 2</td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>CPMK 2</td>
-                <td>Sub CPMK 3</td>
-                <td></td>
-                <td>V</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td rowspan="2">CPMK 3</td>
-                <td>Sub CPMK 4</td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>Sub CPMK 5</td>
-                <td></td>
-                <td>V</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>CPMK 4</td>
-                <td>Sub CPMK 6</td>
-                <td>V</td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td rowspan="3">CPMK n</td>
-                <td>Sub CPMK 5</td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-            </tr>
-            <tr>
-                <td>Sub CPMK 6</td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-            </tr>
-            <tr>
-                <td>Sub CPMK n</td>
-                <td></td>
-                <td></td>
-                <td>V</td>
-            </tr>
+            <?php if (!empty($assessmentData)) : ?>
+                <?php
+                // Create associative arrays for easier lookup
+                $cpmkLookup = [];
+                foreach ($cpmkData as $cpmk) {
+                    $cpmkLookup[$cpmk['id']] = $cpmk['isi_cpmk'];
+                }
+
+                $subCpmkLookup = [];
+                foreach ($subCpmkData as $subCpmk) {
+                    $subCpmkLookup[$subCpmk['id']] = $subCpmk['isi_scmpk'];
+                }
+                ?>
+
+                <?php foreach ($assessmentData as $row) : ?>
+                    <tr class="text-center">
+                        <td>
+                            <?= 'CPMK ' . $row['no_cpmk'] ?>
+                            <?php if (isset($cpmkLookup[$row['id_cpmk']])) : ?>
+                                <br><span class="small text-muted"><?= $cpmkLookup[$row['id_cpmk']] ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?= 'Sub CPMK ' . $row['no_scpmk'] ?>
+                            <?php if (isset($subCpmkLookup[$row['id_scpmk']])) : ?>
+                                <br><span class="small text-muted"><?= $subCpmkLookup[$row['id_scpmk']] ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;"><?= $row['tugas'] ? 'v' : '' ?></td>
+                        <td style="text-align: center; vertical-align: middle;"><?= $row['uts'] ? 'v' : '' ?></td>
+                        <td style="text-align: center; vertical-align: middle;"><?= $row['uas'] ? 'v' : '' ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <tr>
+                    <td colspan="5" class="text-center">Tidak ada data asesmen yang tersedia.</td>
+                </tr>
+            <?php endif; ?>
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">TUGAS</h3>
+    <h3 class="text-lg font-bold mb-2">7.1 TUGAS</h3>
     <p class="mb-8">Mengacu pada contoh rancangan jadwal pada tabel 5, maka dibuat lima rancangan tugas</p>
 
-    <h3 class="text-lg font-bold mb-2">UJIAN TENGAH SEMESTER</h3>
+    <h3 class="text-lg font-bold mb-2">7.2 UJIAN TENGAH SEMESTER</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">UJIAN AKHIR SEMESTER</h3>
+    <h3 class="text-lg font-bold mb-2">7.3 UJIAN AKHIR SEMESTER</h3>
     <p class="mb-8"></p>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">B. PELAKSANAAN PERKULIAHAN</h2>
 
-    <h3 class="text-lg font-bold mb-2">KONTRAK KULIAH</h3>
+    <h3 class="text-lg font-bold mb-2">1. KONTRAK KULIAH</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">REALISASI MENGAJAR</h3>
+    <h3 class="text-lg font-bold mb-2">2. REALISASI MENGAJAR</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">KEHADIRAN MAHASISWA</h3>
+    <h3 class="text-lg font-bold mb-2">3. KEHADIRAN MAHASISWA</h3>
     <p class="mb-8"></p>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">C. HASIL PERKULIAHAN</h2>
 
-    <h3 class="text-lg font-bold mb-2">HASIL TUGAS</h3>
+    <h3 class="text-lg font-bold mb-2">1. HASIL TUGAS</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">HASIL UJIAN TENGAH SEMESTER</h3>
+    <h3 class="text-lg font-bold mb-2">2. HASIL UJIAN TENGAH SEMESTER</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">HASIL UJIAN AKHIR SEMESTER</h3>
+    <h3 class="text-lg font-bold mb-2">3. HASIL UJIAN AKHIR SEMESTER</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">NILAI MATA KULIAH</h3>
+    <h3 class="text-lg font-bold mb-2">4. NILAI MATA KULIAH</h3>
     <p class="mb-8"></p>
 
-    <h3 class="text-lg font-bold mb-2">NILAI CPMK</h3>
+    <h3 class="text-lg font-bold mb-2">5. NILAI CPMK</h3>
     <p class="mb-8"></p>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">D. EVALUASI PERKULIAHAN</h2>
-    <p class="mb-8">....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</p>
+    <p class="mb-8">................................................</p>
 
-    <div class="mt-16 text-left">
-        <p>Disusun Oleh</p>
-        <p>Dosen Koord/Pengampu MK</p>
-        <p class="mt-12">.......................................</p>
-        <p>NPP: 0686.11.....................</p>
+    <div style="text-align: right;">
+        <div style="display: inline-block; text-align: left;">
+            <p>Disusun Oleh</p>
+            <p>Dosen Koord/Pengampu MK</p>
+            <p>.......................................</p>
+            <p>NPP: 0686.11.....................</p>
+        </div>
     </div>
 </body>
 

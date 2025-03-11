@@ -750,6 +750,10 @@ class Portofolio extends BaseController
 
         // Simpan data ke tabel cpmk
         $cpmkModel = new CpmkModel();
+        $subCpmkModel = new SubCpmkModel();
+        $cpmkMapping = []; // Untuk menyimpan mapping antara no_cpmk dan ID database
+        $subCpmkMapping = []; // Untuk menyimpan mapping antara no_scpmk dan ID database
+
         foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
             $cpmkData = [
                 'id_porto' => $portofolioId,
@@ -757,54 +761,83 @@ class Portofolio extends BaseController
                 'isi_cpmk' => $cpmk['narasi']
             ];
             $cpmkId = $cpmkModel->insert($cpmkData);
+            $cpmkMapping[$noCpmk] = $cpmkId; // Simpan mapping antara no_cpmk dan ID database
 
-            // Simpan data ke tabel sub_cpmk
-            $subCpmkModel = new SubCpmkModel();
+            // Simpan Sub-CPMK untuk CPMK ini dan catat ID-nya
             foreach ($cpmk['sub'] as $noSubCpmk => $subCpmk) {
                 $subCpmkData = [
                     'id_porto' => $portofolioId,
                     'no_scpmk' => $noSubCpmk,
                     'isi_scmpk' => $subCpmk
                 ];
-                $subCpmkModel->insert($subCpmkData);
+                $subCpmkId = $subCpmkModel->insert($subCpmkData);
+                $subCpmkMapping[$noSubCpmk] = $subCpmkId; // Simpan mapping antara no_scpmk dan ID database
             }
         }
 
         // Convert stdClass objects to arrays
         $mappingDataArray = json_decode(json_encode($sessionData['mapping_data']), true);
 
-        // Simpan data ke tabel mapping cpmk pi
-        $mappingCpmkPiModel = new MappingCpmkScpmkModel();
-        foreach ($mappingDataArray as $cpmkId => $mapping) {
-            foreach ($mapping as $scpmkId => $nilai) {
-                if (is_array($nilai)) {
-                    // If nilai is still an array, get the first value
-                    $nilaiValue = reset($nilai);
-                } else {
-                    $nilaiValue = $nilai;
-                }
+        // Simpan data ke tabel mapping_cpmk_scpmk menggunakan ID yang benar
+        $mappingCpmkScpmkModel = new MappingCpmkScpmkModel();
 
-                $mappingData = [
-                    'id_cpmk' => $cpmkId,
-                    'id_scpmk' => $scpmkId,
-                    'nilai' => $nilaiValue
-                ];
-                $mappingCpmkPiModel->insert($mappingData);
+        // Lookup table to map CPL ID to actual CPMK ID
+        $cplToCpmkMap = [];
+        foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
+            $cplToCpmkMap[$cpmk['selectedCpl']] = $noCpmk;
+        }
+
+        foreach ($mappingDataArray as $cplId => $cpmkMappings) {
+            // Get the corresponding CPMK ID for this CPL ID
+            $sessionCpmkId = $cplToCpmkMap[$cplId] ?? null;
+
+            if ($sessionCpmkId) {
+                // Cari ID database untuk CPMK ini
+                $actualCpmkId = $cpmkMapping[$sessionCpmkId] ?? null;
+
+                if ($actualCpmkId) {
+                    foreach ($cpmkMappings as $innerKey => $subCpmkValues) {
+                        foreach ($subCpmkValues as $sessionScpmkId => $nilai) {
+                            // Cari ID database untuk Sub-CPMK ini
+                            $actualScpmkId = $subCpmkMapping[$sessionScpmkId] ?? null;
+
+                            if ($actualScpmkId && $nilai == 1) {
+                                $mappingData = [
+                                    'id_cpmk' => $actualCpmkId,
+                                    'id_scpmk' => $actualScpmkId,
+                                    'nilai' => $nilai
+                                ];
+                                $mappingCpmkScpmkModel->insert($mappingData);
+                            }
+                        }
+                    }
+                }
             }
         }
 
         // Simpan data ke tabel rancangan_asesmen
         $rancanganAsesmenModel = new RancanganAsesmenModel();
         foreach ($sessionData['assessment_data'] as $cpmkId => $assessment) {
-            foreach ($assessment as $scpmkId => $kategori) {
-                // Create a new assessment record for each CPMK
-                $rancanganAsesmenData = [
-                    'id_cpmk' => $cpmkId,
-                    'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
-                    'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
-                    'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
-                ];
-                $rancanganAsesmenModel->insert($rancanganAsesmenData);
+            // Cari ID database untuk CPMK ini
+            $actualCpmkId = $cpmkMapping[$cpmkId] ?? null;
+
+            if ($actualCpmkId) {
+                foreach ($assessment as $scpmkId => $kategori) {
+                    // Cari ID database untuk Sub-CPMK ini
+                    $actualScpmkId = $subCpmkMapping[$scpmkId] ?? null;
+
+                    if ($actualScpmkId) {
+                        $rancanganAsesmenData = [
+                            'id_porto' => $portofolioId,
+                            'id_cpmk' => $actualCpmkId,
+                            'id_scpmk' => $actualScpmkId,
+                            'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
+                            'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
+                            'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
+                        ];
+                        $rancanganAsesmenModel->insert($rancanganAsesmenData);
+                    }
+                }
             }
         }
 
@@ -832,7 +865,7 @@ class Portofolio extends BaseController
             }
 
             $rancanganAsesmenFileData = [
-                'id_asesmen' => $portofolioId,
+                'id_porto' => $portofolioId,
                 'kategori' => $kategoriAsesmen,
                 'kategori_file' => $kategoriFile,
                 'file_pdf' => $file['path']

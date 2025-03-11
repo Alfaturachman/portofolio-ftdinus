@@ -20,12 +20,9 @@ class CpmkModel extends Model
     protected $createdField  = 'ins_time';
     protected $updatedField  = 'upd_time';
 
-    public function getCpmkByPortoId($idPorto)
+    public function getCpmkByPorto($id_porto)
     {
-        return $this->select('id, no_cpmk, isi_cpmk')
-            ->where('id_porto', $idPorto)
-            ->orderBy('no_cpmk', 'ASC')
-            ->findAll();
+        return $this->where('id_porto', $id_porto)->findAll();
     }
 
     public function getCpmkByCpl($idPorto, $cplId)

@@ -11,13 +11,14 @@ use setasign\Fpdi\Tcpdf\Fpdi;
 use App\Models\PortofolioModel;
 use App\Controllers\BaseController;
 use App\Models\MappingCpmkScpmkModel;
+use App\Models\RancanganAsesmenModel;
 
 class Cetak extends BaseController
 {
     public function index($idPorto)
     {
         $viewData = $this->prepareViewData($idPorto);
-        return view('backend/pdf/test-cetak', $viewData);
+        return view('backend/pdf/cetak-portofolio', $viewData);
     }
 
     private function prepareViewData($idPorto)
@@ -28,20 +29,18 @@ class Cetak extends BaseController
         $cpmkModel = new CpmkModel();
         $subCpmkModel = new SubCpmkModel();
         $mappingModel = new MappingCpmkScpmkModel();
+        $asesmenModel = new RancanganAsesmenModel();
 
         // Ambil data dari model
         $portofolioData = $portofolioModel->getPortofolioCetakDetails($idPorto);
         $cplPiData = $cplModel->getCplPiByPortoId($idPorto);
-        $cpmkData = $cpmkModel->getCpmkByPortoId($idPorto);
         $cplData = $cplModel->getCplByPortoId($idPorto);
-        $subCpmkData = $subCpmkModel->getSubCpmkByPortoId($idPorto);
-        $mappingData = $mappingModel->getAllMappings();
+        $cpmkData = $cpmkModel->getCpmkByPorto($idPorto);
+        $subCpmkData = $subCpmkModel->getSubCpmkByPorto($idPorto);
+        $assessmentData = $asesmenModel->getAssessmentData($idPorto);
 
-        // Persiapkan data mapping dalam format yang mudah diakses di view
-        $formattedMapping = [];
-        foreach ($mappingData as $mapping) {
-            $formattedMapping[$mapping['id_cpmk']][$mapping['id_scpmk']] = $mapping['nilai'];
-        }
+        // Ambil data mapping
+        $mappingData = $mappingModel->getMapping($idPorto);
 
         // Dapatkan semua nomor Sub-CPMK untuk header tabel
         $subCpmkNumbers = array_column($subCpmkData, 'no_scpmk');
@@ -52,8 +51,9 @@ class Cetak extends BaseController
             'cplData' => $cplData,
             'cpmkData' => $cpmkData,
             'subCpmkData' => $subCpmkData,
-            'mappingData' => $formattedMapping,
-            'subCpmkNumbers' => $subCpmkNumbers
+            'mappingData' => $mappingData,
+            'subCpmkNumbers' => $subCpmkNumbers,
+            'assessmentData' => $assessmentData
         ];
     }
 
@@ -62,7 +62,7 @@ class Cetak extends BaseController
         $viewData = $this->prepareViewData($idPorto);
 
         // 1. Data dari view
-        $html = view('backend/pdf/test-cetak', $viewData);
+        $html = view('backend/pdf/cetak-portofolio', $viewData);
 
         // 2. Konfigurasi Dompdf
         $options = new Options();

@@ -20,12 +20,9 @@ class SubCpmkModel extends Model
     protected $createdField  = 'ins_time';
     protected $updatedField  = 'upd_time';
 
-    public function getSubCpmkByPortoId($idPorto)
+    public function getSubCpmkByPorto($id_porto)
     {
-        return $this->select('id, no_scpmk, isi_scmpk')
-            ->where('id_porto', $idPorto)
-            ->orderBy('no_scpmk', 'ASC')
-            ->findAll();
+        return $this->where('id_porto', $id_porto)->findAll();
     }
 
     public function getSubCpmkByCpmk($idPorto, $cpmkId)
