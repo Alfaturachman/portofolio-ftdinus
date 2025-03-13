@@ -124,17 +124,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Get user NPP from session
-        $npp = session()->get('UserSession.username');
-
-        // Get data from database with joined tables
+        // Get data from database from info_matkul table
         $db = \Config\Database::connect();
-        $mataKuliahData = $db->table('matkul_diampu md')
-            ->select('md.matkul as nama_mk, md.kode_matkul as kode_mk, im.kelp_matkul as kelompok_mk, 
-                    im.fakultas, im.prodi as progdi, im.teori as sks_teori, im.praktek as sks_praktik')
-            ->join('info_matkul im', 'md.kode_matkul = im.kode_matkul', 'left')
-            ->where('md.npp', $npp)
-            ->groupBy(['md.kode_matkul', 'md.matkul', 'im.kelp_matkul', 'im.fakultas', 'im.prodi', 'im.teori', 'im.praktek'])
+        $mataKuliahData = $db->table('info_matkul')
+            ->select('matakuliah as nama_mk, kode_matkul as kode_mk, kelp_matkul as kelompok_mk, 
+                    fakultas, prodi as progdi, teori as sks_teori, praktek as sks_praktik')
+            ->groupBy(['kode_matkul', 'matakuliah', 'kelp_matkul', 'fakultas', 'prodi', 'teori', 'praktek'])
             ->get()
             ->getResultArray();
 
@@ -427,6 +422,26 @@ class Portofolio extends BaseController
             // Save assessment data to session
             session()->set('assessment_data', $assessmentData);
 
+            // Check which assessment types are selected
+            $tugasSelected = false;
+            $utsSelected = false;
+            $uasSelected = false;
+
+            // Loop through the assessment data to check what's selected
+            foreach ($assessmentData as $cpmkData) {
+                foreach ($cpmkData as $subCpmkData) {
+                    if (isset($subCpmkData['tugas']) && $subCpmkData['tugas']) {
+                        $tugasSelected = true;
+                    }
+                    if (isset($subCpmkData['uts']) && $subCpmkData['uts']) {
+                        $utsSelected = true;
+                    }
+                    if (isset($subCpmkData['uas']) && $subCpmkData['uas']) {
+                        $uasSelected = true;
+                    }
+                }
+            }
+
             // Check if files were changed
             $filesChanged = $this->request->getPost('files_changed') === 'true';
 
@@ -441,14 +456,24 @@ class Portofolio extends BaseController
 
             // Process file uploads
             $uploadedFiles = session()->get('assessment_files') ?? [];
-            $fileFields = [
-                'soal_tugas',
-                'rubrik_tugas',
-                'soal_uts',
-                'rubrik_uts',
-                'soal_uas',
-                'rubrik_uas'
-            ];
+            
+            // Define file fields based on selected assessment types
+            $fileFields = [];
+            
+            if ($tugasSelected) {
+                $fileFields[] = 'soal_tugas';
+                $fileFields[] = 'rubrik_tugas';
+            }
+            
+            if ($utsSelected) {
+                $fileFields[] = 'soal_uts';
+                $fileFields[] = 'rubrik_uts';
+            }
+            
+            if ($uasSelected) {
+                $fileFields[] = 'soal_uas';
+                $fileFields[] = 'rubrik_uas';
+            }
 
             // Create upload directory if it doesn't exist
             $uploadDir = WRITEPATH . 'uploads/assessment/';

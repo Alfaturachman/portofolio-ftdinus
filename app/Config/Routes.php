@@ -73,3 +73,17 @@ $routes->get('/view-pdf/(:segment)', 'Cetak::index/$1');
 $routes->get('/cetak', 'Cetak::cetakPortofolioPdf');
 
 $routes->get('/generate-pdf', 'Cetak::generatePdf');
+
+$routes->group('import-data', function ($routes) {
+    // Rute GET
+    $routes->get('/', 'ImportData::index');
+
+    // Rute POST
+    $routes->post('saveImportCplPi', 'ImportData::saveImportCplPi');
+    $routes->post('saveImportMatkul', 'ImportData::saveImportMatkul');
+    $routes->post('saveImportMatkulDiampu', 'ImportData::saveImportMatkulDiampu');
+});
+
+$routes->get('downloads/template_cpl_pi.xlsx', 'ImportData::downloadTemplateCplPi');
+$routes->get('downloads/template_matkul.xlsx', 'ImportData::downloadTemplateMatkul');
+$routes->get('downloads/template_matkul_diampu.xlsx', 'ImportData::downloadTemplateMatkulDiampu');

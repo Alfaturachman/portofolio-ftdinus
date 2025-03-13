@@ -63,6 +63,17 @@
                                 <span class="hide-menu">Portofolio</span>
                             </a>
                         </li>
+                        <li class="sidebar-item <?= (strpos(current_url(), 'import-data') !== false) ? 'selected' : '' ?>">
+                            <a class="sidebar-link <?= (current_url() == base_url('import-data'))
+                                                        ? 'active' : '' ?>"
+                                href="<?= base_url('import-data') ?>"
+                                aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-file-description"></i>
+                                </span>
+                                <span class="hide-menu">Import Data</span>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
                 <!-- End Sidebar navigation -->

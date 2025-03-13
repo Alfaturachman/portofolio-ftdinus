@@ -46,6 +46,42 @@
             display: none;
         }
     }
+
+    .custom-select-container {
+        position: relative;
+    }
+    
+    .custom-select-dropdown {
+        position: absolute;
+        width: 100%;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        background: white;
+        border: 1px solid #ced4da;
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .custom-select-item {
+        cursor: pointer;
+        padding: 8px 12px;
+    }
+    
+    .custom-select-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .list-group {
+        margin-bottom: 0;
+    }
+    
+    .no-results {
+        padding: 8px 12px;
+        color: #6c757d;
+        font-style: italic;
+    }
 </style>
 
 <?= $this->include('backend/partials/header') ?>
@@ -187,22 +223,27 @@
                         </div>
                         <!-- Replace the select and script sections in the view -->
                         <div class="form-group mb-3">
-                            <label for="nama_mk" class="form-label">Nama Mata Kuliah</label>
-                            <select class="form-select" id="nama_mk" name="nama_mk" required>
-                                <option value="" hidden>Pilih Mata Kuliah</option>
-                                <?php foreach ($mataKuliah as $mk): ?>
-                                    <option value="<?= htmlspecialchars($mk['nama_mk']) ?>"
-                                        data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
-                                        data-progdi="<?= htmlspecialchars($mk['progdi']) ?>"
-                                        data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
-                                        data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
-                                        data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
-                                        data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>"
-                                        <?= (isset($infoMatkul['nama_mk']) && $infoMatkul['nama_mk'] === $mk['nama_mk']) ? 'selected' : '' ?>>
-                                        <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <label for="nama_mk_display" class="form-label">Nama Mata Kuliah</label>
+                            <div class="custom-select-container">
+                                <input type="text" class="form-control" id="nama_mk_display" placeholder="Cari mata kuliah..." autocomplete="off">
+                                <input type="hidden" id="nama_mk" name="nama_mk" value="<?= isset($infoMatkul['nama_mk']) ? $infoMatkul['nama_mk'] : '' ?>">
+                                <div class="custom-select-dropdown" id="custom_select_dropdown" style="display: none;">
+                                    <ul class="list-group">
+                                        <?php foreach ($mataKuliah as $mk): ?>
+                                            <li class="list-group-item custom-select-item" 
+                                                data-value="<?= htmlspecialchars($mk['nama_mk']) ?>"
+                                                data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
+                                                data-progdi="<?= htmlspecialchars($mk['progdi']) ?>"
+                                                data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
+                                                data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
+                                                data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
+                                                data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>">
+                                                <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group mb-3">
                             <label for="kode_mk" class="form-label">Kode MK</label>
@@ -248,41 +289,106 @@
     </div>
 
     <script>
-        // Clear all fields on page load if no mata kuliah is selected
         document.addEventListener('DOMContentLoaded', function() {
-            const selectedOption = document.getElementById('nama_mk');
-            if (!selectedOption.value) {
-                clearFields();
+            const input = document.getElementById('nama_mk_display');
+            const hiddenInput = document.getElementById('nama_mk');
+            const dropdown = document.getElementById('custom_select_dropdown');
+            const items = document.querySelectorAll('.custom-select-item');
+            
+            // Set initial value if exists
+            if (hiddenInput.value) {
+                const selectedItem = Array.from(items).find(item => item.getAttribute('data-value') === hiddenInput.value);
+                if (selectedItem) {
+                    input.value = selectedItem.textContent.trim();
+                    updateFields(selectedItem);
+                }
+            }
+            
+            // Show dropdown when input is focused
+            input.addEventListener('focus', function() {
+                dropdown.style.display = 'block';
+                filterItems(input.value);
+            });
+            
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+            
+            // Filter items as user types
+            input.addEventListener('input', function() {
+                filterItems(this.value);
+                dropdown.style.display = 'block';
+                
+                // Clear fields if input is empty
+                if (!this.value) {
+                    hiddenInput.value = '';
+                    clearFields();
+                }
+            });
+            
+            // Select item when clicked
+            items.forEach(item => {
+                item.addEventListener('click', function() {
+                    input.value = this.textContent.trim();
+                    hiddenInput.value = this.getAttribute('data-value');
+                    dropdown.style.display = 'none';
+                    updateFields(this);
+                });
+            });
+            
+            // Function to filter dropdown items
+            function filterItems(query) {
+                const normalizedQuery = query.toLowerCase();
+                let hasResults = false;
+                
+                // Remove existing "no results" message if present
+                const noResultsMsg = dropdown.querySelector('.no-results');
+                if (noResultsMsg) {
+                    noResultsMsg.remove();
+                }
+                
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(normalizedQuery)) {
+                        item.style.display = 'block';
+                        hasResults = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Show "no results" message if no matches
+                if (!hasResults) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-results';
+                    noResults.textContent = 'Tidak ada hasil yang ditemukan';
+                    dropdown.querySelector('.list-group').appendChild(noResults);
+                }
+            }
+            
+            // Function to update all fields based on selected item
+            function updateFields(selectedItem) {
+                document.getElementById('fakultas').value = selectedItem.getAttribute('data-fakultas') || '';
+                document.getElementById('progdi').value = selectedItem.getAttribute('data-progdi') || '';
+                document.getElementById('kode_mk').value = selectedItem.getAttribute('data-kode_mk') || '';
+                document.getElementById('kelompok_mk').value = selectedItem.getAttribute('data-kelompok_mk') || '';
+                document.getElementById('sks_teori').value = selectedItem.getAttribute('data-sks_teori') || '';
+                document.getElementById('sks_praktik').value = selectedItem.getAttribute('data-sks_praktik') || '';
+            }
+            
+            // Function to clear all fields
+            function clearFields() {
+                document.getElementById('kode_mk').value = '';
+                document.getElementById('kelompok_mk').value = '';
+                document.getElementById('sks_teori').value = '';
+                document.getElementById('sks_praktik').value = '';
+                document.getElementById('fakultas').value = '';
+                document.getElementById('progdi').value = '';
             }
         });
-
-        document.getElementById('nama_mk').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption.value) {
-                // Mengisi field berdasarkan atribut data pada option
-                document.getElementById('kode_mk').value = selectedOption.getAttribute('data-kode_mk') || '';
-                document.getElementById('kelompok_mk').value = selectedOption.getAttribute('data-kelompok_mk') || '';
-                document.getElementById('sks_teori').value = selectedOption.getAttribute('data-sks_teori') || '';
-                document.getElementById('sks_praktik').value = selectedOption.getAttribute('data-sks_praktik') || '';
-                document.getElementById('fakultas').value = selectedOption.getAttribute('data-fakultas') || '';
-                document.getElementById('progdi').value = selectedOption.getAttribute('data-progdi') || '';
-            } else {
-                // Kosongkan field jika tidak ada yang dipilih
-                clearFields();
-            }
-        });
-
-        // Function to clear all fields
-        function clearFields() {
-            document.getElementById('kode_mk').value = '';
-            document.getElementById('kelompok_mk').value = '';
-            document.getElementById('sks_teori').value = '';
-            document.getElementById('sks_praktik').value = '';
-            document.getElementById('fakultas').value = '';
-            document.getElementById('progdi').value = '';
-            document.getElementById('mk_prasyarat').value = '';
-            document.getElementById('topik_mk').value = '';
-        }
     </script>
 </div>
 
