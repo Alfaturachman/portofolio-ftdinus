@@ -51,7 +51,7 @@ class Portofolio extends BaseController
         }
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/upload-rps', [
             'pdfUrl' => $pdfUrl,
@@ -60,7 +60,7 @@ class Portofolio extends BaseController
 
     public function view_uploaded_pdf($filename)
     {
-        $path = WRITEPATH . 'uploads/temp/' . $filename;
+        $path = WRITEPATH . 'uploads/rps/' . $filename;
 
         if (file_exists($path)) {
             return $this->response
@@ -105,7 +105,7 @@ class Portofolio extends BaseController
 
         // Handle upload file
         $newName = time() . '_' . $file->getRandomName();
-        $file->move(WRITEPATH . 'uploads/temp', $newName);
+        $file->move(WRITEPATH . 'uploads/rps', $newName);
 
         // Simpan nama file ke session
         session()->set('uploaded_rps', $newName);
@@ -142,7 +142,7 @@ class Portofolio extends BaseController
         $infoMatkul = session()->get('info_matkul') ?? [];
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         // Kirim data ke view
         return view('backend/portofolio-form/info-matkul', [
@@ -255,7 +255,7 @@ class Portofolio extends BaseController
         session()->set('cpl_pi_data', $cplPiData);
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/cpl-pi', [
             'pdfUrl' => $pdfUrl,
@@ -285,7 +285,7 @@ class Portofolio extends BaseController
         $cplPiData = session()->get('cpl_pi_data') ?? [];
 
         // Get PDF URL from session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/cpmk-subcpmk', [
             'pdfUrl' => $pdfUrl,
@@ -340,7 +340,7 @@ class Portofolio extends BaseController
         }
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/pemetaan', [
             'pdfUrl' => $pdfUrl,

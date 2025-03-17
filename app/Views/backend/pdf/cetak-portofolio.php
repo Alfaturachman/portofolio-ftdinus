@@ -50,8 +50,36 @@
             padding: 5px;
         }
 
+        .sub-list {
+            list-style-type: none;
+            counter-reset: sub-counter;
+            padding-left: 20px;
+        }
+
+        .sub-list>li {
+            counter-increment: sub-counter;
+        }
+
+        .sub-list>li::before {
+            content: "7." counter(sub-counter) " ";
+        }
+
         .page-break {
             page-break-after: always;
+        }
+
+        .pdf-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+        }
+
+        .insert-pdf {
+            font-size: 0.1pt;
+            color: white;
         }
     </style>
 </head>
@@ -64,8 +92,18 @@
             <h3>TAHUN AKADEMIK 20XX/20XX</h3>
         </div>
 
-        <div>
-            <img src="/api/placeholder/180/180" alt="Logo" class="mx-auto mb-4">
+        <div style="margin-top: 100px; margin-bottom: 100px;">
+            <?php
+            $path = WRITEPATH . 'uploads/logo_udinus.png';
+            if (file_exists($path)) {
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = file_get_contents($path);
+                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            } else {
+                $base64 = '';
+            }
+            ?>
+            <img src="<?= $base64 ?>" alt="Logo" style="width: 170px;">
         </div>
 
         <div>
@@ -81,10 +119,11 @@
 
     <div class="page-break"></div>
 
-    <h2 class="text-xl font-bold mb-4">DAFTAR ISI</h2>
-    <ol class="list-decimal pl-8 mb-8">
-        <li>A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER
-            <ol class="list-decimal pl-8">
+    <h2>DAFTAR ISI</h2>
+    DAFTAR ISI
+    <ol class="mb-8" style="list-style-type: upper-alpha;">
+        <li style="margin-top: 10px;">RENCANA KEGIATAN PEMBELAJARAN SEMESTER
+            <ol class="pl-8" style="list-style-type: decimal;">
                 <li>Identitas Mata Kuliah (MK)</li>
                 <li>Topik Perkuliahan</li>
                 <li>Capaian Pembelajaran Lulusan (CPL) & Indikator Kinerja Capaian Pembelajaran (IKCP)</li>
@@ -92,7 +131,7 @@
                 <li>Pemetaan CPL -- CPMK -- Sub CPMK</li>
                 <li>Dokumen Rencana Pembelajaran Semester (RPS)</li>
                 <li>Rancangan Asesmen
-                    <ol class="list-decimal pl-8">
+                    <ol class="sub-list">
                         <li>Tugas</li>
                         <li>Ujian Tengah Semester</li>
                         <li>Ujian Akhir Semester</li>
@@ -100,15 +139,15 @@
                 </li>
             </ol>
         </li>
-        <li>B. PELAKSANAAN PERKULIAHAN
-            <ol class="list-decimal pl-8">
+        <li style="margin-top: 10px;">PELAKSANAAN PERKULIAHAN
+            <ol class="pl-8" style="list-style-type: decimal;">
                 <li>Kontrak Kuliah</li>
                 <li>Realisasi Mengajar</li>
                 <li>Kehadiran Mahasiswa</li>
             </ol>
         </li>
-        <li>C. HASIL PERKULIAHAN
-            <ol class="list-decimal pl-8">
+        <li style="margin-top: 10px;">HASIL PERKULIAHAN
+            <ol class="pl-8" style="list-style-type: decimal;">
                 <li>Hasil Tugas</li>
                 <li>Hasil Ujian Tengah Semester</li>
                 <li>Hasil Ujian Akhir Semester</li>
@@ -116,26 +155,46 @@
                 <li>Nilai CPMK</li>
             </ol>
         </li>
-        <li>D. EVALUASI PERKULIAHAN</li>
+        <li style="margin-top: 10px;">EVALUASI PERKULIAHAN</li>
     </ol>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">A. RENCANA KEGIATAN PEMBELAJARAN SEMESTER</h2>
 
-    <h3 class="text-lg font-bold mb-2">1. IDENTITAS MATA KULIAH (MK)</h3>
-    <div class="mb-8">
-        <p>Nama Mata Kuliah : <?= $portofolioData['nama_matkul'] ?></p>
-        <p>Kode MK : <?= $portofolioData['kode_mk'] ?></p>
-        <p>Kelompok MK : <?= $portofolioData['kelp_matkul'] ?></p>
-        <p>SKS : <?= $portofolioData['teori'] ?> T/ <?= $portofolioData['praktek'] ?> P</p>
-        <p>MK Prasyarat : <?= $portofolioData['prasyarat_mk'] ?></p>
-    </div>
+    <h3>1. IDENTITAS MATA KULIAH (MK)</h3>
+    <table style="width: 100%; border: none;">
+        <tr>
+            <td style="width: 25%; text-align: left; padding: 2px 0; border: none;">Nama Mata Kuliah</td>
+            <td style="width: 2%; text-align: center; padding: 2px 0; border: none;">:</td>
+            <td style="width: 73%; text-align: left; padding: 2px 0; border: none;"><?= $portofolioData['nama_matkul'] ?></td>
+        </tr>
+        <tr>
+            <td style="width: 25%; text-align: left; padding: 2px 0; border: none;">Kode MK</td>
+            <td style="width: 2%; text-align: center; padding: 2px 0; border: none;">:</td>
+            <td style="width: 73%; text-align: left; padding: 2px 0; border: none;"><?= $portofolioData['kode_mk'] ?></td>
+        </tr>
+        <tr>
+            <td style="width: 25%; text-align: left; padding: 2px 0; border: none;">Kelompok MK</td>
+            <td style="width: 2%; text-align: center; padding: 2px 0; border: none;">:</td>
+            <td style="width: 73%; text-align: left; padding: 2px 0; border: none;"><?= $portofolioData['kelp_matkul'] ?></td>
+        </tr>
+        <tr>
+            <td style="width: 25%; text-align: left; padding: 2px 0; border: none;">SKS</td>
+            <td style="width: 2%; text-align: center; padding: 2px 0; border: none;">:</td>
+            <td style="width: 73%; text-align: left; padding: 2px 0; border: none;"><?= $portofolioData['teori'] ?> T/ <?= $portofolioData['praktek'] ?> P</td>
+        </tr>
+        <tr>
+            <td style="width: 25%; text-align: left; padding: 2px 0; border: none;">MK Prasyarat</td>
+            <td style="width: 2%; text-align: center; padding: 2px 0; border: none;">:</td>
+            <td style="width: 73%; text-align: left; padding: 2px 0; border: none;"><?= $portofolioData['prasyarat_mk'] ?></td>
+        </tr>
+    </table>
 
-    <h3 class="text-lg font-bold mb-2">2. TOPIK PERKULIAHAN</h3>
-    <p class="mb-8"><?= $portofolioData['topik_perkuliahan'] ?></p>
+    <h3>2. TOPIK PERKULIAHAN</h3>
+    <p><?= $portofolioData['topik_perkuliahan'] ?></p>
 
-    <h3 class="text-lg font-bold mb-2">3. CAPAIAN PEMBELAJARAN LULUSAN (CPL) & INDIKATOR KINERJA CAPAIAN PEMBELAJARAN (IKCP)</h3>
+    <h3>3. CAPAIAN PEMBELAJARAN LULUSAN (CPL) & INDIKATOR KINERJA CAPAIAN PEMBELAJARAN (IKCP)</h3>
     <table class="table table-bordered">
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr>
@@ -170,10 +229,10 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">4. CAPAIAN PEMBELAJARAN MATA KULIAH (CPMK) DAN SUB CAPAIAN PEMBELAJARAN MATA KULIAH (Sub CPMK)</h3>
+    <h3>4. CAPAIAN PEMBELAJARAN MATA KULIAH (CPMK) DAN SUB CAPAIAN PEMBELAJARAN MATA KULIAH (Sub CPMK)</h3>
 
     <h4 class="font-bold mb-2">Tabel 2 Capaian Pembelajaran Mata Kuliah</h4>
-    <table class="mb-8">
+    <table>
         <tbody>
             <?php if (empty($cpmkData)): ?>
                 <tr>
@@ -190,7 +249,7 @@
     </table>
 
     <h4 class="font-bold mb-2">Tabel 3 Sub Capaian Pembelajaran Mata Kuliah</h4>
-    <table class="mb-8">
+    <table>
         <tbody>
             <?php if (empty($subCpmkData)): ?>
                 <tr>
@@ -206,7 +265,7 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">5. PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
+    <h3>5. PEMETAAN CPL -- CPMK -- Sub CPMK</h3>
     <table class="table table-bordered">
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr class="align-middle text-center">
@@ -247,12 +306,13 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
-    <p class="mb-8">Terlampir</p>
+    <h3>6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER (RPS)</h3>
+    <p>Terlampir</p>
+    <p class="insert-pdf">INSERT_PDF_RPS</p>
 
     <div class="page-break"></div>
 
-    <h3 class="text-lg font-bold mb-2">7. RANCANGAN ASESMEN</h3>
+    <h3>7. RANCANGAN ASESMEN</h3>
     <table class="table table-bordered">
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr class="align-middle text-center">
@@ -305,58 +365,120 @@
         </tbody>
     </table>
 
-    <h3 class="text-lg font-bold mb-2">7.1 TUGAS</h3>
-    <p class="mb-8">Mengacu pada contoh rancangan jadwal pada tabel 5, maka dibuat lima rancangan tugas</p>
+    <div class="page-break"></div>
 
-    <h3 class="text-lg font-bold mb-2">7.2 UJIAN TENGAH SEMESTER</h3>
-    <p class="mb-8"></p>
+    <div class="pdf-image">
+        <h3>7.1 TUGAS</h3>
+        <p>Mengacu pada contoh rancangan jadwal pada tabel 5, maka dibuat lima rancangan tugas</p>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_TUGAS</p>
+    </div>
 
-    <h3 class="text-lg font-bold mb-2">7.3 UJIAN AKHIR SEMESTER</h3>
-    <p class="mb-8"></p>
+    <div class="page-break"></div>
+
+    <div class="pdf-image">
+        <h3>7.2 UJIAN TENGAH SEMESTER</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_UTS</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="pdf-image">
+        <h3>7.3 UJIAN AKHIR SEMESTER</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_UAS</p>
+    </div>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">B. PELAKSANAAN PERKULIAHAN</h2>
 
-    <h3 class="text-lg font-bold mb-2">1. KONTRAK KULIAH</h3>
-    <p class="mb-8"></p>
+    <div class="pdf-image">
+        <h3>1. KONTRAK KULIAH</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_KONTRAK_KULIAH</p>
+    </div>
 
-    <h3 class="text-lg font-bold mb-2">2. REALISASI MENGAJAR</h3>
-    <p class="mb-8"></p>
+    <div class="page-break"></div>
 
-    <h3 class="text-lg font-bold mb-2">3. KEHADIRAN MAHASISWA</h3>
-    <p class="mb-8"></p>
+    <div class="pdf-image">
+        <h3>2. REALISASI MENGAJAR</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_REALISASI_MENGAJAR</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="pdf-image">
+        <h3>3. KEHADIRAN MAHASISWA</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_KEHADIRAN_MAHASISWA</p>
+    </div>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">C. HASIL PERKULIAHAN</h2>
 
-    <h3 class="text-lg font-bold mb-2">1. HASIL TUGAS</h3>
-    <p class="mb-8"></p>
+    <div class="pdf-image">
+        <h3>1. HASIL TUGAS</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_HASIL_TUGAS</p>
+    </div>
 
-    <h3 class="text-lg font-bold mb-2">2. HASIL UJIAN TENGAH SEMESTER</h3>
-    <p class="mb-8"></p>
+    <div class="page-break"></div>
 
-    <h3 class="text-lg font-bold mb-2">3. HASIL UJIAN AKHIR SEMESTER</h3>
-    <p class="mb-8"></p>
+    <div class="pdf-image">
+        <h3>2. HASIL UJIAN TENGAH SEMESTER</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_HASIL_UTS</p>
+    </div>
 
-    <h3 class="text-lg font-bold mb-2">4. NILAI MATA KULIAH</h3>
-    <p class="mb-8"></p>
+    <div class="page-break"></div>
 
-    <h3 class="text-lg font-bold mb-2">5. NILAI CPMK</h3>
-    <p class="mb-8"></p>
+    <div class="pdf-image">
+        <h3>3. HASIL UJIAN AKHIR SEMESTER</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_HASIL_UAS</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="pdf-image">
+        <h3>4. NILAI MATA KULIAH</h3>
+        <p style="margin: 0; padding: 0;">Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_NILAI_MATA_KULIAH</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="pdf-image">
+        <h3>5. NILAI CPMK</h3>
+        <p>Terlampir</p>
+        <p class="insert-pdf">INSERT_PDF_NILAI_CPMK</p>
+    </div>
 
     <div class="page-break"></div>
 
     <h2 class="text-xl font-bold mb-4">D. EVALUASI PERKULIAHAN</h2>
-    <p class="mb-8">................................................</p>
+    <p style="text-align: justify;"><?= $portofolioData['isi_evaluasi'] ?></p>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
 
     <div style="text-align: right;">
-        <div style="display: inline-block; text-align: left;">
-            <p>Disusun Oleh</p>
-            <p>Dosen Koord/Pengampu MK</p>
-            <p>.......................................</p>
-            <p>NPP: 0686.11.....................</p>
+        <div style="display: inline-block; text-align: left; margin: 0; padding: 0;">
+            <p style="margin: 0; padding: 0;">Disusun Oleh</p>
+            <p style="margin: 0; padding: 0;">Dosen Koord/Pengampu MK</p>
+            <br>
+            <br>
+            <br>
+            <p style="margin: 0; padding: 0;"><?= $portofolioData['nama_dosen'] ?></p>
+            <p style="margin: 0; padding: 0;">NPP: <?= $portofolioData['npp'] ?></p>
         </div>
     </div>
 </body>
