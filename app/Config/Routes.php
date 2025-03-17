@@ -69,5 +69,26 @@ $routes->group('portofolio-detail', function ($routes) {
 
 // Rute cetak PDF
 $routes->get('/view-pdf/(:segment)', 'Cetak::index/$1');
+<<<<<<< HEAD
 $routes->get('/cetak-pdf/(:segment)', 'Cetak::generatePdf/$1');
 $routes->get('files/pdf/(:segment)', 'Cetak::show/$1');
+=======
+
+$routes->get('/cetak', 'Cetak::cetakPortofolioPdf');
+
+$routes->get('/generate-pdf', 'Cetak::generatePdf');
+
+$routes->group('import-data', function ($routes) {
+    // Rute GET
+    $routes->get('/', 'ImportData::index');
+
+    // Rute POST
+    $routes->post('saveImportCplPi', 'ImportData::saveImportCplPi');
+    $routes->post('saveImportMatkul', 'ImportData::saveImportMatkul');
+    $routes->post('saveImportMatkulDiampu', 'ImportData::saveImportMatkulDiampu');
+});
+
+$routes->get('downloads/template_cpl_pi.xlsx', 'ImportData::downloadTemplateCplPi');
+$routes->get('downloads/template_matkul.xlsx', 'ImportData::downloadTemplateMatkul');
+$routes->get('downloads/template_matkul_diampu.xlsx', 'ImportData::downloadTemplateMatkulDiampu');
+>>>>>>> 31f2652da1b666e2eb39c0acd945345431712191

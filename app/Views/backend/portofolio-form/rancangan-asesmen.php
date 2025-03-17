@@ -259,117 +259,123 @@
                         </div>
 
                         <!-- Tugas -->
-                        <h5 class="fw-bolder mb-3">1. Tugas</h5>
-                        <div class="form-group mb-4">
-                            <label for="soal_tugas" class="form-label">Soal</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_tugas']) ? 'required' : '' ?>>
+                        <div id="tugas-section" class="mb-4">
+                            <h5 class="fw-bolder mb-3">1. Tugas</h5>
+                            <div class="form-group">
+                                <label for="soal_tugas" class="form-label">Soal</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="soal_tugas" name="soal_tugas" accept="application/pdf">
+                                    <?php if (isset(session()->get('assessment_files')['soal_tugas'])): ?>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="ti ti-check"></i> File Terunggah
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                                 <?php if (isset(session()->get('assessment_files')['soal_tugas'])): ?>
-                                    <span class="input-group-text bg-success text-white">
-                                        <i class="ti ti-check"></i> File Terunggah
-                                    </span>
+                                    <div class="mt-2">
+                                        <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_tugas']['name']) ?></span>
+                                        <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_tugas']['size'] / 1024, 2) ?> KB</p>
+                                    </div>
                                 <?php endif; ?>
-                            </div>
-                            <?php if (isset(session()->get('assessment_files')['soal_tugas'])): ?>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_tugas']['name']) ?></span>
-                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_tugas']['size'] / 1024, 2) ?> KB</p>
-                                </div>
-                            <?php endif; ?>
-                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
 
-                            <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_tugas']) ? 'required' : '' ?>>
-                                <?php if (isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
-                                    <span class="input-group-text bg-success text-white">
-                                        <i class="ti ti-check"></i> File Terunggah
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                            <?php if (isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_tugas']['name']) ?></span>
-                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_tugas']['size'] / 1024, 2) ?> KB</p>
+                                <label for="rubrik_tugas" class="form-label mt-2">Rubrik</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="rubrik_tugas" name="rubrik_tugas" accept="application/pdf">
+                                    <?php if (isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="ti ti-check"></i> File Terunggah
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
-                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                                <?php if (isset(session()->get('assessment_files')['rubrik_tugas'])): ?>
+                                    <div class="mt-2">
+                                        <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_tugas']['name']) ?></span>
+                                        <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_tugas']['size'] / 1024, 2) ?> KB</p>
+                                    </div>
+                                <?php endif; ?>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            </div>
                         </div>
 
                         <!-- Ujian Tengah Semester -->
-                        <h5 class="fw-bolder mb-3">2. Ujian Tengah Semester</h5>
-                        <div class="form-group mb-4">
-                            <label for="soal_uts" class="form-label">Soal</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_uts']) ? 'required' : '' ?>>
+                        <div id="uts-section" class="mb-4">
+                            <h5 class="fw-bolder mb-3">2. Ujian Tengah Semester</h5>
+                            <div class="form-group">
+                                <label for="soal_uts" class="form-label">Soal</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="soal_uts" name="soal_uts" accept="application/pdf">
+                                    <?php if (isset(session()->get('assessment_files')['soal_uts'])): ?>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="ti ti-check"></i> File Terunggah
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                                 <?php if (isset(session()->get('assessment_files')['soal_uts'])): ?>
-                                    <span class="input-group-text bg-success text-white">
-                                        <i class="ti ti-check"></i> File Terunggah
-                                    </span>
+                                    <div class="mt-2">
+                                        <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uts']['name']) ?></span>
+                                        <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uts']['size'] / 1024, 2) ?> KB</p>
+                                    </div>
                                 <?php endif; ?>
-                            </div>
-                            <?php if (isset(session()->get('assessment_files')['soal_uts'])): ?>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uts']['name']) ?></span>
-                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uts']['size'] / 1024, 2) ?> KB</p>
-                                </div>
-                            <?php endif; ?>
-                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
 
-                            <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_uts']) ? 'required' : '' ?>>
-                                <?php if (isset(session()->get('assessment_files')['rubrik_uts'])): ?>
-                                    <span class="input-group-text bg-success text-white">
-                                        <i class="ti ti-check"></i> File Terunggah
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                            <?php if (isset(session()->get('assessment_files')['rubrik_uts'])): ?>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uts']['name']) ?></span>
-                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uts']['size'] / 1024, 2) ?> KB</p>
+                                <label for="rubrik_uts" class="form-label mt-2">Rubrik</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="rubrik_uts" name="rubrik_uts" accept="application/pdf">
+                                    <?php if (isset(session()->get('assessment_files')['rubrik_uts'])): ?>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="ti ti-check"></i> File Terunggah
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
-                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                                <?php if (isset(session()->get('assessment_files')['rubrik_uts'])): ?>
+                                    <div class="mt-2">
+                                        <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uts']['name']) ?></span>
+                                        <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uts']['size'] / 1024, 2) ?> KB</p>
+                                    </div>
+                                <?php endif; ?>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            </div>
                         </div>
 
                         <!-- Ujian Akhir Semester -->
-                        <h5 class="fw-bolder mb-3">3. Ujian Akhir Semester</h5>
-                        <div class="form-group mb-4">
-                            <label for="soal_uas" class="form-label">Soal</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['soal_uas']) ? 'required' : '' ?>>
+                        <div id="uas-section" class="mb-4">
+                            <h5 class="fw-bolder mb-3">3. Ujian Akhir Semester</h5>
+                            <div class="form-group">
+                                <label for="soal_uas" class="form-label">Soal</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="soal_uas" name="soal_uas" accept="application/pdf">
+                                    <?php if (isset(session()->get('assessment_files')['soal_uas'])): ?>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="ti ti-check"></i> File Terunggah
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                                 <?php if (isset(session()->get('assessment_files')['soal_uas'])): ?>
-                                    <span class="input-group-text bg-success text-white">
-                                        <i class="ti ti-check"></i> File Terunggah
-                                    </span>
+                                    <div class="mt-2">
+                                        <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uas']['name']) ?></span>
+                                        <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uas']['size'] / 1024, 2) ?> KB</p>
+                                    </div>
                                 <?php endif; ?>
-                            </div>
-                            <?php if (isset(session()->get('assessment_files')['soal_uas'])): ?>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['soal_uas']['name']) ?></span>
-                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['soal_uas']['size'] / 1024, 2) ?> KB</p>
-                                </div>
-                            <?php endif; ?>
-                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
 
-                            <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf" <?= !isset(session()->get('assessment_files')['rubrik_uas']) ? 'required' : '' ?>>
-                                <?php if (isset(session()->get('assessment_files')['rubrik_uas'])): ?>
-                                    <span class="input-group-text bg-success text-white">
-                                        <i class="ti ti-check"></i> File Terunggah
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                            <?php if (isset(session()->get('assessment_files')['rubrik_uas'])): ?>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uas']['name']) ?></span>
-                                    <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uas']['size'] / 1024, 2) ?> KB</p>
+                                <label for="rubrik_uas" class="form-label mt-2">Rubrik</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="rubrik_uas" name="rubrik_uas" accept="application/pdf">
+                                    <?php if (isset(session()->get('assessment_files')['rubrik_uas'])): ?>
+                                        <span class="input-group-text bg-success text-white">
+                                            <i class="ti ti-check"></i> File Terunggah
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
-                            <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                                <?php if (isset(session()->get('assessment_files')['rubrik_uas'])): ?>
+                                    <div class="mt-2">
+                                        <span class="text-success"><i class="ti ti-file"></i> <?= esc(session()->get('assessment_files')['rubrik_uas']['name']) ?></span>
+                                        <p class="text-muted small">Ukuran: <?= round(session()->get('assessment_files')['rubrik_uas']['size'] / 1024, 2) ?> KB</p>
+                                    </div>
+                                <?php endif; ?>
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
@@ -393,12 +399,67 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('rpsForm');
         const checkboxes = document.querySelectorAll('.assessment-checkbox');
+        
+        // Get all file upload sections
+        const taskSection = document.getElementById('tugas-section');
+        const utsSection = document.getElementById('uts-section');
+        const uasSection = document.getElementById('uas-section');
+        
+        // Function to update file upload sections visibility
+        function updateFileUploadSections() {
+            // Check if any task checkbox is checked
+            const taskChecked = Array.from(document.querySelectorAll('input[name*="[tugas]"]'))
+                .some(checkbox => checkbox.checked);
+                
+            // Check if any UTS checkbox is checked
+            const utsChecked = Array.from(document.querySelectorAll('input[name*="[uts]"]'))
+                .some(checkbox => checkbox.checked);
+                
+            // Check if any UAS checkbox is checked
+            const uasChecked = Array.from(document.querySelectorAll('input[name*="[uas]"]'))
+                .some(checkbox => checkbox.checked);
+            
+            // Show/hide sections based on checkbox status
+            taskSection.style.display = taskChecked ? 'block' : 'none';
+            utsSection.style.display = utsChecked ? 'block' : 'none';
+            uasSection.style.display = uasChecked ? 'block' : 'none';
+            
+            // Update required attribute for file inputs
+            if (taskSection) {
+                const taskInputs = taskSection.querySelectorAll('input[type="file"]');
+                taskInputs.forEach(input => {
+                    // Only set required if the section is visible and no file is already uploaded
+                    const fileAlreadyUploaded = input.nextElementSibling && 
+                        input.nextElementSibling.classList.contains('bg-success');
+                    input.required = taskChecked && !fileAlreadyUploaded;
+                });
+            }
+            
+            if (utsSection) {
+                const utsInputs = utsSection.querySelectorAll('input[type="file"]');
+                utsInputs.forEach(input => {
+                    const fileAlreadyUploaded = input.nextElementSibling && 
+                        input.nextElementSibling.classList.contains('bg-success');
+                    input.required = utsChecked && !fileAlreadyUploaded;
+                });
+            }
+            
+            if (uasSection) {
+                const uasInputs = uasSection.querySelectorAll('input[type="file"]');
+                uasInputs.forEach(input => {
+                    const fileAlreadyUploaded = input.nextElementSibling && 
+                        input.nextElementSibling.classList.contains('bg-success');
+                    input.required = uasChecked && !fileAlreadyUploaded;
+                });
+            }
+        }
 
-        // Save checkbox state when changed
+        // Save checkbox state when changed and update file sections
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const assessmentData = collectAssessmentData();
                 saveAssessmentToSession(assessmentData);
+                updateFileUploadSections(); // Update file sections when checkboxes change
             });
         });
 
@@ -438,7 +499,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        console.error('Success to save assessment data:', data.message);
+                        console.log('Success to save assessment data:', data.message);
                     } else {
                         alert(data.message);
                         console.error('Failed to save assessment data:', data.message);
@@ -460,19 +521,33 @@
             const assessmentData = collectAssessmentData();
             formData.append('assessment_data', JSON.stringify(assessmentData));
 
-            // Add file data
-            const fileInputs = [
-                'soal_tugas', 'rubrik_tugas',
-                'soal_uts', 'rubrik_uts',
-                'soal_uas', 'rubrik_uas'
-            ];
+            // Add file data only for visible sections
+            const taskChecked = Array.from(document.querySelectorAll('input[name*="[tugas]"]'))
+                .some(checkbox => checkbox.checked);
+            const utsChecked = Array.from(document.querySelectorAll('input[name*="[uts]"]'))
+                .some(checkbox => checkbox.checked);
+            const uasChecked = Array.from(document.querySelectorAll('input[name*="[uas]"]'))
+                .some(checkbox => checkbox.checked);
+
+            // Define file inputs based on visible sections
+            let fileInputs = [];
+            
+            if (taskChecked) {
+                fileInputs = [...fileInputs, 'soal_tugas', 'rubrik_tugas'];
+            }
+            if (utsChecked) {
+                fileInputs = [...fileInputs, 'soal_uts', 'rubrik_uts'];
+            }
+            if (uasChecked) {
+                fileInputs = [...fileInputs, 'soal_uas', 'rubrik_uas'];
+            }
 
             // Add all files to formData
             let filesChanged = false;
 
             fileInputs.forEach(inputName => {
                 const fileInput = document.getElementById(inputName);
-                if (fileInput.files.length > 0) {
+                if (fileInput && fileInput.files.length > 0) {
                     formData.append(inputName, fileInput.files[0]);
                     filesChanged = true;
                 }
@@ -501,6 +576,9 @@
                     alert('Terjadi kesalahan saat menyimpan data asesmen.');
                 });
         });
+        
+        // Call the update function on page load to set initial state
+        updateFileUploadSections();
     });
 </script>
 
