@@ -175,11 +175,31 @@
                     </div>
 
                     <form id="topicForm" action="<?= base_url('portofolio-form/saveEvaluasiPerkuliahan') ?>" method="post">
-                        <?php if (!empty($pdfUrl)): ?>
-                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
-                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold">Rata-Rata CPMK</label>
+                            <div class="row g-3 mb-3" id="cpmkInputsContainer">
+                                <?php if (isset($cpmk_data) && is_array($cpmk_data) && count($cpmk_data) > 0): ?>
+                                    <?php foreach ($cpmk_data as $cpmkNo => $cpmkInfo): ?>
+                                        <div class="col-md-6 col-lg-3">
+                                            <div class="form-floating">
+                                                <input type="number" class="form-control cpmk-input" id="cpmk<?= $cpmkNo ?>" 
+                                                       name="cpmk_nilai[<?= $cpmkNo ?>]" 
+                                                       placeholder="Nilai CPMK <?= $cpmkNo ?>" 
+                                                       min="0" max="4" step="0.1" 
+                                                       value="<?= isset($cpmk_nilai[$cpmkNo]) ? $cpmk_nilai[$cpmkNo] : '' ?>">
+                                                <label for="cpmk<?= $cpmkNo ?>">CPMK <?= $cpmkNo ?></label>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="col-12">
+                                        <div class="alert alert-warning">
+                                            Tidak ada data CPMK yang tersimpan. Silahkan isi data CPMK terlebih dahulu.
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
-                        <?php endif; ?>
+                        </div>
 
                         <div class="form-group mb-3">
                             <label for="evaluasi" class="form-label">Evaluasi Perkuliahan</label>
@@ -227,12 +247,126 @@
             var messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
             messageModal.show();
         <?php endif; ?>
+
+        // Initialize chart with data from session
+        initChart();
+
+        // Add event listeners to CPMK input fields
+        const cpmkInputs = document.querySelectorAll('.cpmk-input');
+        cpmkInputs.forEach(input => {
+            input.addEventListener('change', updateChart);
+        });
     });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    let cpmkChart;
+
+    function initChart() {
+        const ctx = document.getElementById('cpmkChart').getContext('2d');
+        
+        // Get labels and data from CPMK inputs
+        const labels = [];
+        const cpmkValues = [];
+        
+        document.querySelectorAll('.cpmk-input').forEach(input => {
+            const cpmkNo = input.id.replace('cpmk', '');
+            labels.push('CPMK ' + cpmkNo);
+            cpmkValues.push(input.value ? parseFloat(input.value) : 0);
+        });
+
+        // Create chart configuration
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Nilai CPMK',
+                data: cpmkValues,
+                backgroundColor: 'rgba(15, 76, 146, 0.1)',
+                borderColor: 'rgba(15, 76, 146, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 4,
+                        ticks: {
+                            stepSize: 0.5
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Nilai Rerata CPMK',
+                        font: {
+                            size: 18
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'midLine',
+                afterDraw: (chart) => {
+                    const {
+                        ctx,
+                        chartArea: {
+                            top,
+                            bottom,
+                            left,
+                            right
+                        },
+                        scales: {
+                            y
+                        }
+                    } = chart;
+                    const yValue = y.getPixelForValue(2); // Posisi garis pada y=2
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(left, yValue);
+                    ctx.lineTo(right, yValue);
+                    ctx.strokeStyle = 'red';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]); // Garis putus-putus
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }]
+        };
+
+        // Create the chart
+        cpmkChart = new Chart(ctx, config);
+    }
+
+    function updateChart() {
+        // Get updated values from inputs
+        const cpmkValues = [];
+        document.querySelectorAll('.cpmk-input').forEach(input => {
+            cpmkValues.push(input.value ? parseFloat(input.value) : 0);
+        });
+
+        // Update chart data
+        cpmkChart.data.datasets[0].data = cpmkValues;
+        cpmkChart.update();
+    }
+
     document.getElementById("topicForm").addEventListener("submit", function(event) {
         event.preventDefault(); // Mencegah reload halaman
 
@@ -266,84 +400,6 @@
             })
             .catch(error => console.error("Error:", error));
     });
-</script>
-
-<script>
-    const data = {
-        labels: ['CPMK 1', 'CPMK 2', 'CPMK 3', 'CPMK 4'],
-        datasets: [{
-            label: 'Nilai CPMK',
-            data: [3.5, 2.8, 3.2, 2.5],
-            backgroundColor: 'rgba(15, 76, 146, 0.1)',
-            borderColor: 'rgba(15, 76, 146, 1)',
-            borderWidth: 1
-        }]
-    };
-
-    const config = {
-        type: 'bar',
-        data: data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 4,
-                    ticks: {
-                        stepSize: 0.5
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Nilai Rerata CPMK',
-                    font: {
-                        size: 18
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 20
-                    }
-                }
-            }
-        },
-        plugins: [{
-            id: 'midLine',
-            afterDraw: (chart) => {
-                const {
-                    ctx,
-                    chartArea: {
-                        top,
-                        bottom,
-                        left,
-                        right
-                    },
-                    scales: {
-                        y
-                    }
-                } = chart;
-                const yValue = y.getPixelForValue(2); // Posisi garis pada y=2
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(left, yValue);
-                ctx.lineTo(right, yValue);
-                ctx.strokeStyle = 'red';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]); // Garis putus-putus
-                ctx.stroke();
-                ctx.restore();
-            }
-        }]
-    };
-
-    const ctx = document.getElementById('cpmkChart').getContext('2d');
-    const cpmkChart = new Chart(ctx, config);
 </script>
 
 <?= $this->include('backend/partials/footer') ?>

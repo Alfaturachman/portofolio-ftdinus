@@ -29,7 +29,7 @@ class Portofolio extends BaseController
         $currentUserNPP = session()->get('UserSession.username');
 
         $portofolioModel = new PortofolioModel();
-        $data['portofolios'] = $portofolioModel->getPortofolioWithUserDetails($currentUserNPP);
+        $data['portofolios'] = $portofolioModel->getAllPortofolio();
 
         return view('backend/portofolio-form/index', $data);
     }
@@ -676,9 +676,21 @@ class Portofolio extends BaseController
 
         // Ambil data evaluasi dari session
         $evaluasi_perkuliahan = session()->get('evaluasi_perkuliahan') ?? '';
+        
+        // Ambil data CPMK dari session
+        $cpmk_data = session()->get('cpmk_data')['cpmk'] ?? [];
+        
+        // Ambil nilai CPMK yang sudah disimpan (jika ada)
+        $cpmk_nilai = session()->get('cpmk_nilai') ?? [];
+
+        // Ambil PDF URL dari session jika ada
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/evaluasi-perkuliahan', [
-            'evaluasi_perkuliahan' => $evaluasi_perkuliahan
+            'evaluasi_perkuliahan' => $evaluasi_perkuliahan,
+            'cpmk_data' => $cpmk_data,
+            'cpmk_nilai' => $cpmk_nilai,
+            'pdfUrl' => $pdfUrl
         ]);
     }
 
@@ -820,49 +832,55 @@ class Portofolio extends BaseController
 
         // Simpan data ke tabel rancangan_asesmen
         $rancanganAsesmenModel = new RancanganAsesmenModel();
-        foreach ($sessionData['assessment_data'] as $cpmkId => $assessment) {
-            foreach ($assessment as $scpmkId => $kategori) {
-                // Create a new assessment record for each CPMK
-                $rancanganAsesmenData = [
-                    'id_cpmk' => $cpmkId,
-                    'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
-                    'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
-                    'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
-                ];
-                $rancanganAsesmenModel->insert($rancanganAsesmenData);
+        if (isset($sessionData['assessment_data']) && is_array($sessionData['assessment_data'])) {
+            foreach ($sessionData['assessment_data'] as $cpmkId => $cpmkAssessments) {
+                foreach ($cpmkAssessments as $scpmkId => $kategori) {
+                    // Create a new assessment record for each Sub CPMK
+                    $rancanganAsesmenData = [
+                        'id_porto' => $portofolioId,
+                        'id_cpmk' => $cpmkId,
+                        'id_scpmk' => $scpmkId,
+                        'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
+                        'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
+                        'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
+                    ];
+                    $rancanganAsesmenModel->insert($rancanganAsesmenData);
+                }
             }
         }
 
         // Simpan data ke tabel rancangan asesmen file
         $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
-        foreach ($sessionData['assessment_files'] as $kategori => $file) {
-            // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
-            if (strpos($kategori, 'soal_') === 0) {
-                $kategoriFile = 'Soal';
-            } elseif (strpos($kategori, 'rubrik_') === 0) {
-                $kategoriFile = 'Rubrik';
-            } else {
-                $kategoriFile = 'Lainnya';
-            }
+        if (isset($sessionData['assessment_files']) && is_array($sessionData['assessment_files'])) {
+            foreach ($sessionData['assessment_files'] as $kategori => $file) {
+                // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
+                if (strpos($kategori, 'soal_') === 0) {
+                    $kategoriFile = 'Soal';
+                } elseif (strpos($kategori, 'rubrik_') === 0) {
+                    $kategoriFile = 'Rubrik';
+                } else {
+                    $kategoriFile = 'Lainnya';
+                }
 
-            // Kategori berdasarkan suffix
-            if (strpos($kategori, '_tugas') !== false) {
-                $kategoriAsesmen = 'Tugas';
-            } elseif (strpos($kategori, '_uts') !== false) {
-                $kategoriAsesmen = 'UTS';
-            } elseif (strpos($kategori, '_uas') !== false) {
-                $kategoriAsesmen = 'UAS';
-            } else {
-                $kategoriAsesmen = 'Lainnya';
-            }
+                // Kategori berdasarkan suffix
+                if (strpos($kategori, '_tugas') !== false) {
+                    $kategoriAsesmen = 'Tugas';
+                } elseif (strpos($kategori, '_uts') !== false) {
+                    $kategoriAsesmen = 'UTS';
+                } elseif (strpos($kategori, '_uas') !== false) {
+                    $kategoriAsesmen = 'UAS';
+                } else {
+                    $kategoriAsesmen = 'Lainnya';
+                }
 
-            $rancanganAsesmenFileData = [
-                'id_asesmen' => $portofolioId,
-                'kategori' => $kategoriAsesmen,
-                'kategori_file' => $kategoriFile,
-                'file_pdf' => $file['path']
-            ];
-            $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+                $rancanganAsesmenFileData = [
+                    'id_porto' => $portofolioId,
+                    'kategori' => $kategoriAsesmen,
+                    'kategori_file' => $kategoriFile,
+                    'file_pdf' => $file['path']
+                ];
+                $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+            }
         }
 
         // Simpan data ke tabel pelaksanaan perkuliahan

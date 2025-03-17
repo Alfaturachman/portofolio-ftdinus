@@ -116,6 +116,9 @@
                                                         <input type="file" name="file_cpl_pi" class="dropzone" accept=".xls,.xlsx" required>
                                                     </div>
                                                 </div>
+                                                <div class="mb-4">
+                                                    <p class="text-danger">*Mohon untuk mengunduh template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
+                                                </div>
                                                 <div class="text-center">
                                                     <a href="<?= base_url('downloads/template_cpl_pi.xlsx') ?>" class="btn btn-outline-primary me-2">
                                                         <i class="fas fa-download me-1"></i> Download Template
@@ -150,6 +153,9 @@
                                                         <input type="file" name="file_mata_kuliah" class="dropzone" accept=".xls,.xlsx" required>
                                                     </div>
                                                 </div>
+                                                <div class="mb-4">
+                                                    <p class="text-danger">*Mohon untuk mengunduh template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
+                                                </div>
                                                 <div class="text-center">
                                                 <a href="<?= base_url('downloads/template_matkul.xlsx') ?>" class="btn btn-outline-primary me-2">
                                                         <i class="fas fa-download me-1"></i> Download Template
@@ -183,6 +189,9 @@
                                                         </div>
                                                         <input type="file" name="file_mata_kuliah_diampu" class="dropzone" accept=".xls,.xlsx" required>
                                                     </div>
+                                                </div>
+                                                <div class="mb-4">
+                                                    <p class="text-danger">*Mohon untuk mengunduh template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
                                                 </div>
                                                 <div class="text-center">
                                                     <a href="<?= base_url('downloads/template_matkul_diampu.xlsx') ?>" class="btn btn-outline-primary me-2">
