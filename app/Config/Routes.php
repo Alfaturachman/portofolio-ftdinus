@@ -59,7 +59,7 @@ $routes->group('portofolio-form', function ($routes) {
 });
 
 // Rute untuk mengakses file PDF yang diupload
-$routes->get('uploads/temp/(:segment)', 'Portofolio::view_uploaded_pdf/$1');
+$routes->get('uploads/rps/(:segment)', 'Portofolio::view_uploaded_pdf/$1');
 
 // Rute form portofolio
 $routes->group('portofolio-detail', function ($routes) {
@@ -69,6 +69,8 @@ $routes->group('portofolio-detail', function ($routes) {
 
 // Rute cetak PDF
 $routes->get('/view-pdf/(:segment)', 'Cetak::index/$1');
+$routes->get('/cetak-pdf/(:segment)', 'Cetak::generatePdf/$1');
+$routes->get('files/pdf/(:segment)', 'Cetak::show/$1');
 
 $routes->get('/cetak', 'Cetak::cetakPortofolioPdf');
 

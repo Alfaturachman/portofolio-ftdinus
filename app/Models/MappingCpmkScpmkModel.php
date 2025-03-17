@@ -18,11 +18,23 @@ class MappingCpmkScpmkModel extends Model
 
     protected $useTimestamps = false;
 
-    public function getMappingData($idCpmk, $idScpmk)
+    public function getMapping($id_porto)
     {
-        return $this->where('id_cpmk', $idCpmk)
-            ->where('id_scpmk', $idScpmk)
-            ->first();
+        $query = $this->db->table($this->table)
+            ->select('mapping_cpmk_scpmk.id_cpmk, mapping_cpmk_scpmk.id_scpmk, mapping_cpmk_scpmk.nilai')
+            ->join('cpmk', 'cpmk.id = mapping_cpmk_scpmk.id_cpmk')
+            ->where('cpmk.id_porto', $id_porto)
+            ->get();
+
+        $result = $query->getResultArray();
+
+        // Format data untuk kebutuhan view
+        $mapping = [];
+        foreach ($result as $row) {
+            $mapping[$row['id_cpmk']][$row['id_scpmk']] = $row['nilai'];
+        }
+
+        return $mapping;
     }
 
     public function getAllMappings()

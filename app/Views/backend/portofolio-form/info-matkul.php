@@ -50,7 +50,7 @@
     .custom-select-container {
         position: relative;
     }
-    
+
     .custom-select-dropdown {
         position: absolute;
         width: 100%;
@@ -61,22 +61,22 @@
         border: 1px solid #ced4da;
         border-top: none;
         border-radius: 0 0 4px 4px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    
+
     .custom-select-item {
         cursor: pointer;
         padding: 8px 12px;
     }
-    
+
     .custom-select-item:hover {
         background-color: #f8f9fa;
     }
-    
+
     .list-group {
         margin-bottom: 0;
     }
-    
+
     .no-results {
         padding: 8px 12px;
         color: #6c757d;
@@ -172,7 +172,7 @@
                             </div>
                             <small class="d-block mt-2 step-label">Hasil Asesmen</small>
                         </div>
-                        
+
                         <div class="step-line"></div>
 
                         <!-- Evaluasi Perkuliahan -->
@@ -230,7 +230,7 @@
                                 <div class="custom-select-dropdown" id="custom_select_dropdown" style="display: none;">
                                     <ul class="list-group">
                                         <?php foreach ($mataKuliah as $mk): ?>
-                                            <li class="list-group-item custom-select-item" 
+                                            <li class="list-group-item custom-select-item"
                                                 data-value="<?= htmlspecialchars($mk['nama_mk']) ?>"
                                                 data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
                                                 data-progdi="<?= htmlspecialchars($mk['progdi']) ?>"
@@ -294,7 +294,7 @@
             const hiddenInput = document.getElementById('nama_mk');
             const dropdown = document.getElementById('custom_select_dropdown');
             const items = document.querySelectorAll('.custom-select-item');
-            
+
             // Set initial value if exists
             if (hiddenInput.value) {
                 const selectedItem = Array.from(items).find(item => item.getAttribute('data-value') === hiddenInput.value);
@@ -303,32 +303,32 @@
                     updateFields(selectedItem);
                 }
             }
-            
+
             // Show dropdown when input is focused
             input.addEventListener('focus', function() {
                 dropdown.style.display = 'block';
                 filterItems(input.value);
             });
-            
+
             // Hide dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!input.contains(e.target) && !dropdown.contains(e.target)) {
                     dropdown.style.display = 'none';
                 }
             });
-            
+
             // Filter items as user types
             input.addEventListener('input', function() {
                 filterItems(this.value);
                 dropdown.style.display = 'block';
-                
+
                 // Clear fields if input is empty
                 if (!this.value) {
                     hiddenInput.value = '';
                     clearFields();
                 }
             });
-            
+
             // Select item when clicked
             items.forEach(item => {
                 item.addEventListener('click', function() {
@@ -338,18 +338,18 @@
                     updateFields(this);
                 });
             });
-            
+
             // Function to filter dropdown items
             function filterItems(query) {
                 const normalizedQuery = query.toLowerCase();
                 let hasResults = false;
-                
+
                 // Remove existing "no results" message if present
                 const noResultsMsg = dropdown.querySelector('.no-results');
                 if (noResultsMsg) {
                     noResultsMsg.remove();
                 }
-                
+
                 items.forEach(item => {
                     const text = item.textContent.toLowerCase();
                     if (text.includes(normalizedQuery)) {
@@ -359,7 +359,7 @@
                         item.style.display = 'none';
                     }
                 });
-                
+
                 // Show "no results" message if no matches
                 if (!hasResults) {
                     const noResults = document.createElement('div');
@@ -368,7 +368,7 @@
                     dropdown.querySelector('.list-group').appendChild(noResults);
                 }
             }
-            
+
             // Function to update all fields based on selected item
             function updateFields(selectedItem) {
                 document.getElementById('fakultas').value = selectedItem.getAttribute('data-fakultas') || '';
@@ -378,7 +378,7 @@
                 document.getElementById('sks_teori').value = selectedItem.getAttribute('data-sks_teori') || '';
                 document.getElementById('sks_praktik').value = selectedItem.getAttribute('data-sks_praktik') || '';
             }
-            
+
             // Function to clear all fields
             function clearFields() {
                 document.getElementById('kode_mk').value = '';

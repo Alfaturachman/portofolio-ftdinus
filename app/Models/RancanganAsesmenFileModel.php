@@ -14,7 +14,7 @@ class RancanganAsesmenFileModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['id_asesmen', 'kategori', 'kategori_file', 'file_pdf'];
+    protected $allowedFields = ['id_porto', 'kategori', 'kategori_file', 'file_pdf'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'ins_time';

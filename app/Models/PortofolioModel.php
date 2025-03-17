@@ -42,12 +42,14 @@ class PortofolioModel extends Model
         portofolio.npp,
         portofolio.ins_time,
         identitas_matkul.prasyarat_mk,
-        identitas_matkul.topik_perkuliahan
+        identitas_matkul.topik_perkuliahan,
+        evaluasi_perkuliahan.isi_evaluasi
     ')
             ->join('matkul_diampu', 'portofolio.kode_mk = matkul_diampu.kode_matkul', 'left')
             ->join('info_matkul', 'portofolio.kode_mk = info_matkul.kode_matkul', 'left')
             ->join('users', 'portofolio.npp = users.username', 'left')
             ->join('identitas_matkul', 'portofolio.id = identitas_matkul.id_porto', 'left')
+            ->join('evaluasi_perkuliahan', 'portofolio.id = evaluasi_perkuliahan.id_porto', 'left')
             ->where('portofolio.id', $idPorto)
             ->first();
     }

@@ -51,7 +51,7 @@ class Portofolio extends BaseController
         }
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/upload-rps', [
             'pdfUrl' => $pdfUrl,
@@ -60,7 +60,7 @@ class Portofolio extends BaseController
 
     public function view_uploaded_pdf($filename)
     {
-        $path = WRITEPATH . 'uploads/temp/' . $filename;
+        $path = WRITEPATH . 'uploads/rps/' . $filename;
 
         if (file_exists($path)) {
             return $this->response
@@ -105,7 +105,7 @@ class Portofolio extends BaseController
 
         // Handle upload file
         $newName = time() . '_' . $file->getRandomName();
-        $file->move(WRITEPATH . 'uploads/temp', $newName);
+        $file->move(WRITEPATH . 'uploads/rps', $newName);
 
         // Simpan nama file ke session
         session()->set('uploaded_rps', $newName);
@@ -137,7 +137,7 @@ class Portofolio extends BaseController
         $infoMatkul = session()->get('info_matkul') ?? [];
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         // Kirim data ke view
         return view('backend/portofolio-form/info-matkul', [
@@ -250,7 +250,7 @@ class Portofolio extends BaseController
         session()->set('cpl_pi_data', $cplPiData);
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/cpl-pi', [
             'pdfUrl' => $pdfUrl,
@@ -280,7 +280,7 @@ class Portofolio extends BaseController
         $cplPiData = session()->get('cpl_pi_data') ?? [];
 
         // Get PDF URL from session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/cpmk-subcpmk', [
             'pdfUrl' => $pdfUrl,
@@ -335,7 +335,7 @@ class Portofolio extends BaseController
         }
 
         // Cek apakah ada file yang disimpan di session
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/pemetaan', [
             'pdfUrl' => $pdfUrl,
@@ -684,7 +684,7 @@ class Portofolio extends BaseController
         $cpmk_nilai = session()->get('cpmk_nilai') ?? [];
 
         // Ambil PDF URL dari session jika ada
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/evaluasi-perkuliahan', [
             'evaluasi_perkuliahan' => $evaluasi_perkuliahan,
@@ -880,34 +880,36 @@ class Portofolio extends BaseController
 
         // Simpan data ke tabel rancangan asesmen file
         $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
-        foreach ($sessionData['assessment_files'] as $kategori => $file) {
-            // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
-            if (strpos($kategori, 'soal_') === 0) {
-                $kategoriFile = 'Soal';
-            } elseif (strpos($kategori, 'rubrik_') === 0) {
-                $kategoriFile = 'Rubrik';
-            } else {
-                $kategoriFile = 'Lainnya';
-            }
+        if (isset($sessionData['assessment_files']) && is_array($sessionData['assessment_files'])) {
+                foreach ($sessionData['assessment_files'] as $kategori => $file) {
+                    // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
+                    if (strpos($kategori, 'soal_') === 0) {
+                        $kategoriFile = 'Soal';
+                    } elseif (strpos($kategori, 'rubrik_') === 0) {
+                        $kategoriFile = 'Rubrik';
+                    } else {
+                        $kategoriFile = 'Lainnya';
+                    }
 
-            // Kategori berdasarkan suffix
-            if (strpos($kategori, '_tugas') !== false) {
-                $kategoriAsesmen = 'Tugas';
-            } elseif (strpos($kategori, '_uts') !== false) {
-                $kategoriAsesmen = 'UTS';
-            } elseif (strpos($kategori, '_uas') !== false) {
-                $kategoriAsesmen = 'UAS';
-            } else {
-                $kategoriAsesmen = 'Lainnya';
-            }
+                    // Kategori berdasarkan suffix
+                    if (strpos($kategori, '_tugas') !== false) {
+                        $kategoriAsesmen = 'Tugas';
+                    } elseif (strpos($kategori, '_uts') !== false) {
+                        $kategoriAsesmen = 'UTS';
+                    } elseif (strpos($kategori, '_uas') !== false) {
+                        $kategoriAsesmen = 'UAS';
+                    } else {
+                        $kategoriAsesmen = 'Lainnya';
+                    }
 
-            $rancanganAsesmenFileData = [
-                'id_porto' => $portofolioId,
-                'kategori' => $kategoriAsesmen,
-                'kategori_file' => $kategoriFile,
-                'file_pdf' => $file['path']
-            ];
-            $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+                $rancanganAsesmenFileData = [
+                    'id_porto' => $portofolioId,
+                    'kategori' => $kategoriAsesmen,
+                    'kategori_file' => $kategoriFile,
+                    'file_pdf' => $file['path']
+                ];
+                $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+            }
         }
 
         // Simpan data ke tabel pelaksanaan perkuliahan
