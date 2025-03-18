@@ -69,6 +69,8 @@ $routes->group('portofolio-detail', function ($routes) {
 
 // Rute cetak PDF
 $routes->get('/view-pdf/(:segment)', 'Cetak::index/$1');
+$routes->get('/cetak-pdf/(:segment)', 'Cetak::generatePdf/$1');
+$routes->get('files/pdf/(:segment)', 'Cetak::show/$1');
 
 $routes->get('/cetak', 'Cetak::cetakPortofolioPdf');
 

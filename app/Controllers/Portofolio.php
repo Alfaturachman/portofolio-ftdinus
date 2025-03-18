@@ -684,7 +684,7 @@ class Portofolio extends BaseController
         $cpmk_nilai = session()->get('cpmk_nilai') ?? [];
 
         // Ambil PDF URL dari session jika ada
-        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/temp/' . session()->get('uploaded_rps')) : '';
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
         return view('backend/portofolio-form/evaluasi-perkuliahan', [
             'evaluasi_perkuliahan' => $evaluasi_perkuliahan,
@@ -711,9 +711,11 @@ class Portofolio extends BaseController
 
             // Ambil data dari form
             $evaluasi = $this->request->getPost('evaluasi');
+            $cpmk_nilai = $this->request->getPost('cpmk_nilai') ?? [];
 
             // Simpan ke session
             session()->set('evaluasi_perkuliahan', $evaluasi);
+            session()->set('cpmk_nilai', $cpmk_nilai); // Tambahkan baris ini
             session()->set('current_progress', 'evaluasi_perkuliahan');
 
             return $this->response->setJSON([
@@ -791,11 +793,21 @@ class Portofolio extends BaseController
         $cpmkMapping = []; // Untuk menyimpan mapping antara no_cpmk dan ID database
         $subCpmkMapping = []; // Untuk menyimpan mapping antara no_scpmk dan ID database
 
+        // Ambil nilai CPMK dari session
+        $cpmkNilai = $sessionData['cpmk_nilai'] ?? [];
+
         foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
+            // Cek apakah ada nilai untuk CPMK ini
+            $avgCpmk = null;
+            if (isset($cpmkNilai[$noCpmk])) {
+                $avgCpmk = floatval($cpmkNilai[$noCpmk]);
+            }
+
             $cpmkData = [
                 'id_porto' => $portofolioId,
                 'no_cpmk' => $cpmk['selectedCpl'],
-                'isi_cpmk' => $cpmk['narasi']
+                'isi_cpmk' => $cpmk['narasi'],
+                'avg_cpmk' => $avgCpmk // Simpan nilai CPMK ke field avg_cpmk
             ];
             $cpmkId = $cpmkModel->insert($cpmkData);
             $cpmkMapping[$noCpmk] = $cpmkId; // Simpan mapping antara no_cpmk dan ID database
@@ -881,26 +893,26 @@ class Portofolio extends BaseController
         // Simpan data ke tabel rancangan asesmen file
         $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
         if (isset($sessionData['assessment_files']) && is_array($sessionData['assessment_files'])) {
-            foreach ($sessionData['assessment_files'] as $kategori => $file) {
-                // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
-                if (strpos($kategori, 'soal_') === 0) {
-                    $kategoriFile = 'Soal';
-                } elseif (strpos($kategori, 'rubrik_') === 0) {
-                    $kategoriFile = 'Rubrik';
-                } else {
-                    $kategoriFile = 'Lainnya';
-                }
+                foreach ($sessionData['assessment_files'] as $kategori => $file) {
+                    // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
+                    if (strpos($kategori, 'soal_') === 0) {
+                        $kategoriFile = 'Soal';
+                    } elseif (strpos($kategori, 'rubrik_') === 0) {
+                        $kategoriFile = 'Rubrik';
+                    } else {
+                        $kategoriFile = 'Lainnya';
+                    }
 
-                // Kategori berdasarkan suffix
-                if (strpos($kategori, '_tugas') !== false) {
-                    $kategoriAsesmen = 'Tugas';
-                } elseif (strpos($kategori, '_uts') !== false) {
-                    $kategoriAsesmen = 'UTS';
-                } elseif (strpos($kategori, '_uas') !== false) {
-                    $kategoriAsesmen = 'UAS';
-                } else {
-                    $kategoriAsesmen = 'Lainnya';
-                }
+                    // Kategori berdasarkan suffix
+                    if (strpos($kategori, '_tugas') !== false) {
+                        $kategoriAsesmen = 'Tugas';
+                    } elseif (strpos($kategori, '_uts') !== false) {
+                        $kategoriAsesmen = 'UTS';
+                    } elseif (strpos($kategori, '_uas') !== false) {
+                        $kategoriAsesmen = 'UAS';
+                    } else {
+                        $kategoriAsesmen = 'Lainnya';
+                    }
 
                 $rancanganAsesmenFileData = [
                     'id_porto' => $portofolioId,

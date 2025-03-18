@@ -14,7 +14,7 @@ class CpmkModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['id_porto', 'no_cpmk', 'isi_cpmk'];
+    protected $allowedFields = ['id_porto', 'no_cpmk', 'isi_cpmk', 'avg_cpmk'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'ins_time';

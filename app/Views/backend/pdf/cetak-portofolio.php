@@ -81,6 +81,13 @@
             font-size: 0.1pt;
             color: white;
         }
+
+        .chart-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -462,6 +469,10 @@
 
     <h2 class="text-xl font-bold mb-4">D. EVALUASI PERKULIAHAN</h2>
     <p style="text-align: justify;"><?= $portofolioData['isi_evaluasi'] ?></p>
+
+    <div class="chart-container">
+        <img src="<?= $chartImageBase64 ?>" alt="Grafik Nilai CPMK" style="width: 100%; max-width: 500px;">
+    </div>
 
     <br>
     <br>

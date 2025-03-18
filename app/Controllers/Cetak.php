@@ -44,6 +44,8 @@ class Cetak extends BaseController
         $subCpmkData = $subCpmkModel->getSubCpmkByPorto($idPorto);
         $assessmentData = $asesmenModel->getAssessmentData($idPorto);
 
+        $chartImageBase64 = $this->generateChartImage($cpmkData);
+
         // Ambil data mapping
         $mappingData = $mappingModel->getMapping($idPorto);
 
@@ -55,6 +57,7 @@ class Cetak extends BaseController
             'cplPiData' => $cplPiData,
             'cplData' => $cplData,
             'cpmkData' => $cpmkData,
+            'chartImageBase64' => $chartImageBase64,
             'subCpmkData' => $subCpmkData,
             'mappingData' => $mappingData,
             'subCpmkNumbers' => $subCpmkNumbers,
@@ -343,6 +346,94 @@ class Cetak extends BaseController
         }
 
         $pdf->Output($outputPath, 'F');
+    }
+
+    private function generateChartImage($cpmkData)
+    {
+        // Siapkan data untuk chart
+        $labels = [];
+        $values = [];
+        foreach ($cpmkData as $cpmk) {
+            $labels[] = 'CPMK ' . $cpmk['no_cpmk'];
+            $values[] = $cpmk['avg_cpmk'];
+        }
+
+        // Konfigurasi chart menggunakan QuickChart
+        $chartConfig = [
+            'type' => 'bar',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [
+                    [
+                        'label' => 'Nilai CPMK',
+                        'data' => $values,
+                        'backgroundColor' => 'rgba(15, 76, 146, 0.1)',
+                        'borderColor' => 'rgba(15, 76, 146, 1)',
+                        'borderWidth' => 1
+                    ]
+                ]
+            ],
+            'options' => [
+                'scales' => [
+                    'y' => [
+                        'beginAtZero' => false, // Mulai dari nilai yang ditentukan, bukan 0
+                        'min' => 1.00, // Nilai minimum sumbu Y
+                        'max' => 4.00, // Nilai maksimum sumbu Y
+                        'ticks' => [
+                            'stepSize' => 0.50, // Interval 0.50
+                            'callback' => 'function(value) { return value.toFixed(2); }' // Format angka dengan 2 desimal
+                        ],
+                        'grid' => [
+                            'drawOnChartArea' => true,
+                            'color' => 'rgba(0, 0, 0, 0.1)'
+                        ]
+                    ]
+                ],
+                'plugins' => [
+                    'legend' => [
+                        'position' => 'top'
+                    ],
+                    'tooltip' => [
+                        'callbacks' => [
+                            'label' => 'function(context) { return "Nilai: " + context.raw.toFixed(2); }'
+                        ]
+                    ],
+                    'annotation' => [
+                        'annotations' => [
+                            'line1' => [
+                                'type' => 'line',
+                                'yMin' => 2.00, // Garis horizontal di nilai 2.00
+                                'yMax' => 2.00,
+                                'borderColor' => 'red',
+                                'borderWidth' => 2,
+                                'borderDash' => [5, 5], // Garis putus-putus
+                                'scaleID' => 'y', // Skala yang digunakan (sumbu Y)
+                                'label' => [
+                                    'display' => true,
+                                    'content' => 'Nilai minimum (2.00)',
+                                    'position' => 'end',
+                                    'backgroundColor' => 'rgba(255, 0, 0, 0.7)',
+                                    'font' => [
+                                        'size' => 12,
+                                        'weight' => 'bold'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        // Encode konfigurasi chart ke URL
+        $chartConfigEncoded = urlencode(json_encode($chartConfig));
+
+        // Generate URL gambar chart dari QuickChart
+        $chartUrl = "https://quickchart.io/chart?c={$chartConfigEncoded}&w=500&h=300";
+
+        // Ambil gambar chart sebagai base64
+        $imageData = file_get_contents($chartUrl);
+        return 'data:image/png;base64,' . base64_encode($imageData);
     }
 
     public function show($filename)
