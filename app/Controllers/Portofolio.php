@@ -456,20 +456,20 @@ class Portofolio extends BaseController
 
             // Process file uploads
             $uploadedFiles = session()->get('assessment_files') ?? [];
-            
+
             // Define file fields based on selected assessment types
             $fileFields = [];
-            
+
             if ($tugasSelected) {
                 $fileFields[] = 'soal_tugas';
                 $fileFields[] = 'rubrik_tugas';
             }
-            
+
             if ($utsSelected) {
                 $fileFields[] = 'soal_uts';
                 $fileFields[] = 'rubrik_uts';
             }
-            
+
             if ($uasSelected) {
                 $fileFields[] = 'soal_uas';
                 $fileFields[] = 'rubrik_uas';
@@ -676,10 +676,10 @@ class Portofolio extends BaseController
 
         // Ambil data evaluasi dari session
         $evaluasi_perkuliahan = session()->get('evaluasi_perkuliahan') ?? '';
-        
+
         // Ambil data CPMK dari session
         $cpmk_data = session()->get('cpmk_data')['cpmk'] ?? [];
-        
+
         // Ambil nilai CPMK yang sudah disimpan (jika ada)
         $cpmk_nilai = session()->get('cpmk_nilai') ?? [];
 
@@ -902,13 +902,14 @@ class Portofolio extends BaseController
                     $kategoriAsesmen = 'Lainnya';
                 }
 
-            $rancanganAsesmenFileData = [
-                'id_porto' => $portofolioId,
-                'kategori' => $kategoriAsesmen,
-                'kategori_file' => $kategoriFile,
-                'file_pdf' => $file['path']
-            ];
-            $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+                $rancanganAsesmenFileData = [
+                    'id_porto' => $portofolioId,
+                    'kategori' => $kategoriAsesmen,
+                    'kategori_file' => $kategoriFile,
+                    'file_pdf' => $file['path']
+                ];
+                $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+            }
         }
 
         // Simpan data ke tabel pelaksanaan perkuliahan

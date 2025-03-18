@@ -3,11 +3,7 @@
         'name' => 'codeigniter4/appstarter',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-<<<<<<< HEAD
-        'reference' => 'a889918294df35778eea856647e79e925e20a169',
-=======
         'reference' => '8cac87b0e175248d2382e3943fc11d4780e432be',
->>>>>>> 31f2652da1b666e2eb39c0acd945345431712191
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -26,11 +22,7 @@
         'codeigniter4/appstarter' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-<<<<<<< HEAD
-            'reference' => 'a889918294df35778eea856647e79e925e20a169',
-=======
             'reference' => '8cac87b0e175248d2382e3943fc11d4780e432be',
->>>>>>> 31f2652da1b666e2eb39c0acd945345431712191
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -522,21 +514,12 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-<<<<<<< HEAD
-        'smalot/pdfparser' => array(
-            'pretty_version' => 'v2.11.0',
-            'version' => '2.11.0.0',
-            'reference' => 'ac8e6678b0940e4b2ccd5caadd3fb18e68093be6',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../smalot/pdfparser',
-=======
         'shuchkin/simplexlsx' => array(
             'pretty_version' => '1.1.13',
             'version' => '1.1.13.0',
             'reference' => '71a5e3d40d14e33161f8a40b3fd02de542218ef0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../shuchkin/simplexlsx',
->>>>>>> 31f2652da1b666e2eb39c0acd945345431712191
             'aliases' => array(),
             'dev_requirement' => false,
         ),
