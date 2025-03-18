@@ -117,7 +117,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="mb-4">
-                                                    <p class="text-danger">*Mohon untuk mengunduh template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
+                                                    <p class="text-danger">*Mohon untuk mengunduh dan menggunakan template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
                                                 </div>
                                                 <div class="text-center">
                                                     <a href="<?= base_url('downloads/template_cpl_pi.xlsx') ?>" class="btn btn-outline-primary me-2">
@@ -154,7 +154,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="mb-4">
-                                                    <p class="text-danger">*Mohon untuk mengunduh template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
+                                                    <p class="text-danger">*Mohon untuk mengunduh dan menggunakan template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
                                                 </div>
                                                 <div class="text-center">
                                                 <a href="<?= base_url('downloads/template_matkul.xlsx') ?>" class="btn btn-outline-primary me-2">
@@ -191,7 +191,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="mb-4">
-                                                    <p class="text-danger">*Mohon untuk mengunduh template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
+                                                    <p class="text-danger">*Mohon untuk mengunduh dan menggunakan template pada tombol Download Template di bawah ini, agar sistem dapat menyimpan data dengan benar.</p>
                                                 </div>
                                                 <div class="text-center">
                                                     <a href="<?= base_url('downloads/template_matkul_diampu.xlsx') ?>" class="btn btn-outline-primary me-2">

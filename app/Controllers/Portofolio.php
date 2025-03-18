@@ -711,9 +711,11 @@ class Portofolio extends BaseController
 
             // Ambil data dari form
             $evaluasi = $this->request->getPost('evaluasi');
+            $cpmk_nilai = $this->request->getPost('cpmk_nilai') ?? [];
 
             // Simpan ke session
             session()->set('evaluasi_perkuliahan', $evaluasi);
+            session()->set('cpmk_nilai', $cpmk_nilai); // Tambahkan baris ini
             session()->set('current_progress', 'evaluasi_perkuliahan');
 
             return $this->response->setJSON([
@@ -791,11 +793,21 @@ class Portofolio extends BaseController
         $cpmkMapping = []; // Untuk menyimpan mapping antara no_cpmk dan ID database
         $subCpmkMapping = []; // Untuk menyimpan mapping antara no_scpmk dan ID database
 
+        // Ambil nilai CPMK dari session
+        $cpmkNilai = $sessionData['cpmk_nilai'] ?? [];
+
         foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
+            // Cek apakah ada nilai untuk CPMK ini
+            $avgCpmk = null;
+            if (isset($cpmkNilai[$noCpmk])) {
+                $avgCpmk = floatval($cpmkNilai[$noCpmk]);
+            }
+
             $cpmkData = [
                 'id_porto' => $portofolioId,
                 'no_cpmk' => $cpmk['selectedCpl'],
-                'isi_cpmk' => $cpmk['narasi']
+                'isi_cpmk' => $cpmk['narasi'],
+                'avg_cpmk' => $avgCpmk // Simpan nilai CPMK ke field avg_cpmk
             ];
             $cpmkId = $cpmkModel->insert($cpmkData);
             $cpmkMapping[$noCpmk] = $cpmkId; // Simpan mapping antara no_cpmk dan ID database
