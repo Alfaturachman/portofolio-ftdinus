@@ -29,19 +29,42 @@ class Portofolio extends BaseController
         $currentUserNPP = session()->get('UserSession.username');
 
         $portofolioModel = new PortofolioModel();
-        $data['portofolios'] = $portofolioModel->getAllPortofolio();
-
+        
+        // Get data from matkul_diampu table grouped by kelp_matkul for the current user
+        $data['matkulList'] = $portofolioModel->getMatkulDiampuByUser($currentUserNPP);
+        
+        // Check import status for each course
+        $importStatus = [];
+        foreach ($data['matkulList'] as $matkul) {
+            $key = $matkul['kode_matkul'] . '_' . $matkul['kelp_matkul'] . '_' . $matkul['kode_ts'];
+            $importStatus[$key] = $portofolioModel->checkMahasiswaKelasExists(
+                $matkul['kode_matkul'], 
+                $matkul['kelp_matkul'], 
+                $matkul['kode_ts']
+            );
+        }
+        $data['importStatus'] = $importStatus;
+        
         return view('backend/portofolio-form/index', $data);
     }
 
-    public function edit($id)
+    public function daftar($kode_matkul)
     {
-        // Tambahkan logika untuk mengedit portofolio
-    }
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
 
-    public function cetak($id)
-    {
-        // Tambahkan logika untuk mencetak portofolio
+        $portofolioModel = new PortofolioModel();
+        
+        // Get the mata kuliah details
+        $matkulDetail = $portofolioModel->getMatkulDetail($kode_matkul);
+        
+        // Get list of portofolios for this mata kuliah
+        $data['portofolioList'] = $portofolioModel->getPortofolioByKodeMK($kode_matkul);
+        $data['matkul'] = $matkulDetail;
+        $data['kode_matkul'] = $kode_matkul;
+        
+        return view('backend/portofolio-form/daftar-portofolio', $data);
     }
 
     public function upload_rps()
@@ -429,16 +452,14 @@ class Portofolio extends BaseController
 
             // Loop through the assessment data to check what's selected
             foreach ($assessmentData as $cpmkData) {
-                foreach ($cpmkData as $subCpmkData) {
-                    if (isset($subCpmkData['tugas']) && $subCpmkData['tugas']) {
-                        $tugasSelected = true;
-                    }
-                    if (isset($subCpmkData['uts']) && $subCpmkData['uts']) {
-                        $utsSelected = true;
-                    }
-                    if (isset($subCpmkData['uas']) && $subCpmkData['uas']) {
-                        $uasSelected = true;
-                    }
+                if (isset($cpmkData['tugas']) && $cpmkData['tugas']) {
+                    $tugasSelected = true;
+                }
+                if (isset($cpmkData['uts']) && $cpmkData['uts']) {
+                    $utsSelected = true;
+                }
+                if (isset($cpmkData['uas']) && $cpmkData['uas']) {
+                    $uasSelected = true;
                 }
             }
 
@@ -450,7 +471,8 @@ class Portofolio extends BaseController
                 session()->set('current_progress', 'assessment');
                 return $this->response->setJSON([
                     'success' => true,
-                    'message' => 'Data asesmen berhasil disimpan'
+                    'message' => 'Data asesmen berhasil disimpan',
+                    'redirect' => site_url('portofolio-form/rancangan-soal') // Changed redirect to rancangan-soal
                 ]);
             }
 
@@ -507,7 +529,7 @@ class Portofolio extends BaseController
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Data asesmen dan file berhasil disimpan',
-                'redirect' => site_url('portofolio-form/pelaksanaan-perkuliahan')
+                'redirect' => site_url('portofolio-form/rancangan-soal') // Changed redirect to rancangan-soal
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -515,6 +537,194 @@ class Portofolio extends BaseController
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    public function rancangan_soal()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Check if assessment data exists in session
+        if (!session()->get('assessment_data')) {
+            return redirect()->to('/portofolio-form/rancangan-asesmen')
+                ->with('error', 'Silakan lengkapi rancangan asesmen terlebih dahulu.');
+        }
+
+        // Initialize soal_mapping data in session if not exists
+        if (!session()->has('soal_mapping_data')) {
+            // Create default mapping with 1 soal for each assessment type
+            $soalMapping = [
+                'tugas' => [
+                    ['soal_no' => 1, 'cpmk_mappings' => []]
+                ],
+                'uts' => [
+                    ['soal_no' => 1, 'cpmk_mappings' => []]
+                ],
+                'uas' => [
+                    ['soal_no' => 1, 'cpmk_mappings' => []]
+                ]
+            ];
+            
+            session()->set('soal_mapping_data', $soalMapping);
+        }
+
+        return view('backend/portofolio-form/rancangan-soal');
+    }
+
+    public function saveSoalMapping()
+    {
+        try {
+            $json = $this->request->getJSON();
+            $soalMappingData = $json->soal_mapping ?? null;
+
+            if (!$soalMappingData) {
+                throw new \Exception('Data pemetaan soal kosong atau tidak valid.');
+            }
+
+            // Convert the data to an array
+            $soalMappingArray = json_decode(json_encode($soalMappingData), true);
+            
+            // Process the data before saving
+            $processedData = [
+                'tugas' => [],
+                'uts' => [],
+                'uas' => []
+            ];
+            
+            foreach (['tugas', 'uts', 'uas'] as $type) {
+                if (isset($soalMappingArray[$type]) && is_array($soalMappingArray[$type])) {
+                    // Sort the items by soal_no to ensure consistent ordering
+                    usort($soalMappingArray[$type], function($a, $b) {
+                        return $a['soal_no'] <=> $b['soal_no'];
+                    });
+                    
+                    $processedData[$type] = $soalMappingArray[$type];
+                }
+            }
+
+            session()->set('soal_mapping_data', $processedData);
+            session()->set('current_progress', 'soal_mapping');
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Data pemetaan soal berhasil disimpan'
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function addSoal()
+    {
+        try {
+            $json = $this->request->getJSON();
+            $assessmentType = $json->assessment_type ?? null;
+
+            if (!$assessmentType || !in_array($assessmentType, ['tugas', 'uts', 'uas'])) {
+                throw new \Exception('Tipe asesmen tidak valid.');
+            }
+
+            // Get current soal mapping data
+            $soalMappingData = session()->get('soal_mapping_data') ?? [
+                'tugas' => [],
+                'uts' => [],
+                'uas' => []
+            ];
+
+            // Find the highest soal number for this assessment type
+            $maxSoalNo = 0;
+            foreach ($soalMappingData[$assessmentType] as $soal) {
+                if ($soal['soal_no'] > $maxSoalNo) {
+                    $maxSoalNo = $soal['soal_no'];
+                }
+            }
+
+            // Add new soal with number incremented by 1
+            $soalMappingData[$assessmentType][] = [
+                'soal_no' => $maxSoalNo + 1,
+                'cpmk_mappings' => []
+            ];
+
+            // Save updated data back to session
+            session()->set('soal_mapping_data', $soalMappingData);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Soal berhasil ditambahkan',
+                'soal_no' => $maxSoalNo + 1
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function rekap_nilai()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Check if soal_mapping data exists in session
+        if (!session()->get('soal_mapping_data')) {
+            return redirect()->to('/portofolio-form/rancangan-soal')
+                ->with('error', 'Silakan lengkapi rancangan soal terlebih dahulu.');
+        }
+
+        // Check if assessment data exists in session
+        if (!session()->get('assessment_data')) {
+            return redirect()->to('/portofolio-form/rancangan-asesmen')
+                ->with('error', 'Silakan lengkapi rancangan asesmen terlebih dahulu.');
+        }
+
+        // Check if CPMK and mapping data exists in session
+        if (!session()->get('cpmk_data') || !session()->get('mapping_data')) {
+            return redirect()->to('/portofolio-form/cpmk-cpl')
+                ->with('error', 'Silakan lengkapi data CPMK dan CPL terlebih dahulu.');
+        }
+
+        return view('backend/portofolio-form/rekap-nilai');
+    }
+
+    public function getMahasiswaByKelas($kelasId)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized access']);
+        }
+
+        $db = \Config\Database::connect();
+        
+        // Get kelas data
+        $kelasData = $db->table('matkul_diampu')
+            ->where('id', $kelasId)
+            ->get()
+            ->getRowArray();
+        
+        if (!$kelasData) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Kelas tidak ditemukan']);
+        }
+        
+        // Get mahasiswa data
+        $mahasiswaData = $db->table('mahasiswa_kelas')
+            ->select('nim, nama')
+            ->where('kode_matkul', $kelasData['kode_matkul'])
+            ->where('kelp_matkul', $kelasData['kelp_matkul'])
+            ->where('kode_ts', $kelasData['kode_ts'] ?? null)
+            ->orderBy('nama', 'ASC')
+            ->get()
+            ->getResultArray();
+        
+        if (empty($mahasiswaData)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada mahasiswa di kelas ini']);
+        }
+        
+        return $this->response->setJSON(['success' => true, 'mahasiswa' => $mahasiswaData]);
     }
 
     public function pelaksanaan_perkuliahan()
