@@ -54,9 +54,9 @@
                                     <td><?= date('d M Y H:i', strtotime($portofolio['ins_time'])) ?></td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="<?= base_url('portofolio/edit/' . $portofolio['id']) ?>" class="btn btn-sm btn-warning">
+                                            <!-- <a href="<?= base_url('portofolio/edit/' . $portofolio['id']) ?>" class="btn btn-sm btn-warning">
                                                 Edit
-                                            </a>
+                                            </a> -->
                                             <a href="<?= base_url('cetak-pdf/' . $portofolio['id']) ?>" class="btn btn-sm btn-primary">
                                                 Cetak
                                             </a>
