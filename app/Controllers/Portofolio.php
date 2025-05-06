@@ -665,7 +665,7 @@ class Portofolio extends BaseController
         }
     }
 
-    public function rekap_nilai()
+    public function nilai_soal()
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -689,7 +689,7 @@ class Portofolio extends BaseController
                 ->with('error', 'Silakan lengkapi data CPMK dan CPL terlebih dahulu.');
         }
 
-        return view('backend/portofolio-form/rekap-nilai');
+        return view('backend/portofolio-form/nilai-soal');
     }
 
     public function getMahasiswaByKelas($kelasId)
@@ -725,6 +725,125 @@ class Portofolio extends BaseController
         }
         
         return $this->response->setJSON(['success' => true, 'mahasiswa' => $mahasiswaData]);
+    }
+
+    public function saveNilaiSoal()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Sesi login Anda telah berakhir. Silakan login kembali.'
+            ]);
+        }
+
+        // Get kelas ID from POST data
+        $kelasId = $this->request->getPost('kelas_id');
+        if (!$kelasId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ID Kelas tidak ditemukan'
+            ]);
+        }
+
+        // Get nilai data from POST
+        $nilaiData = $this->request->getPost('nilai');
+        if (!$nilaiData) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Tidak ada data nilai yang diterima'
+            ]);
+        }
+
+        // Initialize arrays to store grades and averages
+        $gradesData = [];
+        $cpmkAverages = [];
+
+        // Get assessment types with soal
+        $soalMappingData = session()->get('soal_mapping_data') ?? [
+            'tugas' => [],
+            'uts' => [],
+            'uas' => []
+        ];
+
+        // Process each assessment type (tugas, uts, uas)
+        foreach ($nilaiData as $type => $mahasiswaData) {
+            // Skip if no soal for this type
+            if (empty($soalMappingData[$type])) {
+                continue;
+            }
+
+            $gradesData[$type] = [];
+            $cpmkAverages[$type] = [];
+            
+            // Get list of CPMK numbers used in this assessment type
+            $cpmkNumbers = [];
+            foreach ($soalMappingData[$type] as $soal) {
+                foreach ($soal['cpmk_mappings'] as $cpmkNo => $isUsed) {
+                    if ($isUsed && !in_array($cpmkNo, $cpmkNumbers)) {
+                        $cpmkNumbers[] = $cpmkNo;
+                    }
+                }
+            }
+            
+            // Calculate CPMK averages for this assessment type
+            foreach ($cpmkNumbers as $cpmkNo) {
+                // Get all soal mapped to this CPMK
+                $soalNumbers = [];
+                foreach ($soalMappingData[$type] as $soal) {
+                    if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]) {
+                        $soalNumbers[] = $soal['soal_no'];
+                    }
+                }
+                
+                // Calculate average for each soal in this CPMK
+                $soalAverages = [];
+                foreach ($soalNumbers as $soalNo) {
+                    $sum = 0;
+                    $count = 0;
+                    
+                    // Sum up all student grades for this soal and CPMK
+                    foreach ($mahasiswaData as $nim => $studentData) {
+                        if (isset($studentData[$cpmkNo][$soalNo]) && $studentData[$cpmkNo][$soalNo] !== '') {
+                            $sum += floatval($studentData[$cpmkNo][$soalNo]);
+                            $count++;
+                        }
+                    }
+                    
+                    // Calculate average for this soal
+                    $soalAverages[$soalNo] = $count > 0 ? $sum / $count : 0;
+                }
+                
+                // Calculate average of all soal for this CPMK
+                $totalAvg = 0;
+                $validCount = 0;
+                foreach ($soalAverages as $avg) {
+                    if ($avg > 0) {
+                        $totalAvg += $avg;
+                        $validCount++;
+                    }
+                }
+                
+                // Store CPMK average
+                $cpmkAverages[$type][$cpmkNo] = $validCount > 0 ? 
+                    number_format($totalAvg / $validCount, 2) : 0;
+            }
+            
+            // Store individual student grades
+            $gradesData[$type] = $mahasiswaData;
+        }
+
+        // Store data in session
+        session()->set('nilai_data', [
+            'kelas_id' => $kelasId,
+            'grades' => $gradesData,
+            'cpmk_averages' => $cpmkAverages
+        ]);
+
+        // Return success response
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data nilai berhasil disimpan'
+        ]);
     }
 
     public function pelaksanaan_perkuliahan()

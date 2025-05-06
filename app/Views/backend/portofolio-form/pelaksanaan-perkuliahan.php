@@ -236,7 +236,7 @@
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/rancangan-soal') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/nilai-soal') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <div>

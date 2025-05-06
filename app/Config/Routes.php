@@ -35,7 +35,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->get('pemetaan', 'Portofolio::pemetaan');
     $routes->get('rancangan-asesmen', 'Portofolio::rancangan_asesmen');
     $routes->get('rancangan-soal', 'Portofolio::rancangan_soal');
-    $routes->get('rekap-nilai', 'Portofolio::rekap_nilai');
+    $routes->get('nilai-soal', 'Portofolio::nilai_soal');
     $routes->get('pelaksanaan-perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
     $routes->get('hasil-asesmen', 'Portofolio::hasil_asesmen');
     $routes->get('evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
@@ -55,7 +55,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->post('saveAssessmentToSession', 'Portofolio::saveAssessmentToSession');
     $routes->post('saveAssessmentWithFiles', 'Portofolio::saveAssessmentWithFiles');
     $routes->post('saveSoalMapping', 'Portofolio::saveSoalMapping');
-    $routes->post('pelaksanaan_perkuliahan', 'Portofolio::pelaksanaan_perkuliahan');
+    $routes->post('saveNilaiSoal', 'Portofolio::saveNilaiSoal');
     $routes->post('savePelaksanaanPerkuliahan', 'Portofolio::savePelaksanaanPerkuliahan');
     $routes->post('saveHasilAsesmen', 'Portofolio::saveHasilAsesmen');
     $routes->post('saveEvaluasiPerkuliahan', 'Portofolio::saveEvaluasiPerkuliahan');
