@@ -166,12 +166,12 @@
 
                     <form id="rpsForm" enctype="multipart/form-data">
                         <h5 class="fw-bolder mb-3">Rancangan Jadwal Assesmen</h5>
+                        <!-- Modified table structure in the view file -->
                         <div class="table-responsive mb-3">
                             <table class="table table-bordered">
                                 <thead class="text-white" style="background-color: #0f4c92;">
                                     <tr class="align-middle text-center">
                                         <th>CPMK</th>
-                                        <th>Sub CPMK</th>
                                         <th>TUGAS</th>
                                         <th>UTS</th>
                                         <th>UAS</th>
@@ -189,69 +189,52 @@
                                     }
 
                                     if ($mappingData && $cpmkData):
-                                        $currentCpmk = null;
-                                        $rowspanCount = [];
-
-                                        // Calculate rowspan for each CPMK
+                                        // Get unique CPMK numbers from mapping data
+                                        $uniqueCpmkNumbers = [];
                                         foreach ($mappingData as $cplNo => $cplMapping) {
                                             foreach ($cplMapping as $cpmkNo => $subCpmks) {
-                                                if (!isset($rowspanCount[$cpmkNo])) {
-                                                    $rowspanCount[$cpmkNo] = 0;
-                                                }
-                                                foreach ($subCpmks as $subNo => $isChecked) {
-                                                    if ($isChecked) {
-                                                        $rowspanCount[$cpmkNo]++;
-                                                    }
+                                                if (!in_array($cpmkNo, $uniqueCpmkNumbers)) {
+                                                    $uniqueCpmkNumbers[] = $cpmkNo;
                                                 }
                                             }
                                         }
-
-                                        // Display the table rows
-                                        foreach ($mappingData as $cplNo => $cplMapping):
-                                            foreach ($cplMapping as $cpmkNo => $subCpmks):
-                                                $firstRow = true;
-                                                foreach ($subCpmks as $subNo => $isChecked):
-                                                    if ($isChecked):
+                                        
+                                        // Sort CPMK numbers
+                                        sort($uniqueCpmkNumbers);
+                                        
+                                        // Display one row per CPMK
+                                        foreach ($uniqueCpmkNumbers as $cpmkNo):
                                     ?>
-                                                        <tr>
-                                                            <?php if ($firstRow && $rowspanCount[$cpmkNo] > 0): ?>
-                                                                <td class="align-middle" rowspan="<?= $rowspanCount[$cpmkNo] ?>">
-                                                                    <strong>CPMK <?= $cpmkNo ?></strong>
-                                                                </td>
-                                                            <?php endif; ?>
-                                                            <td class="align-middle">
-                                                                <strong>Sub CPMK <?= $subNo ?></strong>
-                                                            </td>
-                                                            <!-- Modified checkbox input fields in the table -->
-                                                            <td class="text-center">
-                                                                <input type="checkbox"
-                                                                    class="assessment-checkbox"
-                                                                    name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][tugas]"
-                                                                    <?= isset($assessmentData[$cpmkNo][$subNo]['tugas']) && $assessmentData[$cpmkNo][$subNo]['tugas'] ? 'checked' : '' ?>>
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <input type="checkbox"
-                                                                    class="assessment-checkbox"
-                                                                    name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][uts]"
-                                                                    <?= isset($assessmentData[$cpmkNo][$subNo]['uts']) && $assessmentData[$cpmkNo][$subNo]['uts'] ? 'checked' : '' ?>>
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <input type="checkbox"
-                                                                    class="assessment-checkbox"
-                                                                    name="assessment[<?= $cpmkNo ?>][<?= $subNo ?>][uas]"
-                                                                    <?= isset($assessmentData[$cpmkNo][$subNo]['uas']) && $assessmentData[$cpmkNo][$subNo]['uas'] ? 'checked' : '' ?>>
-                                                            </td>
-                                                        </tr>
-                                        <?php
-                                                        $firstRow = false;
-                                                    endif;
-                                                endforeach;
-                                            endforeach;
+                                        <tr>
+                                            <td class="align-middle">
+                                                <strong>CPMK <?= $cpmkNo ?></strong>
+                                            </td>
+                                            <!-- Modified checkbox input fields in the table -->
+                                            <td class="text-center">
+                                                <input type="checkbox"
+                                                    class="assessment-checkbox"
+                                                    name="assessment[<?= $cpmkNo ?>][tugas]"
+                                                    <?= isset($assessmentData[$cpmkNo]['tugas']) && $assessmentData[$cpmkNo]['tugas'] ? 'checked' : '' ?>>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox"
+                                                    class="assessment-checkbox"
+                                                    name="assessment[<?= $cpmkNo ?>][uts]"
+                                                    <?= isset($assessmentData[$cpmkNo]['uts']) && $assessmentData[$cpmkNo]['uts'] ? 'checked' : '' ?>>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox"
+                                                    class="assessment-checkbox"
+                                                    name="assessment[<?= $cpmkNo ?>][uas]"
+                                                    <?= isset($assessmentData[$cpmkNo]['uas']) && $assessmentData[$cpmkNo]['uas'] ? 'checked' : '' ?>>
+                                            </td>
+                                        </tr>
+                                    <?php
                                         endforeach;
                                     else:
-                                        ?>
+                                    ?>
                                         <tr>
-                                            <td colspan="5" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
+                                            <td colspan="4" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -463,21 +446,19 @@
             });
         });
 
-        // Function to collect assessment data from checkboxes
+        // Function to collect assessment data from checkboxes (modified for CPMK-only)
         function collectAssessmentData() {
             const assessmentData = {};
 
             checkboxes.forEach(checkbox => {
                 const name = checkbox.getAttribute('name');
-                const matches = name.match(/assessment\[(\d+)\]\[(\d+)\]\[(\w+)\]/);
+                const matches = name.match(/assessment\[(\d+)\]\[(\w+)\]/);
 
                 if (matches) {
-                    const [, cpmk, subCpmk, type] = matches;
+                    const [, cpmk, type] = matches;
 
                     if (!assessmentData[cpmk]) assessmentData[cpmk] = {};
-                    if (!assessmentData[cpmk][subCpmk]) assessmentData[cpmk][subCpmk] = {};
-
-                    assessmentData[cpmk][subCpmk][type] = checkbox.checked;
+                    assessmentData[cpmk][type] = checkbox.checked;
                 }
             });
 
@@ -566,7 +547,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = '<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>';
+                        window.location.href = '<?= base_url('portofolio-form/rancangan-soal') ?>';
                     } else {
                         alert('Gagal menyimpan data asesmen: ' + data.message);
                     }

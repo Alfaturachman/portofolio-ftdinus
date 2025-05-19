@@ -579,6 +579,209 @@ class ImportData extends BaseController
         }
     }
 
+    public function saveMahasiswaKelas()
+    {
+        // Set memory limit
+        ini_set('memory_limit', '512M');
+        
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Validate file
+        $validationRules = [
+            'importFile' => [
+                'rules' => 'uploaded[importFile]|ext_in[importFile,xls,xlsx]|max_size[importFile,51200]',
+                'errors' => [
+                    'uploaded' => 'File harus diupload',
+                    'ext_in' => 'Format file harus xls atau xlsx',
+                    'max_size' => 'Ukuran file maksimal 50MB'
+                ]
+            ]
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()->with('error', $this->validator->getError('importFile'));
+        }
+
+        $file = $this->request->getFile('importFile');
+        
+        if (!$file->isValid()) {
+            return redirect()->back()->with('error', 'File gagal diupload');
+        }
+
+        // Get course information from form
+        $kodeMatkul = $this->request->getPost('kode_matkul');
+        $matkul = $this->request->getPost('matkul');
+        $kelpMatkul = $this->request->getPost('kelp_matkul');
+        $kodeTs = $this->request->getPost('kode_ts');
+        
+        // Validate required course data
+        if (empty($kodeMatkul) || empty($matkul)) {
+            return redirect()->back()->with('error', 'Data mata kuliah tidak lengkap');
+        }
+
+        $fileName = $file->getRandomName();
+        $file->move(WRITEPATH . 'uploads/excel/', $fileName);
+        $filePath = WRITEPATH . 'uploads/excel/' . $fileName;
+
+        try {
+            require_once ROOTPATH . 'vendor/autoload.php';
+            
+            // Use PhpSpreadsheet to read Excel file
+            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($filePath);
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            
+            // Prepare for database
+            $model = new \App\Models\MahasiswaKelasModel();
+            $successCount = 0;
+            $errorCount = 0;
+            $errorMessages = [];
+            
+            // Define column indexes
+            $nimColIndex = null;
+            $namaColIndex = null;
+            $startDataRow = null;
+            
+            // Find header row containing "NIM" or similar
+            $highestRow = $worksheet->getHighestRow();
+            $highestColumn = $worksheet->getHighestColumn();
+            $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+            
+            // Look for header row (up to row 20)
+            for ($row = 1; $row <= min(20, $highestRow); ++$row) {
+                for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+                    // Convert column index to column letter
+                    $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                    $cellValue = trim((string)$worksheet->getCell($columnLetter . $row)->getValue());
+                    
+                    if ($cellValue === 'NIM') {
+                        $nimColIndex = $col;
+                        $startDataRow = $row + 1; // Data starts after header
+                    }
+                    
+                    if ($cellValue === 'Nama Mahasiswa' || $cellValue === 'Nama') {
+                        $namaColIndex = $col;
+                    }
+                }
+                
+                if ($nimColIndex !== null) {
+                    break;
+                }
+            }
+            
+            // If NIM column not found
+            if ($nimColIndex === null) {
+                @unlink($filePath);
+                return redirect()->back()->with('error', 'Format file tidak sesuai. Kolom NIM tidak ditemukan.');
+            }
+            
+            // If Nama column not found, try to find any column with "Nama" in it
+            if ($namaColIndex === null) {
+                for ($row = 1; $row <= min(20, $highestRow); ++$row) {
+                    for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+                        $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                        $cellValue = trim((string)$worksheet->getCell($columnLetter . $row)->getValue());
+                        
+                        if (strpos(strtolower($cellValue), 'nama') !== false) {
+                            $namaColIndex = $col;
+                            break 2; // Exit both loops
+                        }
+                    }
+                }
+            }
+            
+            // If still not found, assume it's the column after NIM
+            if ($namaColIndex === null) {
+                $namaColIndex = $nimColIndex + 1;
+            }
+            
+            // Process data rows
+            $batchData = [];
+            $batchSize = 500;
+            
+            for ($row = $startDataRow; $row <= $highestRow; ++$row) {
+                // Get the row number or first cell to check if it's a data row
+                $firstColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(1);
+                $rowNumber = trim((string)$worksheet->getCell($firstColLetter . $row)->getValue());
+                
+                // Get NIM and Nama values
+                $nimColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($nimColIndex);
+                $namaColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($namaColIndex);
+                
+                $nim = trim((string)$worksheet->getCell($nimColLetter . $row)->getValue());
+                $nama = trim((string)$worksheet->getCell($namaColLetter . $row)->getValue());
+                
+                // Skip if NIM is empty
+                if (empty($nim)) {
+                    continue;
+                }
+                
+                // Prepare data for insertion
+                $rowData = [
+                    'nim' => $nim,
+                    'nama' => $nama,
+                    'kode_matkul' => $kodeMatkul,
+                    'matkul' => $matkul,
+                    'kelp_matkul' => $kelpMatkul,
+                    'kode_ts' => $kodeTs,
+                    'ins_time' => date('Y-m-d H:i:s'),
+                    'upd_time' => date('Y-m-d H:i:s')
+                ];
+                
+                $batchData[] = $rowData;
+                
+                // Process batch if reached batch size
+                if (count($batchData) >= $batchSize) {
+                    try {
+                        $model->insertBatchData($batchData);
+                        $successCount += count($batchData);
+                    } catch (\Exception $e) {
+                        $errorCount++;
+                        $errorMessages[] = "Error pada baris sekitar " . ($row - count($batchData)) . ": " . $e->getMessage();
+                    }
+                    
+                    // Reset batch data
+                    $batchData = [];
+                    
+                    // Force garbage collection
+                    gc_collect_cycles();
+                }
+            }
+            
+            // Process remaining data
+            if (count($batchData) > 0) {
+                try {
+                    $model->insertBatchData($batchData);
+                    $successCount += count($batchData);
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    $errorMessages[] = "Error pada batch terakhir: " . $e->getMessage();
+                }
+            }
+            
+            // Clean up
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
+            @unlink($filePath);
+            
+            if ($successCount == 0) {
+                return redirect()->back()->with('error', 'Tidak ada data mahasiswa yang berhasil diimpor. Periksa format file Excel Anda.');
+            } else if ($errorCount > 0) {
+                return redirect()->back()->with('error', 'Terdapat error saat import data mahasiswa. ' . implode('<br>', $errorMessages));
+            } else {
+                return redirect()->back()->with('success', "Berhasil mengimpor $successCount data mahasiswa ke database.");
+            }
+            
+        } catch (\Exception $e) {
+            // Clean up resources
+            @unlink($filePath);
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
     public function downloadTemplateCplPi()
     {
         // Load library untuk membuat file Excel
