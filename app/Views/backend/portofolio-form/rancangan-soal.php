@@ -35,6 +35,27 @@
         margin-top: 5px;
     }
 
+    .delete-btn {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+    }
+
+    .soal-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
     @media (max-width: 768px) {
         .d-flex.justify-content-between.align-items-baseline {
             flex-wrap: wrap;
@@ -226,6 +247,7 @@
                                             <?php foreach ($uniqueCpmkNumbers as $cpmkNo): ?>
                                             <th colspan="1">CPMK <?= $cpmkNo ?></th>
                                             <?php endforeach; ?>
+                                            <th rowspan="2" style="vertical-align: middle;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -249,6 +271,11 @@
                                                     <?= isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo] ? 'checked' : '' ?>>
                                             </td>
                                             <?php endforeach; ?>
+                                            <td class="text-center">
+                                                <button type="button" class="delete-btn delete-soal-btn" data-type="tugas" data-soal-no="<?= $soal['soal_no'] ?>" title="Hapus Soal">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -272,6 +299,7 @@
                                             <?php foreach ($uniqueCpmkNumbers as $cpmkNo): ?>
                                             <th colspan="1">CPMK <?= $cpmkNo ?></th>
                                             <?php endforeach; ?>
+                                            <th rowspan="2" style="vertical-align: middle;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -295,6 +323,11 @@
                                                     <?= isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo] ? 'checked' : '' ?>>
                                             </td>
                                             <?php endforeach; ?>
+                                            <td class="text-center">
+                                                <button type="button" class="delete-btn delete-soal-btn" data-type="uts" data-soal-no="<?= $soal['soal_no'] ?>" title="Hapus Soal">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -318,6 +351,7 @@
                                             <?php foreach ($uniqueCpmkNumbers as $cpmkNo): ?>
                                             <th colspan="1">CPMK <?= $cpmkNo ?></th>
                                             <?php endforeach; ?>
+                                            <th rowspan="2" style="vertical-align: middle;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -341,6 +375,11 @@
                                                     <?= isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo] ? 'checked' : '' ?>>
                                             </td>
                                             <?php endforeach; ?>
+                                            <td class="text-center">
+                                                <button type="button" class="delete-btn delete-soal-btn" data-type="uas" data-soal-no="<?= $soal['soal_no'] ?>" title="Hapus Soal">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -383,6 +422,16 @@
                 addNewSoalRow(assessmentType);
             });
         });
+
+        // Add click handlers to all "Hapus Soal" buttons (using event delegation)
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-soal-btn') || e.target.closest('.delete-soal-btn')) {
+                const button = e.target.classList.contains('delete-soal-btn') ? e.target : e.target.closest('.delete-soal-btn');
+                const assessmentType = button.getAttribute('data-type');
+                const soalNo = button.getAttribute('data-soal-no');
+                deleteSoalRow(assessmentType, soalNo);
+            }
+        });
         
         // Function to add a new question row
         function addNewSoalRow(assessmentType) {
@@ -416,7 +465,7 @@
                 </td>
             `;
             
-            // Get all CPMK columns from the header
+            // Get all CPMK columns from the header (exclude the first and last column which are "Soal No" and "Aksi")
             const cpmkHeaders = table.querySelectorAll('thead th[colspan="1"]');
             
             // Add checkbox cells for each CPMK
@@ -432,9 +481,82 @@
                     </td>
                 `;
             });
+
+            // Add delete button cell
+            newRowHtml += `
+                <td class="text-center">
+                    <button type="button" class="delete-btn delete-soal-btn" data-type="${assessmentType}" data-soal-no="${newSoalNo}" title="Hapus Soal">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </td>
+            `;
             
             newRow.innerHTML = newRowHtml;
             tbody.appendChild(newRow);
+        }
+
+        // Function to delete a question row
+        function deleteSoalRow(assessmentType, soalNo) {
+            const table = document.getElementById(`${assessmentType}-table`);
+            if (!table) return;
+
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+
+            // Check if there's only one row left
+            if (rows.length <= 1) {
+                alert('Minimal harus ada satu soal untuk setiap jenis asesmen.');
+                return;
+            }
+
+            // Confirm deletion
+            if (confirm(`Apakah Anda yakin ingin menghapus Soal no ${soalNo}?`)) {
+                // Find and remove the row
+                const rowToDelete = tbody.querySelector(`tr[data-soal-no="${soalNo}"]`);
+                if (rowToDelete) {
+                    rowToDelete.remove();
+                    
+                    // Reorder the remaining rows
+                    reorderSoalRows(assessmentType);
+                }
+            }
+        }
+
+        // Function to reorder soal numbers after deletion
+        function reorderSoalRows(assessmentType) {
+            const table = document.getElementById(`${assessmentType}-table`);
+            if (!table) return;
+
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+
+            // Reorder rows and update soal numbers
+            rows.forEach((row, index) => {
+                const newSoalNo = index + 1;
+                
+                // Update data attribute
+                row.setAttribute('data-soal-no', newSoalNo);
+                
+                // Update soal number display
+                const soalNoCell = row.querySelector('td:first-child strong');
+                if (soalNoCell) {
+                    soalNoCell.textContent = `Soal no ${newSoalNo}`;
+                }
+                
+                // Update checkbox names
+                const checkboxes = row.querySelectorAll('.soal-checkbox');
+                checkboxes.forEach(checkbox => {
+                    const name = checkbox.getAttribute('name');
+                    const newName = name.replace(/\[\d+\]/, `[${newSoalNo}]`);
+                    checkbox.setAttribute('name', newName);
+                });
+
+                // Update delete button data attribute
+                const deleteBtn = row.querySelector('.delete-soal-btn');
+                if (deleteBtn) {
+                    deleteBtn.setAttribute('data-soal-no', newSoalNo);
+                }
+            });
         }
         
         // Form submission handler
@@ -507,7 +629,7 @@
                 if (data.success) {
                     console.log('Berhasil menyimpan data pemetaan soal:', data.message);
                     // Redirect to the next page after successful save
-                    window.location.href = '<?= base_url('portofolio-form/nilai-soal') ?>';
+                    window.location.href = '<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>';
                 } else {
                     alert('Gagal menyimpan data pemetaan soal: ' + data.message);
                     console.error('Gagal menyimpan data pemetaan soal:', data.message);

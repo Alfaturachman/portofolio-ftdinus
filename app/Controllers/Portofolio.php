@@ -10,9 +10,11 @@ use App\Models\CpmkModel;
 use App\Models\SubCpmkModel;
 use App\Models\PortofolioModel;
 use App\Models\HasilAsesmenModel;
-use App\Models\MappingCpmkScpmkModel;
+use App\Controllers\BaseController;
 use App\Models\IdentitasMatkulModel;
+use App\Models\MappingCpmkScpmkModel;
 use App\Models\RancanganAsesmenModel;
+use App\Models\RancanganSoalModel;
 use App\Models\EvaluasiPerkuliahanModel;
 use App\Models\RancanganAsesmenFileModel;
 use App\Models\PelaksanaanPerkuliahanModel;
@@ -1193,27 +1195,77 @@ class Portofolio extends BaseController
             }
         }
 
-        // Simpan data ke tabel rancangan_asesmen
+        // Simpan data ke tabel rancangan_asesmen (MODIFIED VERSION)
         $rancanganAsesmenModel = new RancanganAsesmenModel();
-        foreach ($sessionData['assessment_data'] as $cpmkId => $assessment) {
-            // Cari ID database untuk CPMK ini
-            $actualCpmkId = $cpmkMapping[$cpmkId] ?? null;
 
-            if ($actualCpmkId) {
-                foreach ($assessment as $scpmkId => $kategori) {
-                    // Cari ID database untuk Sub-CPMK ini
-                    $actualScpmkId = $subCpmkMapping[$scpmkId] ?? null;
+        // Get assessment data from session
+        $assessmentData = $sessionData['assessment_data'] ?? [];
 
-                    if ($actualScpmkId) {
-                        $rancanganAsesmenData = [
+        // Convert assessment data to array if it's not already an array
+        if (is_object($assessmentData)) {
+            $assessmentData = json_decode(json_encode($assessmentData), true);
+        }
+
+        // Loop through assessment data (CPMK level only)
+        foreach ($assessmentData as $sessionCpmkId => $assessmentTypes) {
+            // Find the actual CPMK ID from the mapping
+            $actualCpmkId = $cpmkMapping[$sessionCpmkId] ?? null;
+
+            if ($actualCpmkId && is_array($assessmentTypes)) {
+                // Create one record per CPMK (without subcpmk)
+                $rancanganAsesmenData = [
+                    'id_porto' => $portofolioId,
+                    'id_cpmk' => $actualCpmkId,
+                    'id_scpmk' => null, // Set to null since we're not using subcpmk
+                    'tugas' => isset($assessmentTypes['tugas']) && $assessmentTypes['tugas'] ? 1 : 0,
+                    'uts' => isset($assessmentTypes['uts']) && $assessmentTypes['uts'] ? 1 : 0,
+                    'uas' => isset($assessmentTypes['uas']) && $assessmentTypes['uas'] ? 1 : 0
+                ];
+                
+                $rancanganAsesmenModel->insert($rancanganAsesmenData);
+            }
+        }
+
+        // Simpan data ke tabel rancangan_soal (MODIFIED VERSION)
+        $rancanganSoalModel = new RancanganSoalModel();
+        $soalMappingData = $sessionData['soal_mapping_data'] ?? [];
+
+        // Loop through each assessment type (tugas, uts, uas)
+        foreach ($soalMappingData as $assessmentType => $soalList) {
+            // Determine the category based on assessment type
+            $kategoriSoal = '';
+            switch ($assessmentType) {
+                case 'tugas':
+                    $kategoriSoal = 'Tugas';
+                    break;
+                case 'uts':
+                    $kategoriSoal = 'UTS';
+                    break;
+                case 'uas':
+                    $kategoriSoal = 'UAS';
+                    break;
+            }
+            
+            // Loop through each soal in the assessment type
+            foreach ($soalList as $soal) {
+                $soalNo = $soal['soal_no'];
+                $cpmkMappings = $soal['cpmk_mappings'] ?? [];
+                
+                // Loop through each CPMK mapping for this soal
+                foreach ($cpmkMappings as $sessionCpmkNo => $isChecked) {
+                    // Find the actual CPMK ID from the mapping
+                    $actualCpmkId = $cpmkMapping[$sessionCpmkNo] ?? null;
+                    
+                    if ($actualCpmkId) {
+                        $rancanganSoalData = [
                             'id_porto' => $portofolioId,
                             'id_cpmk' => $actualCpmkId,
-                            'id_scpmk' => $actualScpmkId,
-                            'tugas' => isset($kategori['tugas']) && $kategori['tugas'] ? 1 : 0,
-                            'uts' => isset($kategori['uts']) && $kategori['uts'] ? 1 : 0,
-                            'uas' => isset($kategori['uas']) && $kategori['uas'] ? 1 : 0
+                            'kategori_soal' => $kategoriSoal, // Simpan kategori soal ke field kategori_soal
+                            'no_soal' => $soalNo, // Simpan hanya nomor soal tanpa prefix kategori
+                            'nilai' => $isChecked ? 1 : 0
                         ];
-                        $rancanganAsesmenModel->insert($rancanganAsesmenData);
+                        
+                        $rancanganSoalModel->insert($rancanganSoalData);
                     }
                 }
             }
@@ -1283,7 +1335,7 @@ class Portofolio extends BaseController
         ];
         $hasilAsesmenModel->insert($hasilAsesmenData);
 
-        // Simpan data ke tabel hasil asesmen
+        // Duplikasi data hasil asesmen (seperti di kode asli)
         $hasilAsesmenModel = new HasilAsesmenModel();
         $sessionFiles = session()->get('hasil_asesmen_files');
         if (is_string($sessionFiles)) {

@@ -16,7 +16,11 @@ class RancanganAsesmenModel extends Model
 
     protected $allowedFields = ['id_porto', 'id_cpmk', 'id_scpmk', 'tugas', 'uts', 'uas'];
 
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
+    protected $dateFormat    = 'datetime';
+    protected $createdField  = 'ins_time';
+    protected $updatedField  = 'upd_time';
+    protected $deletedField  = 'deleted_at';
 
     public function getAssessmentData($idPorto)
     {

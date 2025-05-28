@@ -220,7 +220,7 @@
             <td class="align-middle">
                 <strong>CPMK ${cpmkCounter}</strong>
                 <select class="form-select mt-2" name="cpmk[${cpmkCounter}][selectedCpl]" required>
-                    <option value="">Pilih CPL</option>
+                    <option value="" hidden>Pilih CPL</option>
                     <?php
                     if (isset($cplPiData)):
                         foreach ($cplPiData as $cplNo => $cplData):
