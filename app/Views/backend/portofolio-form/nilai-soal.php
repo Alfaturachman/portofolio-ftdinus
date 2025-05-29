@@ -56,7 +56,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-sm-flex d-block align-items-center justify-content-center mb-4">
-                        <h5 class="fw-bolder mb-0">Rekap Nilai Mahasiswa</h5>
+                        <h5 class="fw-bolder mb-0">Nilai Soal Mahasiswa</h5>
                     </div>
                     
                     <!-- Step navigation -->
@@ -171,7 +171,7 @@
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-5">
-                        <h4 class="fw-bolder mb-3">Rekap Nilai Mahasiswa</h4>
+                        <h4 class="fw-bolder mb-3">Nilai Soal Mahasiswa</h4>
                         <div id="alert" class="alert alert-primary" role="alert">
                             Silahkan pilih kelas dan isi nilai mahasiswa sesuai dengan soal yang telah dirancang
                         </div>
@@ -182,11 +182,14 @@
                         <div class="col-md-6">
                             <label for="kelas_matkul" class="form-label">Kelas Mata Kuliah</label>
                             <select id="kelas_matkul" class="form-select" aria-label="Pilih Kelas">
-                                <option value="" selected hidden>-- Pilih Kelas --</option>
+                                <option value="" hidden>-- Pilih Kelas --</option>
                                 <?php
                                 // Get mata kuliah kelas from matkul_diampu with kode_matkul from session
                                 $infoMatkul = session()->get('info_matkul');
                                 $kodeMatkul = $infoMatkul['kode_mk'] ?? '';
+                                
+                                // Get selected kelas from session if exists
+                                $selectedKelasId = session()->get('selected_kelas_id') ?? '';
                                 
                                 $db = \Config\Database::connect();
                                 $kelasList = $db->table('matkul_diampu')
@@ -196,8 +199,9 @@
                                     ->getResultArray();
                                 
                                 foreach ($kelasList as $kelas):
+                                    $selected = ($kelas['id'] == $selectedKelasId) ? 'selected' : '';
                                 ?>
-                                <option value="<?= $kelas['id'] ?>">
+                                <option value="<?= $kelas['id'] ?>" <?= $selected ?>>
                                     <?= $kelas['matkul'] ?> - <?= $kelas['kelp_matkul'] ?> (<?= $kelas['semester'] ?> <?= $kelas['tahun'] ?>)
                                 </option>
                                 <?php endforeach; ?>
@@ -257,12 +261,21 @@
                             if (isset($types['uts']) && $types['uts']) $showUTS = true;
                             if (isset($types['uas']) && $types['uas']) $showUAS = true;
                         }
+                        
+                        // Get existing saved data
+                        $savedNilaiData = session()->get('nilai_soal_data') ?? null;
                         ?>
+                        
+                        <!-- Hidden inputs for JavaScript -->
+                        <input type="hidden" id="soalMappingData" value='<?= json_encode($soalMappingData) ?>'>
+                        <input type="hidden" id="uniqueCpmkNumbers" value='<?= json_encode($uniqueCpmkNumbers) ?>'>
+                        <input type="hidden" id="savedNilaiData" value='<?= json_encode($savedNilaiData) ?>'>
+                        <input type="hidden" id="selectedKelasId" value='<?= $selectedKelasId ?>'>
 
                         <!-- Tugas Section -->
                         <?php if ($showTugas && !empty($soalMappingData['tugas'])): ?>
                         <div id="tugas-nilai-section" class="mb-5">
-                            <h5 class="fw-bolder mb-3">1. Nilai Tugas</h5>
+                            <h5 class="fw-bolder mb-3">1. Nilai Soal Tugas</h5>
                             <div class="table-responsive mb-3">
                                 <table class="table table-bordered" id="tugas-nilai-table">
                                     <thead class="text-white" style="background-color: #0f4c92;">
@@ -302,14 +315,41 @@
                                         <tr>
                                             <td colspan="3" class="text-center"><strong>Rata-rata</strong></td>
                                             <?php foreach ($uniqueCpmkNumbers as $cpmkNo): ?>
-                                                <?php foreach ($soalMappingData['tugas'] as $soal): ?>
-                                                    <?php if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]): ?>
-                                                    <td class="text-center rata-rata" 
-                                                        id="rata-tugas-<?= $cpmkNo ?>-<?= $soal['soal_no'] ?>">
-                                                        Rata-rata
-                                                    </td>
-                                                    <?php endif; ?>
-                                                <?php endforeach; ?>
+                                                <?php
+                                                // Count how many soal are mapped to this CPMK
+                                                $soalCount = 0;
+                                                $firstSoal = null;
+                                                foreach ($soalMappingData['tugas'] as $soal) {
+                                                    if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]) {
+                                                        $soalCount++;
+                                                        if ($firstSoal === null) {
+                                                            $firstSoal = $soal['soal_no'];
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                // If we have soal for this CPMK
+                                                if ($soalCount > 0):
+                                                    // For the first soal, show the CPMK rata-rata with colspan
+                                                    // For other soal, don't render a cell (it's covered by colspan)
+                                                    foreach ($soalMappingData['tugas'] as $soal):
+                                                        if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]):
+                                                            if ($soal['soal_no'] === $firstSoal):
+                                                                // Get average from session if exists
+                                                                $avgValue = '0.00';
+                                                                if ($savedNilaiData && isset($savedNilaiData['cpmk_average']['tugas'][$cpmkNo])) {
+                                                                    $avgValue = $savedNilaiData['cpmk_average']['tugas'][$cpmkNo];
+                                                                }
+                                                ?>
+                                                <td class="text-center rata-rata" id="rata-tugas-<?= $cpmkNo ?>-<?= $soal['soal_no'] ?>" colspan="<?= $soalCount ?>" data-average="<?= $avgValue ?>">
+                                                    <?= $avgValue ?>
+                                                </td>
+                                                <?php 
+                                                            endif;
+                                                        endif;
+                                                    endforeach;
+                                                endif;
+                                                ?>
                                             <?php endforeach; ?>
                                         </tr>
                                     </tfoot>
@@ -321,7 +361,7 @@
                         <!-- UTS Section -->
                         <?php if ($showUTS && !empty($soalMappingData['uts'])): ?>
                         <div id="uts-nilai-section" class="mb-5">
-                            <h5 class="fw-bolder mb-3">2. Nilai Ujian Tengah Semester</h5>
+                            <h5 class="fw-bolder mb-3">2. Nilai Soal Ujian Tengah Semester</h5>
                             <div class="table-responsive mb-3">
                                 <table class="table table-bordered" id="uts-nilai-table">
                                     <thead class="text-white" style="background-color: #0f4c92;">
@@ -361,14 +401,41 @@
                                         <tr>
                                             <td colspan="3" class="text-center"><strong>Rata-rata</strong></td>
                                             <?php foreach ($uniqueCpmkNumbers as $cpmkNo): ?>
-                                                <?php foreach ($soalMappingData['uts'] as $soal): ?>
-                                                    <?php if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]): ?>
-                                                    <td class="text-center rata-rata" 
-                                                        id="rata-uts-<?= $cpmkNo ?>-<?= $soal['soal_no'] ?>">
-                                                        Rata-rata
-                                                    </td>
-                                                    <?php endif; ?>
-                                                <?php endforeach; ?>
+                                                <?php
+                                                // Count how many soal are mapped to this CPMK
+                                                $soalCount = 0;
+                                                $firstSoal = null;
+                                                foreach ($soalMappingData['uts'] as $soal) {
+                                                    if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]) {
+                                                        $soalCount++;
+                                                        if ($firstSoal === null) {
+                                                            $firstSoal = $soal['soal_no'];
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                // If we have soal for this CPMK
+                                                if ($soalCount > 0):
+                                                    // For the first soal, show the CPMK rata-rata with colspan
+                                                    // For other soal, don't render a cell (it's covered by colspan)
+                                                    foreach ($soalMappingData['uts'] as $soal):
+                                                        if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]):
+                                                            if ($soal['soal_no'] === $firstSoal):
+                                                                // Get average from session if exists
+                                                                $avgValue = '0.00';
+                                                                if ($savedNilaiData && isset($savedNilaiData['cpmk_average']['uts'][$cpmkNo])) {
+                                                                    $avgValue = $savedNilaiData['cpmk_average']['uts'][$cpmkNo];
+                                                                }
+                                                ?>
+                                                <td class="text-center rata-rata" id="rata-uts-<?= $cpmkNo ?>-<?= $soal['soal_no'] ?>" colspan="<?= $soalCount ?>" data-average="<?= $avgValue ?>">
+                                                    <?= $avgValue ?>
+                                                </td>
+                                                <?php 
+                                                            endif;
+                                                        endif;
+                                                    endforeach;
+                                                endif;
+                                                ?>
                                             <?php endforeach; ?>
                                         </tr>
                                     </tfoot>
@@ -380,7 +447,7 @@
                         <!-- UAS Section -->
                         <?php if ($showUAS && !empty($soalMappingData['uas'])): ?>
                         <div id="uas-nilai-section" class="mb-5">
-                            <h5 class="fw-bolder mb-3">3. Nilai Ujian Akhir Semester</h5>
+                            <h5 class="fw-bolder mb-3">3. Nilai Soal Ujian Akhir Semester</h5>
                             <div class="table-responsive mb-3">
                                 <table class="table table-bordered" id="uas-nilai-table">
                                     <thead class="text-white" style="background-color: #0f4c92;">
@@ -420,14 +487,41 @@
                                         <tr>
                                             <td colspan="3" class="text-center"><strong>Rata-rata</strong></td>
                                             <?php foreach ($uniqueCpmkNumbers as $cpmkNo): ?>
-                                                <?php foreach ($soalMappingData['uas'] as $soal): ?>
-                                                    <?php if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]): ?>
-                                                    <td class="text-center rata-rata" 
-                                                        id="rata-uas-<?= $cpmkNo ?>-<?= $soal['soal_no'] ?>">
-                                                        Rata-rata
-                                                    </td>
-                                                    <?php endif; ?>
-                                                <?php endforeach; ?>
+                                                <?php
+                                                // Count how many soal are mapped to this CPMK
+                                                $soalCount = 0;
+                                                $firstSoal = null;
+                                                foreach ($soalMappingData['uas'] as $soal) {
+                                                    if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]) {
+                                                        $soalCount++;
+                                                        if ($firstSoal === null) {
+                                                            $firstSoal = $soal['soal_no'];
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                // If we have soal for this CPMK
+                                                if ($soalCount > 0):
+                                                    // For the first soal, show the CPMK rata-rata with colspan
+                                                    // For other soal, don't render a cell (it's covered by colspan)
+                                                    foreach ($soalMappingData['uas'] as $soal):
+                                                        if (isset($soal['cpmk_mappings'][$cpmkNo]) && $soal['cpmk_mappings'][$cpmkNo]):
+                                                            if ($soal['soal_no'] === $firstSoal):
+                                                                // Get average from session if exists
+                                                                $avgValue = '0.00';
+                                                                if ($savedNilaiData && isset($savedNilaiData['cpmk_average']['uas'][$cpmkNo])) {
+                                                                    $avgValue = $savedNilaiData['cpmk_average']['uas'][$cpmkNo];
+                                                                }
+                                                ?>
+                                                <td class="text-center rata-rata" id="rata-uas-<?= $cpmkNo ?>-<?= $soal['soal_no'] ?>" colspan="<?= $soalCount ?>" data-average="<?= $avgValue ?>">
+                                                    <?= $avgValue ?>
+                                                </td>
+                                                <?php 
+                                                            endif;
+                                                        endif;
+                                                    endforeach;
+                                                endif;
+                                                ?>
                                             <?php endforeach; ?>
                                         </tr>
                                     </tfoot>
@@ -437,7 +531,7 @@
                         <?php endif; ?>
 
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pelaksanaan-perkuliahan') ?>">
+                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/rancangan-soal') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
                             <div>
@@ -461,6 +555,15 @@
         const rekapForm = document.getElementById('rekapNilaiForm');
         const emptyState = document.getElementById('empty-state');
         const loadingIndicator = document.getElementById('loading');
+        const selectedKelasId = document.getElementById('selectedKelasId')?.value || '';
+        const savedNilaiData = document.getElementById('savedNilaiData')?.value ? JSON.parse(document.getElementById('savedNilaiData').value) : null;
+        
+        // Initialize baseUrl for API calls
+        const baseUrl = window.location.origin;
+        
+        // Define soalMappingJSON globally
+        const soalMappingJSON = JSON.parse(document.getElementById('soalMappingData').value);
+        const uniqueCpmkJSON = JSON.parse(document.getElementById('uniqueCpmkNumbers').value);
         
         // Ubah options untuk select input nilai di tabel
         const gradeOptions = [
@@ -468,7 +571,7 @@
         ];
 
         // Menghasilkan nilai dari 1.00 hingga 4.00 dengan interval 0.25
-        for (let i = 4.00; i >= 1.00; i -= 1.00) {
+        for (let i = 4.00; i >= 1.00; i -= 1) {
             // Format nilai agar selalu menampilkan 2 digit desimal
             const formattedValue = i.toFixed(2);
             gradeOptions.push(`<option value="${formattedValue}">${formattedValue}</option>`);
@@ -476,6 +579,11 @@
 
         // Gabungkan menjadi satu string HTML
         const gradeOptionsHTML = gradeOptions.join('');
+        
+        // Auto-load data if a class is already selected
+        if (selectedKelasId) {
+            loadMahasiswaData(selectedKelasId);
+        }
         
         // Handle class selection
         kelasSelect.addEventListener('change', function() {
@@ -487,12 +595,17 @@
                 return;
             }
             
+            loadMahasiswaData(kelasId);
+        });
+        
+        // Function to load mahasiswa data
+        function loadMahasiswaData(kelasId) {
             // Show loading indicator
             emptyState.classList.add('d-none');
             loadingIndicator.classList.remove('d-none');
             
             // Fetch mahasiswa data for the selected class
-            fetch(`<?= base_url('portofolio-form/getMahasiswaByKelas') ?>/${kelasId}`)
+            fetch(`${baseUrl}/portofolio-form/getMahasiswaByKelas/${kelasId}`)
                 .then(response => response.json())
                 .then(data => {
                     // Hide loading indicator
@@ -509,6 +622,18 @@
                         
                         // Initialize average calculation
                         setupAverageCalculation();
+                        
+                        // If we have existing data from the response, populate it
+                        if (data.existingData && data.existingData.grades) {
+                            populateExistingData(data.existingData.grades);
+                        } 
+                        // Or use data from session if available
+                        else if (savedNilaiData && savedNilaiData.grades) {
+                            populateExistingData(savedNilaiData.grades);
+                        }
+                        
+                        // Calculate all averages after populating data
+                        calculateAllAverages();
                     } else {
                         // Show error message
                         emptyState.classList.remove('d-none');
@@ -527,7 +652,7 @@
                         <p class="mt-3">Terjadi kesalahan saat memuat data. Silakan coba lagi.</p>
                     `;
                 });
-        });
+        }
         
         // Function to populate mahasiswa table
         function populateMahasiswaTable(type, mahasiswaData) {
@@ -536,10 +661,6 @@
             
             // Clear existing content
             tableBody.innerHTML = '';
-            
-            // Get soal mapping data from PHP
-            const soalMappingData = <?= json_encode($soalMappingData) ?>;
-            const uniqueCpmkNumbers = <?= json_encode($uniqueCpmkNumbers) ?>;
             
             // Generate table rows for each mahasiswa
             mahasiswaData.forEach((mahasiswa, index) => {
@@ -553,8 +674,8 @@
                 `;
                 
                 // Add grade select boxes for each CPMK and soal
-                uniqueCpmkNumbers.forEach(cpmkNo => {
-                    soalMappingData[type].forEach(soal => {
+                uniqueCpmkJSON.forEach(cpmkNo => {
+                    soalMappingJSON[type].forEach(soal => {
                         if (soal.cpmk_mappings[cpmkNo]) {
                             // Create select box for this soal and CPMK
                             const selectCell = document.createElement('td');
@@ -566,7 +687,8 @@
                             select.setAttribute('data-type', type);
                             select.setAttribute('data-cpmk', cpmkNo);
                             select.setAttribute('data-soal', soal.soal_no);
-                            select.innerHTML = gradeOptions;
+                            select.setAttribute('data-nim', mahasiswa.nim);
+                            select.innerHTML = gradeOptionsHTML;
                             
                             selectCell.appendChild(select);
                             row.appendChild(selectCell);
@@ -578,6 +700,39 @@
             });
         }
         
+        // Function to populate existing data if available
+        function populateExistingData(gradesData) {
+            // Loop through each assessment type
+            for (const type in gradesData) {
+                // Loop through each student
+                for (const nim in gradesData[type]) {
+                    // Loop through each CPMK
+                    for (const cpmkNo in gradesData[type][nim]) {
+                        // Loop through each soal
+                        for (const soalNo in gradesData[type][nim][cpmkNo]) {
+                            // Find the select element
+                            const select = document.querySelector(`select[name="nilai[${type}][${nim}][${cpmkNo}][${soalNo}]"]`);
+                            if (select) {
+                                // Set the value
+                                select.value = gradesData[type][nim][cpmkNo][soalNo];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Calculate all averages for all types and CPMKs
+        function calculateAllAverages() {
+            const assessmentTypes = ['tugas', 'uts', 'uas'];
+            
+            assessmentTypes.forEach(type => {
+                uniqueCpmkJSON.forEach(cpmkNo => {
+                    calculateCPMKAverage(type, cpmkNo);
+                });
+            });
+        }
+        
         // Setup average calculation for each column
         function setupAverageCalculation() {
             // Add event listeners to all grade selects
@@ -586,39 +741,72 @@
                 select.addEventListener('change', function() {
                     const type = this.getAttribute('data-type');
                     const cpmkNo = this.getAttribute('data-cpmk');
-                    const soalNo = this.getAttribute('data-soal');
                     
-                    calculateAverage(type, cpmkNo, soalNo);
+                    // Calculate averages for this CPMK
+                    calculateCPMKAverage(type, cpmkNo);
                 });
             });
         }
         
-        // Function to calculate average for a specific column
-        function calculateAverage(type, cpmkNo, soalNo) {
-            // Get all select elements for this column
-            const selects = document.querySelectorAll(`select[data-type="${type}"][data-cpmk="${cpmkNo}"][data-soal="${soalNo}"]`);
-            
-            // Initialize variables for calculation
-            let sum = 0;
-            let count = 0;
-            
-            // Sum up all selected values
-            selects.forEach(select => {
-                const value = select.value;
-                if (value) {
-                    // Nilai sudah berupa angka, jadi cukup konversi dari string ke number
-                    sum += parseFloat(value);
-                    count++;
+        // Function to calculate average for a specific CPMK across all soal
+        function calculateCPMKAverage(type, cpmkNo) {
+            // Get all soal numbers that map to this CPMK
+            const soalNumbers = [];
+            soalMappingJSON[type].forEach(soal => {
+                if (soal.cpmk_mappings[cpmkNo]) {
+                    soalNumbers.push(soal.soal_no);
                 }
             });
             
-            // Calculate average
-            const average = count > 0 ? (sum / count).toFixed(2) : 'N/A';
+            if (soalNumbers.length === 0) return;
             
-            // Update the rata-rata cell
-            const rataRataCell = document.getElementById(`rata-${type}-${cpmkNo}-${soalNo}`);
-            if (rataRataCell) {
-                rataRataCell.textContent = average;
+            // First calculate average for each soal
+            const soalAverages = {};
+            soalNumbers.forEach(soalNo => {
+                // Get all select elements for this soal
+                const selects = document.querySelectorAll(`select[data-type="${type}"][data-cpmk="${cpmkNo}"][data-soal="${soalNo}"]`);
+                
+                // Initialize variables for calculation
+                let sum = 0;
+                let count = 0;
+                
+                // Sum up all selected values
+                selects.forEach(select => {
+                    const value = select.value;
+                    if (value) {
+                        sum += parseFloat(value);
+                        count++;
+                    }
+                });
+                
+                // Calculate average for this soal
+                const average = count > 0 ? (sum / count) : 0;
+                soalAverages[soalNo] = average;
+            });
+            
+            // Now calculate the average of all soal averages for this CPMK
+            let totalSoalAverage = 0;
+            let validSoalCount = 0;
+            
+            for (const soalNo in soalAverages) {
+                if (soalAverages[soalNo] > 0) {
+                    totalSoalAverage += soalAverages[soalNo];
+                    validSoalCount++;
+                }
+            }
+            
+            // Calculate CPMK average
+            const cpmkAverage = validSoalCount > 0 ? (totalSoalAverage / validSoalCount).toFixed(2) : '0.00';
+            
+            // Update all rata-rata cells for this CPMK with the same value
+            const firstSoalNo = soalNumbers.length > 0 ? soalNumbers[0] : null;
+            if (firstSoalNo) {
+                const rataRataCell = document.getElementById(`rata-${type}-${cpmkNo}-${firstSoalNo}`);
+                if (rataRataCell) {
+                    rataRataCell.textContent = cpmkAverage;
+                    // Store the average value as a data attribute for form submission
+                    rataRataCell.setAttribute('data-average', cpmkAverage);
+                }
             }
         }
         
@@ -638,8 +826,38 @@
             const formData = new FormData(form);
             formData.append('kelas_id', kelasId);
             
+            // Add CPMK averages to form data
+            const assessmentTypes = ['tugas', 'uts', 'uas'];
+            
+            assessmentTypes.forEach(type => {
+                uniqueCpmkJSON.forEach(cpmkNo => {
+                    // Find the first soal for this CPMK
+                    let firstSoalNo = null;
+                    
+                    for (const soal of soalMappingJSON[type]) {
+                        if (soal.cpmk_mappings[cpmkNo]) {
+                            firstSoalNo = soal.soal_no;
+                            break;
+                        }
+                    }
+                    
+                    if (firstSoalNo) {
+                        const rataRataCell = document.getElementById(`rata-${type}-${cpmkNo}-${firstSoalNo}`);
+                        if (rataRataCell) {
+                            const average = rataRataCell.getAttribute('data-average') || '0';
+                            formData.append(`cpmk_average[${type}][${cpmkNo}]`, average);
+                        }
+                    }
+                });
+            });
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
+            
             // Send data via fetch API
-            fetch('<?= base_url('portofolio-form/saveNilai') ?>', {
+            fetch(`${baseUrl}/portofolio-form/saveNilaiSoal`, {
                 method: 'POST',
                 body: formData
             })
@@ -647,14 +865,18 @@
             .then(data => {
                 if (data.success) {
                     // Redirect to the next page
-                    window.location.href = '<?= base_url('portofolio-form/evaluasi-perkuliahan') ?>';
+                    window.location.href = `${baseUrl}/portofolio-form/pelaksanaan-perkuliahan`;
                 } else {
                     alert(data.message || 'Gagal menyimpan data nilai');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Simpan & Lanjutkan <i class="ti ti-arrow-right"></i>';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('Terjadi kesalahan saat menyimpan data');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Simpan & Lanjutkan <i class="ti ti-arrow-right"></i>';
             });
         });
     });

@@ -507,7 +507,7 @@
                 if (data.success) {
                     console.log('Berhasil menyimpan data pemetaan soal:', data.message);
                     // Redirect to the next page after successful save
-                    window.location.href = '<?= base_url('portofolio-form/rekap-nilai') ?>';
+                    window.location.href = '<?= base_url('portofolio-form/nilai-soal') ?>';
                 } else {
                     alert('Gagal menyimpan data pemetaan soal: ' + data.message);
                     console.error('Gagal menyimpan data pemetaan soal:', data.message);
