@@ -17,6 +17,7 @@ use App\Models\MappingCpmkScpmkModel;
 use App\Models\RancanganAsesmenModel;
 use App\Models\RancanganAsesmenFileModel;
 use App\Models\PelaksanaanPerkuliahanModel;
+use App\Models\RancanganSoalModel;
 
 class Cetak extends BaseController
 {
@@ -35,6 +36,7 @@ class Cetak extends BaseController
         $subCpmkModel = new SubCpmkModel();
         $mappingModel = new MappingCpmkScpmkModel();
         $asesmenModel = new RancanganAsesmenModel();
+        $asesmenSoalModel = new RancanganSoalModel();
 
         // Ambil data dari model
         $portofolioData = $portofolioModel->getPortofolioCetakDetails($idPorto);
@@ -43,6 +45,7 @@ class Cetak extends BaseController
         $cpmkData = $cpmkModel->getCpmkByPorto($idPorto);
         $subCpmkData = $subCpmkModel->getSubCpmkByPorto($idPorto);
         $assessmentData = $asesmenModel->getAssessmentData($idPorto);
+        $assessmentSoalData = $asesmenSoalModel->getAssessmentSoalData($idPorto);
 
         $chartImageBase64 = $this->generateChartImage($cpmkData);
 
@@ -61,7 +64,8 @@ class Cetak extends BaseController
             'subCpmkData' => $subCpmkData,
             'mappingData' => $mappingData,
             'subCpmkNumbers' => $subCpmkNumbers,
-            'assessmentData' => $assessmentData
+            'assessmentData' => $assessmentData,
+            'assessmentSoalData' => $assessmentSoalData
         ];
     }
 
@@ -358,7 +362,19 @@ class Cetak extends BaseController
             $values[] = $cpmk['avg_cpmk'];
         }
 
-        // Konfigurasi chart menggunakan QuickChart
+        // Hitung nilai max secara dinamis untuk menentukan batas atas
+        $maxValue = max($values);
+
+        // Set yMin selalu 0 dan yMax dengan buffer
+        $yMin = 0.0; // Selalu mulai dari 0
+        $yMax = min(4, ceil(($maxValue + 0.5) * 2) / 2); // Bulatkan ke atas ke kelipatan 0.5 dengan buffer
+
+        // Pastikan yMax minimal 2.5 untuk memberikan ruang yang cukup
+        if ($yMax < 2.5) {
+            $yMax = 2.5;
+        }
+
+        // Konfigurasi chart menggunakan QuickCharts
         $chartConfig = [
             'type' => 'bar',
             'data' => [
@@ -376,12 +392,12 @@ class Cetak extends BaseController
             'options' => [
                 'scales' => [
                     'y' => [
-                        'beginAtZero' => false, // Mulai dari nilai yang ditentukan, bukan 0
-                        'min' => 1.00, // Nilai minimum sumbu Y
-                        'max' => 4.00, // Nilai maksimum sumbu Y
+                        'beginAtZero' => true,
+                        'min' => 0.0,
+                        'max' => $yMax,
                         'ticks' => [
-                            'stepSize' => 0.50, // Interval 0.50
-                            'callback' => 'function(value) { return value.toFixed(2); }' // Format angka dengan 2 desimal
+                            'stepSize' => 0.5,
+                            'callback' => 'function(value) { return value.toFixed(2); }'
                         ],
                         'grid' => [
                             'drawOnChartArea' => true,
@@ -402,12 +418,12 @@ class Cetak extends BaseController
                         'annotations' => [
                             'line1' => [
                                 'type' => 'line',
-                                'yMin' => 2.00, // Garis horizontal di nilai 2.00
+                                'yMin' => 2.00,
                                 'yMax' => 2.00,
                                 'borderColor' => 'red',
                                 'borderWidth' => 2,
-                                'borderDash' => [5, 5], // Garis putus-putus
-                                'scaleID' => 'y', // Skala yang digunakan (sumbu Y)
+                                'borderDash' => [5, 5],
+                                'scaleID' => 'y',
                                 'label' => [
                                     'display' => true,
                                     'content' => 'Nilai minimum (2.00)',

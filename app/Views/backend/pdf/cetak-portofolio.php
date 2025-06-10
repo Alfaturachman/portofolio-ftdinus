@@ -320,11 +320,11 @@
     <div class="page-break"></div>
 
     <h3>7. RANCANGAN ASESMEN</h3>
+    <p>Rancangan Asesmen</p>
     <table class="table table-bordered">
         <thead class="text-white" style="background-color: #0f4c92;">
             <tr class="align-middle text-center">
                 <th>CPMK</th>
-                <th>Sub CPMK</th>
                 <th>TUGAS</th>
                 <th>UTS</th>
                 <th>UAS</th>
@@ -333,15 +333,10 @@
         <tbody>
             <?php if (!empty($assessmentData)) : ?>
                 <?php
-                // Create associative arrays for easier lookup
+                // Buat lookup CPMK saja
                 $cpmkLookup = [];
                 foreach ($cpmkData as $cpmk) {
                     $cpmkLookup[$cpmk['id']] = $cpmk['isi_cpmk'];
-                }
-
-                $subCpmkLookup = [];
-                foreach ($subCpmkData as $subCpmk) {
-                    $subCpmkLookup[$subCpmk['id']] = $subCpmk['isi_scmpk'];
                 }
                 ?>
 
@@ -353,12 +348,6 @@
                                 <br><span class="small text-muted"><?= $cpmkLookup[$row['id_cpmk']] ?></span>
                             <?php endif; ?>
                         </td>
-                        <td>
-                            <?= 'Sub CPMK ' . $row['no_scpmk'] ?>
-                            <?php if (isset($subCpmkLookup[$row['id_scpmk']])) : ?>
-                                <br><span class="small text-muted"><?= $subCpmkLookup[$row['id_scpmk']] ?></span>
-                            <?php endif; ?>
-                        </td>
                         <td style="text-align: center; vertical-align: middle;"><?= $row['tugas'] ? 'v' : '' ?></td>
                         <td style="text-align: center; vertical-align: middle;"><?= $row['uts'] ? 'v' : '' ?></td>
                         <td style="text-align: center; vertical-align: middle;"><?= $row['uas'] ? 'v' : '' ?></td>
@@ -366,11 +355,66 @@
                 <?php endforeach; ?>
             <?php else : ?>
                 <tr>
-                    <td colspan="5" class="text-center">Tidak ada data asesmen yang tersedia.</td>
+                    <td colspan="4" class="text-center">Tidak ada data asesmen yang tersedia.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
     </table>
+
+    <?php
+    $kategoriList = ['Tugas', 'UTS', 'UAS'];
+    $groupedSoal = [];
+
+    foreach ($assessmentSoalData as $soal) {
+        $groupedSoal[$soal['kategori_soal']][] = $soal;
+    }
+    ?>
+
+    <?php foreach ($kategoriList as $index => $kategori) : ?>
+        <h5><?= ($index + 1) . '. ' . $kategori ?></h5>
+        <table class="table table-bordered">
+            <thead class="text-white text-center" style="background-color: #0f4c92;">
+                <tr>
+                    <th>Soal No</th>
+                    <?php foreach ($cpmkData as $cpmk) : ?>
+                        <th><?= 'CPMK ' . $cpmk['no_cpmk'] ?></th>
+                    <?php endforeach; ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (isset($groupedSoal[$kategori]) && !empty($groupedSoal[$kategori])) : ?>
+                    <?php
+                    // Kelompokkan berdasarkan no_soal
+                    $bySoal = [];
+                    foreach ($groupedSoal[$kategori] as $item) {
+                        $bySoal[$item['no_soal']][] = $item;
+                    }
+                    ?>
+                    <?php foreach ($bySoal as $noSoal => $soalItems) : ?>
+                        <tr class="text-center align-middle">
+                            <td><?= esc($noSoal) ?></td>
+                            <?php foreach ($cpmkData as $cpmk) : ?>
+                                <?php
+                                $nilai = false;
+                                foreach ($soalItems as $item) {
+                                    if ($item['id_cpmk'] == $cpmk['id']) {
+                                        $nilai = $item['nilai'];
+                                        break;
+                                    }
+                                }
+                                ?>
+                                <td><?= $nilai ? 'v' : '-' ?></td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="<?= count($cpmkData) + 2 ?>" class="text-center">Belum ada soal untuk kategori ini.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    <?php endforeach; ?>
 
     <div class="page-break"></div>
 

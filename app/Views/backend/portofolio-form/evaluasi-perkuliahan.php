@@ -182,11 +182,11 @@
                                     <?php foreach ($cpmk_data as $cpmkNo => $cpmkInfo): ?>
                                         <div class="col-md-6 col-lg-3">
                                             <div class="form-floating">
-                                                <input type="number" class="form-control cpmk-input" id="cpmk<?= $cpmkNo ?>" 
-                                                       name="cpmk_nilai[<?= $cpmkNo ?>]" 
-                                                       placeholder="Nilai CPMK <?= $cpmkNo ?>" 
-                                                       min="0" max="4" step="0.1" 
-                                                       value="<?= isset($cpmk_nilai[$cpmkNo]) ? $cpmk_nilai[$cpmkNo] : '' ?>">
+                                                <input type="number" class="form-control cpmk-input" id="cpmk<?= $cpmkNo ?>"
+                                                    name="cpmk_nilai[<?= $cpmkNo ?>]"
+                                                    placeholder="Nilai CPMK <?= $cpmkNo ?>"
+                                                    min="0" max="4" step="0.1"
+                                                    value="<?= isset($cpmk_nilai[$cpmkNo]) ? $cpmk_nilai[$cpmkNo] : '' ?>">
                                                 <label for="cpmk<?= $cpmkNo ?>">CPMK <?= $cpmkNo ?></label>
                                             </div>
                                         </div>
@@ -266,11 +266,11 @@
 
     function initChart() {
         const ctx = document.getElementById('cpmkChart').getContext('2d');
-        
+
         // Get labels and data from CPMK inputs
         const labels = [];
         const cpmkValues = [];
-        
+
         document.querySelectorAll('.cpmk-input').forEach(input => {
             const cpmkNo = input.id.replace('cpmk', '');
             labels.push('CPMK ' + cpmkNo);
