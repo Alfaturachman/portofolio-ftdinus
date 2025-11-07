@@ -345,6 +345,12 @@ class Portofolio extends BaseController
         // Get CPL-PI data from session
         $cplPiData = session()->get('cpl_pi_data') ?? [];
 
+        // If session data is empty, get from database
+        if (empty($cplPiData)) {
+            $cplPiModel = new \App\Models\CplPiModel();
+            $cplPiData = $cplPiModel->getCplGrouped();
+        }
+
         // Get PDF URL from session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
@@ -354,26 +360,61 @@ class Portofolio extends BaseController
         ]);
     }
 
-
     public function saveCPMKToSession()
     {
         $json = $this->request->getJSON();
         $cpmkData = $json->cpmk ?? null;
+        $cplData = $json->cpl ?? null;
         $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
 
         if ($cpmkData) {
             // Convert to array if it's an object
             $cpmkArray = json_decode(json_encode($cpmkData), true);
 
-            // Store in session
+            // Store CPMK data in session
             session()->set('cpmk_data', [
                 'cpmk' => $cpmkArray,
                 'globalSubCpmkCounter' => $globalSubCpmkCounter
             ]);
 
+            // Check if cpl_pi_data exists in session
+            $existingCplData = session()->get('cpl_pi_data');
+
+            // If CPL data doesn't exist or is empty, save the CPL data from the form
+            if (empty($existingCplData) && !empty($cplData)) {
+                $cplArray = json_decode(json_encode($cplData), true);
+
+                // Transform CPL data to match the expected format
+                $formattedCplData = [];
+                foreach ($cplArray as $cplNo => $cplInfo) {
+                    $formattedCplData[$cplNo] = [
+                        'cpl_indo' => $cplInfo['narasi'] ?? '',
+                        'pi_list' => [] // Empty PI list since we don't have it
+                    ];
+                }
+
+                session()->set('cpl_pi_data', $formattedCplData);
+            } elseif (!empty($cplData)) {
+                // If CPL data exists, merge with new CPL data from form
+                $cplArray = json_decode(json_encode($cplData), true);
+                $existingCplData = $existingCplData ?? [];
+
+                foreach ($cplArray as $cplNo => $cplInfo) {
+                    // Only add if CPL doesn't exist yet
+                    if (!isset($existingCplData[$cplNo])) {
+                        $existingCplData[$cplNo] = [
+                            'cpl_indo' => $cplInfo['narasi'] ?? '',
+                            'pi_list' => []
+                        ];
+                    }
+                }
+
+                session()->set('cpl_pi_data', $existingCplData);
+            }
+
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data CPMK berhasil disimpan'
+                'message' => 'Data CPMK dan CPL berhasil disimpan'
             ]);
         }
 

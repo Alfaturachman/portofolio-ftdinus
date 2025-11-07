@@ -207,7 +207,7 @@
                             <a class="btn btn-secondary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                 <i class="ti ti-arrow-left"></i> Kembali
                             </a>
-                            <a class="btn btn-primary <?= empty($cplPiData) ? 'disabled' : '' ?>"
+                            <a class="btn btn-primary"
                                 href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
                                 Selanjutnya <i class="ti ti-arrow-right"></i>
                             </a>

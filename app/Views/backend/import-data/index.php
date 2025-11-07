@@ -202,46 +202,10 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <!-- Informasi Program Studi -->
-                                                <div class="mb-4">
-                                                    <h6 class="text-primary mb-3">Informasi Program Studi</h6>
-
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Fakultas <span class="text-danger">*</span></label>
-                                                            <input type="text" name="fakultas" class="form-control" placeholder="Contoh: Teknik" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Program Studi <span class="text-danger">*</span></label>
-                                                            <input type="text" name="prodi" class="form-control" placeholder="Contoh: Teknik Informatika" required>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Jenjang <span class="text-danger">*</span></label>
-                                                            <select name="jenjang" class="form-control" required>
-                                                                <option value="">-- Pilih Jenjang --</option>
-                                                                <option value="D3">D3 (Diploma 3)</option>
-                                                                <option value="S1">S1 (Sarjana)</option>
-                                                                <option value="S2">S2 (Magister)</option>
-                                                                <option value="S3">S3 (Doktor)</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Kurikulum <span class="text-danger">*</span></label>
-                                                            <input type="text" name="kurikulum" class="form-control" placeholder="Contoh: 2024" required>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <hr>
-
-                                                <div class="text-center mt-4">
-                                                    <button type="reset" class="btn btn-secondary me-2">
-                                                        <i class="fas fa-undo me-1"></i> Reset
-                                                    </button>
+                                                <div class="text-center">
+                                                    <a href="<?= base_url('downloads/template_matkul.xlsx') ?>" class="btn btn-outline-primary me-2">
+                                                        <i class="fas fa-download me-1"></i> Download Template
+                                                    </a>
                                                     <button type="submit" class="btn btn-primary">
                                                         <i class="fas fa-save me-1"></i> Simpan Data
                                                     </button>
@@ -253,6 +217,243 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- <div class="tab-pane" id="mata-kuliah" role="tabpanel">
+
+                            <div class="row">
+
+                                <div class="col-12">
+
+                                    <div class="card">
+
+                                        <div class="card-body">
+
+                                            <h5 class="card-title mb-4">Form Input Data Mata Kuliah</h5>
+
+
+
+                                            <form action="<?= base_url('mata-kuliah/save') ?>" method="post">
+
+                                                <?= csrf_field() ?>
+
+
+
+                                                 Informasi Dasar Mata Kuliah
+
+                                                <div class="mb-4">
+
+                                                    <h6 class="text-primary mb-3">Informasi Dasar</h6>
+
+
+
+                                                    <div class="row mb-3">
+
+                                                        <div class="col-md-4">
+
+                                                            <label class="form-label">Kode Mata Kuliah <span class="text-danger">*</span></label>
+
+                                                            <input type="text" name="kode_matkul" class="form-control" placeholder="Contoh: MK001" required>
+
+                                                        </div>
+
+                                                        <div class="col-md-8">
+
+                                                            <label class="form-label">Nama Mata Kuliah <span class="text-danger">*</span></label>
+
+                                                            <input type="text" name="kelp_matkul" class="form-control" placeholder="Contoh: Pemrograman Web" required>
+
+                                                        </div>
+
+                                                    </div>
+
+
+
+                                                    <div class="row mb-3">
+
+                                                        <div class="col-md-4">
+
+                                                            <label class="form-label">Semester <span class="text-danger">*</span></label>
+
+                                                            <input type="number" name="smt_matkul" class="form-control" min="1" max="14" placeholder="1-14" required>
+
+                                                        </div>
+
+                                                        <div class="col-md-4">
+
+                                                            <label class="form-label">Jenis Mata Kuliah <span class="text-danger">*</span></label>
+
+                                                            <select name="jenis_matkul" class="form-control" required>
+
+                                                                <option value="">-- Pilih Jenis --</option>
+
+                                                                <option value="Wajib">Wajib</option>
+
+                                                                <option value="Pilihan">Pilihan</option>
+
+                                                            </select>
+
+                                                        </div>
+
+                                                        <div class="col-md-4">
+
+                                                            <label class="form-label">Tipe Mata Kuliah <span class="text-danger">*</span></label>
+
+                                                            <select name="tipe_matkul" class="form-control" required>
+
+                                                                <option value="">-- Pilih Tipe --</option>
+
+                                                                <option value="Teori">Teori</option>
+
+                                                                <option value="Praktik">Praktik</option>
+
+                                                                <option value="Teori & Praktik">Teori & Praktik</option>
+
+                                                            </select>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+
+
+                                                 Beban SKS
+
+                                                <div class="mb-4">
+
+                                                    <h6 class="text-primary mb-3">Beban SKS</h6>
+
+
+
+                                                    <div class="row mb-3">
+
+                                                        <div class="col-md-6">
+
+                                                            <label class="form-label">SKS Teori <span class="text-danger">*</span></label>
+
+                                                            <input type="number" name="teori" class="form-control" min="0" max="6" placeholder="0-6" required>
+
+                                                            <small class="text-muted">Masukkan 0 jika tidak ada</small>
+
+                                                        </div>
+
+                                                        <div class="col-md-6">
+
+                                                            <label class="form-label">SKS Praktik <span class="text-danger">*</span></label>
+
+                                                            <input type="number" name="praktek" class="form-control" min="0" max="6" placeholder="0-6" required>
+
+                                                            <small class="text-muted">Masukkan 0 jika tidak ada</small>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+
+
+                                                Informasi Program Studi
+
+                                                <div class="mb-4">
+
+                                                    <h6 class="text-primary mb-3">Informasi Program Studi</h6>
+
+
+
+                                                    <div class="row mb-3">
+
+                                                        <div class="col-md-6">
+
+                                                            <label class="form-label">Fakultas <span class="text-danger">*</span></label>
+
+                                                            <input type="text" name="fakultas" class="form-control" placeholder="Contoh: Teknik" required>
+
+                                                        </div>
+
+                                                        <div class="col-md-6">
+
+                                                            <label class="form-label">Program Studi <span class="text-danger">*</span></label>
+
+                                                            <input type="text" name="prodi" class="form-control" placeholder="Contoh: Teknik Informatika" required>
+
+                                                        </div>
+
+                                                    </div>
+
+
+
+                                                    <div class="row mb-3">
+
+                                                        <div class="col-md-6">
+
+                                                            <label class="form-label">Jenjang <span class="text-danger">*</span></label>
+
+                                                            <select name="jenjang" class="form-control" required>
+
+                                                                <option value="">-- Pilih Jenjang --</option>
+
+                                                                <option value="D3">D3 (Diploma 3)</option>
+
+                                                                <option value="S1">S1 (Sarjana)</option>
+
+                                                                <option value="S2">S2 (Magister)</option>
+
+                                                                <option value="S3">S3 (Doktor)</option>
+
+                                                            </select>
+
+                                                        </div>
+
+                                                        <div class="col-md-6">
+
+                                                            <label class="form-label">Kurikulum <span class="text-danger">*</span></label>
+
+                                                            <input type="text" name="kurikulum" class="form-control" placeholder="Contoh: 2024" required>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+
+
+                                                <hr>
+
+
+
+                                                <div class="text-center mt-4">
+
+                                                    <button type="reset" class="btn btn-secondary me-2">
+
+                                                        <i class="fas fa-undo me-1"></i> Reset
+
+                                                    </button>
+
+                                                    <button type="submit" class="btn btn-primary">
+
+                                                        <i class="fas fa-save me-1"></i> Simpan Data
+
+                                                    </button>
+
+                                                </div>
+
+                                            </form>
+
+
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div> -->
+
 
                         <!-- Mata Kuliah Diampu Tab -->
                         <div class="tab-pane" id="mata-kuliah-diampu" role="tabpanel">

@@ -169,8 +169,8 @@
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
                                 <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
                             </div>
-                        <?php else: ?>
                         <?php endif; ?>
+
                         <!-- Inside the table-responsive div -->
                         <div class="table-responsive">
                             <table class="table table-bordered">
@@ -216,7 +216,21 @@
                                             <td colspan="<?= $totalSubCpmk + 2 ?>" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
                                         </tr>
                                     <?php else: ?>
-                                        <?php foreach ($cplPiData as $cplNo => $cplData): ?>
+                                        <?php
+                                        // Create array of CPL numbers that are used in CPMK
+                                        $usedCplNumbers = [];
+                                        foreach ($cpmkData['cpmk'] as $cpmkNo => $cpmkInfo) {
+                                            if (isset($cpmkInfo['selectedCpl'])) {
+                                                $usedCplNumbers[] = $cpmkInfo['selectedCpl'];
+                                            }
+                                        }
+                                        $usedCplNumbers = array_unique($usedCplNumbers);
+                                        sort($usedCplNumbers);
+
+                                        // Display only CPL that are used in CPMK
+                                        foreach ($usedCplNumbers as $cplNo):
+                                            $cplData = $cplPiData[$cplNo] ?? ['cpl_indo' => 'Data CPL tidak tersedia'];
+                                        ?>
                                             <?php
                                             // Get CPMK data for this CPL from session
                                             $relatedCpmk = [];
@@ -234,7 +248,7 @@
                                                 <tr>
                                                     <td class="align-middle">
                                                         <strong>CPL <?= $cplNo ?></strong><br>
-                                                        <?= esc($cplData['narasi'] ?? '') ?>
+                                                        <small><?= esc(is_array($cplData) ? ($cplData['cpl_indo'] ?? $cplData['narasi'] ?? '') : $cplData) ?></small>
                                                     </td>
                                                     <td>-</td>
                                                     <?php foreach ($subCpmkNumbers as $subNo): ?>
@@ -246,12 +260,14 @@
                                                     <tr>
                                                         <?php if ($isFirstRow): ?>
                                                             <td rowspan="<?= $rowspan ?>" class="align-middle">
-                                                                <strong>CPL <?= $cplNo ?></strong>
+                                                                <strong>CPL <?= $cplNo ?></strong><br>
+                                                                <small><?= esc(is_array($cplData) ? ($cplData['cpl_indo'] ?? $cplData['narasi'] ?? '') : $cplData) ?></small>
                                                             </td>
                                                         <?php endif; ?>
 
                                                         <td class="align-middle">
-                                                            <strong>CPMK <?= $cpmkNo ?></strong>
+                                                            <strong>CPMK <?= $cpmkNo ?></strong><br>
+                                                            <small><?= esc($cpmkInfo['narasi'] ?? '') ?></small>
                                                         </td>
 
                                                         <?php foreach ($subCpmkNumbers as $subNo): ?>
@@ -259,13 +275,23 @@
                                                                 <?php
                                                                 $isChecked = false;
                                                                 // Check if mapping exists in session data
-                                                                if (isset($mappingData->$cplNo->$cpmkNo->$subNo)) {
-                                                                    $isChecked = $mappingData->$cplNo->$cpmkNo->$subNo == 1;
+                                                                if (is_array($mappingData)) {
+                                                                    if (isset($mappingData[$cplNo][$cpmkNo][$subNo])) {
+                                                                        $isChecked = $mappingData[$cplNo][$cpmkNo][$subNo] == 1;
+                                                                    }
+                                                                } else if (is_object($mappingData)) {
+                                                                    if (isset($mappingData->$cplNo->$cpmkNo->$subNo)) {
+                                                                        $isChecked = $mappingData->$cplNo->$cpmkNo->$subNo == 1;
+                                                                    }
                                                                 }
                                                                 ?>
                                                                 <input type="checkbox"
-                                                                    class="mapping-checkbox"
+                                                                    class="mapping-checkbox form-check-input"
+                                                                    style="width: 20px; height: 20px; cursor: pointer;"
                                                                     name="mapping[<?= $cplNo ?>][<?= $cpmkNo ?>][<?= $subNo ?>]"
+                                                                    data-cpl="<?= $cplNo ?>"
+                                                                    data-cpmk="<?= $cpmkNo ?>"
+                                                                    data-subcpmk="<?= $subNo ?>"
                                                                     <?= $isChecked ? 'checked' : '' ?>>
                                                             </td>
                                                         <?php endforeach; ?>
@@ -301,9 +327,14 @@
         const form = document.getElementById('rpsForm');
         const checkboxes = document.querySelectorAll('.mapping-checkbox');
 
+        console.log('Total checkboxes found:', checkboxes.length);
+
+        // Add change event to each checkbox
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
+                console.log('Checkbox changed:', this.dataset);
                 const mappingData = collectMappingData();
+                console.log('Mapping data collected:', mappingData);
                 saveMappingToSession(mappingData);
             });
         });
@@ -312,16 +343,15 @@
             const mappingData = {};
 
             checkboxes.forEach(checkbox => {
-                const name = checkbox.getAttribute('name');
-                const matches = name.match(/mapping\[(\d+)\]\[(\d+)\]\[(\d+)\]/);
+                const cpl = checkbox.dataset.cpl;
+                const cpmk = checkbox.dataset.cpmk;
+                const subcpmk = checkbox.dataset.subcpmk;
 
-                if (matches) {
-                    const [, cpl, cpmk, subCpmk] = matches;
-
+                if (cpl && cpmk && subcpmk) {
                     if (!mappingData[cpl]) mappingData[cpl] = {};
                     if (!mappingData[cpl][cpmk]) mappingData[cpl][cpmk] = {};
 
-                    mappingData[cpl][cpmk][subCpmk] = checkbox.checked ? 1 : 0;
+                    mappingData[cpl][cpmk][subcpmk] = checkbox.checked ? 1 : 0;
                 }
             });
 
@@ -357,6 +387,8 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const mappingData = collectMappingData();
+
+            console.log('Submitting mapping data:', mappingData);
 
             fetch('<?= base_url('portofolio-form/saveMappingToSession') ?>', {
                     method: 'POST',
