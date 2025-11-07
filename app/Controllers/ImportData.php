@@ -97,16 +97,16 @@ class ImportData extends BaseController
                             $headers[$colIndex] = $headerValue;
                             
                             if (in_array($headerValue, [
-                                'kurikulum', 'matkul', 'kode_matkul', 
-                                'id_matkul', 'no_cpl', 'cpl_indo', 'cpl_inggris', 'id_cpl', 
-                                'no_pi', 'isi_pi', 'id_pi'
+                                'matkul', 'kode_matkul', 'no_cpl', 
+                                'cpl_indo', 'cpl_inggris', 
+                                'no_pi', 'isi_pi'
                             ])) {
                                 $columnMap[$colIndex] = $headerValue;
                             }
                         }
                         
                         // Validasi required fields
-                        $requiredFields = ['kurikulum', 'kode_matkul', 'no_cpl', 'no_pi'];
+                        $requiredFields = ['kode_matkul', 'no_cpl', 'no_pi'];
                         $missingFields = array_diff($requiredFields, array_values($columnMap));
                         
                         if (!empty($missingFields)) {
@@ -465,8 +465,8 @@ class ImportData extends BaseController
                             $headers[$colIndex] = $headerValue;
                             
                             if (in_array($headerValue, [
-                                'matkul', 'kode_matkul', 'id_matkul', 'kelp_matkul', 
-                                'id_kelas', 'dosen', 'npp', 'id_dosen'
+                                'matkul', 'kode_matkul', 'kelp_matkul', 
+                                'dosen', 'npp'
                             ])) {
                                 $columnMap[$colIndex] = $headerValue;
                             }
@@ -792,9 +792,9 @@ class ImportData extends BaseController
         
         // Set header
         $headers = [
-            'kurikulum', 'matkul', 'kode_matkul', 
-            'id_matkul', 'no_cpl', 'cpl_indo', 'cpl_inggris', 'id_cpl', 
-            'no_pi', 'isi_pi', 'id_pi'
+            'matkul', 'kode_matkul', 
+            'no_cpl', 'cpl_indo', 'cpl_inggris',
+            'no_pi', 'isi_pi'
         ];
         
         $column = 'A';

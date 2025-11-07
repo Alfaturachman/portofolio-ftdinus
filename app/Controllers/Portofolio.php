@@ -31,22 +31,22 @@ class Portofolio extends BaseController
         $currentUserNPP = session()->get('UserSession.username');
 
         $portofolioModel = new PortofolioModel();
-        
+
         // Get data from matkul_diampu table grouped by kelp_matkul for the current user
         $data['matkulList'] = $portofolioModel->getMatkulDiampuByUser($currentUserNPP);
-        
+
         // Check import status for each course
         $importStatus = [];
         foreach ($data['matkulList'] as $matkul) {
             $key = $matkul['kode_matkul'] . '_' . $matkul['kelp_matkul'] . '_' . $matkul['kode_ts'];
             $importStatus[$key] = $portofolioModel->checkMahasiswaKelasExists(
-                $matkul['kode_matkul'], 
-                $matkul['kelp_matkul'], 
+                $matkul['kode_matkul'],
+                $matkul['kelp_matkul'],
                 $matkul['kode_ts']
             );
         }
         $data['importStatus'] = $importStatus;
-        
+
         return view('backend/portofolio-form/index', $data);
     }
 
@@ -57,15 +57,15 @@ class Portofolio extends BaseController
         }
 
         $portofolioModel = new PortofolioModel();
-        
+
         // Get the mata kuliah details
         $matkulDetail = $portofolioModel->getMatkulDetail($kode_matkul);
-        
+
         // Get list of portofolios for this mata kuliah
         $data['portofolioList'] = $portofolioModel->getPortofolioByKodeMK($kode_matkul);
         $data['matkul'] = $matkulDetail;
         $data['kode_matkul'] = $kode_matkul;
-        
+
         return view('backend/portofolio-form/daftar-portofolio', $data);
     }
 
@@ -304,6 +304,12 @@ class Portofolio extends BaseController
         // Get CPL-PI data from session
         $cplPiData = session()->get('cpl_pi_data') ?? [];
 
+        // If session data is empty, get from database
+        if (empty($cplPiData)) {
+            $cplPiModel = new \App\Models\CplPiModel();
+            $cplPiData = $cplPiModel->getCplGrouped();
+        }
+
         // Get PDF URL from session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
@@ -313,26 +319,61 @@ class Portofolio extends BaseController
         ]);
     }
 
-
     public function saveCPMKToSession()
     {
         $json = $this->request->getJSON();
         $cpmkData = $json->cpmk ?? null;
+        $cplData = $json->cpl ?? null;
         $globalSubCpmkCounter = $json->globalSubCpmkCounter ?? 1;
 
         if ($cpmkData) {
             // Convert to array if it's an object
             $cpmkArray = json_decode(json_encode($cpmkData), true);
 
-            // Store in session
+            // Store CPMK data in session
             session()->set('cpmk_data', [
                 'cpmk' => $cpmkArray,
                 'globalSubCpmkCounter' => $globalSubCpmkCounter
             ]);
 
+            // Check if cpl_pi_data exists in session
+            $existingCplData = session()->get('cpl_pi_data');
+
+            // If CPL data doesn't exist or is empty, save the CPL data from the form
+            if (empty($existingCplData) && !empty($cplData)) {
+                $cplArray = json_decode(json_encode($cplData), true);
+
+                // Transform CPL data to match the expected format
+                $formattedCplData = [];
+                foreach ($cplArray as $cplNo => $cplInfo) {
+                    $formattedCplData[$cplNo] = [
+                        'cpl_indo' => $cplInfo['narasi'] ?? '',
+                        'pi_list' => [] // Empty PI list since we don't have it
+                    ];
+                }
+
+                session()->set('cpl_pi_data', $formattedCplData);
+            } elseif (!empty($cplData)) {
+                // If CPL data exists, merge with new CPL data from form
+                $cplArray = json_decode(json_encode($cplData), true);
+                $existingCplData = $existingCplData ?? [];
+
+                foreach ($cplArray as $cplNo => $cplInfo) {
+                    // Only add if CPL doesn't exist yet
+                    if (!isset($existingCplData[$cplNo])) {
+                        $existingCplData[$cplNo] = [
+                            'cpl_indo' => $cplInfo['narasi'] ?? '',
+                            'pi_list' => []
+                        ];
+                    }
+                }
+
+                session()->set('cpl_pi_data', $existingCplData);
+            }
+
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data CPMK berhasil disimpan'
+                'message' => 'Data CPMK dan CPL berhasil disimpan'
             ]);
         }
 
@@ -480,20 +521,20 @@ class Portofolio extends BaseController
 
             // Process file uploads
             $uploadedFiles = session()->get('assessment_files') ?? [];
-            
+
             // Define file fields based on selected assessment types
             $fileFields = [];
-            
+
             if ($tugasSelected) {
                 $fileFields[] = 'soal_tugas';
                 $fileFields[] = 'rubrik_tugas';
             }
-            
+
             if ($utsSelected) {
                 $fileFields[] = 'soal_uts';
                 $fileFields[] = 'rubrik_uts';
             }
-            
+
             if ($uasSelected) {
                 $fileFields[] = 'soal_uas';
                 $fileFields[] = 'rubrik_uas';
@@ -567,7 +608,7 @@ class Portofolio extends BaseController
                     ['soal_no' => 1, 'cpmk_mappings' => []]
                 ]
             ];
-            
+
             session()->set('soal_mapping_data', $soalMapping);
         }
 
@@ -586,21 +627,21 @@ class Portofolio extends BaseController
 
             // Convert the data to an array
             $soalMappingArray = json_decode(json_encode($soalMappingData), true);
-            
+
             // Process the data before saving
             $processedData = [
                 'tugas' => [],
                 'uts' => [],
                 'uas' => []
             ];
-            
+
             foreach (['tugas', 'uts', 'uas'] as $type) {
                 if (isset($soalMappingArray[$type]) && is_array($soalMappingArray[$type])) {
                     // Sort the items by soal_no to ensure consistent ordering
-                    usort($soalMappingArray[$type], function($a, $b) {
+                    usort($soalMappingArray[$type], function ($a, $b) {
                         return $a['soal_no'] <=> $b['soal_no'];
                     });
-                    
+
                     $processedData[$type] = $soalMappingArray[$type];
                 }
             }
@@ -701,17 +742,17 @@ class Portofolio extends BaseController
         }
 
         $db = \Config\Database::connect();
-        
+
         // Get kelas data
         $kelasData = $db->table('matkul_diampu')
             ->where('id', $kelasId)
             ->get()
             ->getRowArray();
-        
+
         if (!$kelasData) {
             return $this->response->setJSON(['success' => false, 'message' => 'Kelas tidak ditemukan']);
         }
-        
+
         // Get mahasiswa data
         $mahasiswaData = $db->table('mahasiswa_kelas')
             ->select('nim, nama')
@@ -721,11 +762,11 @@ class Portofolio extends BaseController
             ->orderBy('nama', 'ASC')
             ->get()
             ->getResultArray();
-        
+
         if (empty($mahasiswaData)) {
             return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada mahasiswa di kelas ini']);
         }
-        
+
         return $this->response->setJSON(['success' => true, 'mahasiswa' => $mahasiswaData]);
     }
 
@@ -776,7 +817,7 @@ class Portofolio extends BaseController
 
             $gradesData[$type] = [];
             $cpmkAverages[$type] = [];
-            
+
             // Get list of CPMK numbers used in this assessment type
             $cpmkNumbers = [];
             foreach ($soalMappingData[$type] as $soal) {
@@ -786,7 +827,7 @@ class Portofolio extends BaseController
                     }
                 }
             }
-            
+
             // Calculate CPMK averages for this assessment type
             foreach ($cpmkNumbers as $cpmkNo) {
                 // Get all soal mapped to this CPMK
@@ -796,13 +837,13 @@ class Portofolio extends BaseController
                         $soalNumbers[] = $soal['soal_no'];
                     }
                 }
-                
+
                 // Calculate average for each soal in this CPMK
                 $soalAverages = [];
                 foreach ($soalNumbers as $soalNo) {
                     $sum = 0;
                     $count = 0;
-                    
+
                     // Sum up all student grades for this soal and CPMK
                     foreach ($mahasiswaData as $nim => $studentData) {
                         if (isset($studentData[$cpmkNo][$soalNo]) && $studentData[$cpmkNo][$soalNo] !== '') {
@@ -810,11 +851,11 @@ class Portofolio extends BaseController
                             $count++;
                         }
                     }
-                    
+
                     // Calculate average for this soal
                     $soalAverages[$soalNo] = $count > 0 ? $sum / $count : 0;
                 }
-                
+
                 // Calculate average of all soal for this CPMK
                 $totalAvg = 0;
                 $validCount = 0;
@@ -824,12 +865,12 @@ class Portofolio extends BaseController
                         $validCount++;
                     }
                 }
-                
+
                 // Store CPMK average
-                $cpmkAverages[$type][$cpmkNo] = $validCount > 0 ? 
+                $cpmkAverages[$type][$cpmkNo] = $validCount > 0 ?
                     number_format($totalAvg / $validCount, 2) : 0;
             }
-            
+
             // Store individual student grades
             $gradesData[$type] = $mahasiswaData;
         }
@@ -1007,10 +1048,10 @@ class Portofolio extends BaseController
 
         // Ambil data evaluasi dari session
         $evaluasi_perkuliahan = session()->get('evaluasi_perkuliahan') ?? '';
-        
+
         // Ambil data CPMK dari session
         $cpmk_data = session()->get('cpmk_data')['cpmk'] ?? [];
-        
+
         // Ambil nilai CPMK yang sudah disimpan (jika ada)
         $cpmk_nilai = session()->get('cpmk_nilai') ?? [];
 
@@ -1221,7 +1262,7 @@ class Portofolio extends BaseController
                     'uts' => isset($assessmentTypes['uts']) && $assessmentTypes['uts'] ? 1 : 0,
                     'uas' => isset($assessmentTypes['uas']) && $assessmentTypes['uas'] ? 1 : 0
                 ];
-                
+
                 $rancanganAsesmenModel->insert($rancanganAsesmenData);
             }
         }
@@ -1245,17 +1286,17 @@ class Portofolio extends BaseController
                     $kategoriSoal = 'UAS';
                     break;
             }
-            
+
             // Loop through each soal in the assessment type
             foreach ($soalList as $soal) {
                 $soalNo = $soal['soal_no'];
                 $cpmkMappings = $soal['cpmk_mappings'] ?? [];
-                
+
                 // Loop through each CPMK mapping for this soal
                 foreach ($cpmkMappings as $sessionCpmkNo => $isChecked) {
                     // Find the actual CPMK ID from the mapping
                     $actualCpmkId = $cpmkMapping[$sessionCpmkNo] ?? null;
-                    
+
                     if ($actualCpmkId) {
                         $rancanganSoalData = [
                             'id_porto' => $portofolioId,
@@ -1264,7 +1305,7 @@ class Portofolio extends BaseController
                             'no_soal' => $soalNo, // Simpan hanya nomor soal tanpa prefix kategori
                             'nilai' => $isChecked ? 1 : 0
                         ];
-                        
+
                         $rancanganSoalModel->insert($rancanganSoalData);
                     }
                 }
@@ -1274,26 +1315,26 @@ class Portofolio extends BaseController
         // Simpan data ke tabel rancangan asesmen file
         $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
         if (isset($sessionData['assessment_files']) && is_array($sessionData['assessment_files'])) {
-                foreach ($sessionData['assessment_files'] as $kategori => $file) {
-                    // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
-                    if (strpos($kategori, 'soal_') === 0) {
-                        $kategoriFile = 'Soal';
-                    } elseif (strpos($kategori, 'rubrik_') === 0) {
-                        $kategoriFile = 'Rubrik';
-                    } else {
-                        $kategoriFile = 'Lainnya';
-                    }
+            foreach ($sessionData['assessment_files'] as $kategori => $file) {
+                // Kategori_file berdasarkan prefix "soal_" atau "rubrik_"
+                if (strpos($kategori, 'soal_') === 0) {
+                    $kategoriFile = 'Soal';
+                } elseif (strpos($kategori, 'rubrik_') === 0) {
+                    $kategoriFile = 'Rubrik';
+                } else {
+                    $kategoriFile = 'Lainnya';
+                }
 
-                    // Kategori berdasarkan suffix
-                    if (strpos($kategori, '_tugas') !== false) {
-                        $kategoriAsesmen = 'Tugas';
-                    } elseif (strpos($kategori, '_uts') !== false) {
-                        $kategoriAsesmen = 'UTS';
-                    } elseif (strpos($kategori, '_uas') !== false) {
-                        $kategoriAsesmen = 'UAS';
-                    } else {
-                        $kategoriAsesmen = 'Lainnya';
-                    }
+                // Kategori berdasarkan suffix
+                if (strpos($kategori, '_tugas') !== false) {
+                    $kategoriAsesmen = 'Tugas';
+                } elseif (strpos($kategori, '_uts') !== false) {
+                    $kategoriAsesmen = 'UTS';
+                } elseif (strpos($kategori, '_uas') !== false) {
+                    $kategoriAsesmen = 'UAS';
+                } else {
+                    $kategoriAsesmen = 'Lainnya';
+                }
 
                 $rancanganAsesmenFileData = [
                     'id_porto' => $portofolioId,

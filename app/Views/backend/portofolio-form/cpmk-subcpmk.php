@@ -362,17 +362,41 @@
 
         // Collect all CPMK and sub-CPMK data
         const cpmkData = {};
+        const cplData = {}; // Untuk menyimpan data CPL
 
         document.querySelectorAll('.cpmk-row').forEach(row => {
             const cpmkNumber = row.dataset.cpmk;
             const narasi = row.querySelector('input[name^="cpmk["]').value;
             const selectedCpl = row.querySelector('select[name^="cpmk["]').value;
+            const selectElement = row.querySelector('select[name^="cpmk["]');
 
             cpmkData[cpmkNumber] = {
                 narasi: narasi,
                 selectedCpl: selectedCpl,
                 sub: {}
             };
+
+            // Collect CPL data from selected option
+            if (selectedCpl && selectElement) {
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                if (selectedOption && !cplData[selectedCpl]) {
+                    // Extract full text from option
+                    let optionText = selectedOption.textContent.trim();
+
+                    // Remove "CPL X - " prefix
+                    const dashIndex = optionText.indexOf(' - ');
+                    if (dashIndex !== -1) {
+                        optionText = optionText.substring(dashIndex + 3);
+                    }
+
+                    // Remove trailing "..."
+                    optionText = optionText.replace(/\.\.\.$/g, '');
+
+                    cplData[selectedCpl] = {
+                        narasi: optionText
+                    };
+                }
+            }
 
             // Get sub-CPMK data for this CPMK
             const subWrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
@@ -388,6 +412,9 @@
             }
         });
 
+        console.log('CPMK Data:', cpmkData);
+        console.log('CPL Data:', cplData);
+
         // Send data to server
         fetch('<?= base_url('portofolio-form/saveCPMKToSession') ?>', {
                 method: 'POST',
@@ -397,12 +424,14 @@
                 },
                 body: JSON.stringify({
                     cpmk: cpmkData,
+                    cpl: cplData,
                     globalSubCpmkCounter: globalSubCpmkCounter
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    console.log('Data berhasil disimpan:', data.message);
                     window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
                 } else {
                     alert('Gagal menyimpan data CPMK. Silakan coba lagi.');
