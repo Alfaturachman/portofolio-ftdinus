@@ -17,6 +17,43 @@ class App extends BaseConfig
      * E.g., http://example.com/
      */
     public string $baseURL = 'http://localhost:8080/';
+    
+    /**
+     * --------------------------------------------------------------------------
+     * Auto-detect Base URL
+     * --------------------------------------------------------------------------
+     *
+     * If true, the baseURL will be automatically detected based on the server
+     * configuration. This is helpful when deploying to different environments
+     * without manually changing the baseURL each time.
+     */
+
+    /**
+     * --------------------------------------------------------------------------
+     * Detect environment and set baseURL accordingly
+     * --------------------------------------------------------------------------
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Auto-detect baseURL based on server configuration
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'];
+            $base = dirname($_SERVER['SCRIPT_NAME']);
+            
+            // Handle the case where the application might be in a subdirectory
+            if ($base === '/' || $base === '\\') {
+                $base = '';
+            } else {
+                $base = rtrim($base, '/') . '/';
+            }
+            
+            // Set the baseURL based on detected values
+            $this->baseURL = $scheme . '://' . $host . $base;
+        }
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

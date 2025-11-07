@@ -237,14 +237,22 @@
                                                 data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
                                                 data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
                                                 data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
-                                                data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>">
-                                                <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?>
+                                                data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>"
+                                                data-tahun="<?= htmlspecialchars($mk['tahun']) ?>"
+                                                data-semester="<?= htmlspecialchars($mk['semester']) ?>"
+                                                data-smt_matkul="<?= htmlspecialchars($mk['smt_matkul']) ?>">
+                                                <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?> (<?= $mk['tahun'] ?> - <?= $mk['semester'] ?> - Smt <?= $mk['smt_matkul'] ?>)
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
                                 </div>
                             </div>
                         </div>
+
+                        <input type="hidden" id="tahun" name="tahun" value="<?= isset($infoMatkul['tahun']) ? $infoMatkul['tahun'] : '' ?>">
+                        <input type="hidden" id="semester" name="semester" value="<?= isset($infoMatkul['semester']) ? $infoMatkul['semester'] : '' ?>">
+                        <input type="hidden" id="smt_matkul" name="smt_matkul" value="<?= isset($infoMatkul['smt_matkul']) ? $infoMatkul['smt_matkul'] : '' ?>">
+
                         <div class="form-group mb-3">
                             <label for="kode_mk" class="form-label">Kode MK</label>
                             <input type="text" class="form-control" id="kode_mk" name="kode_mk" readonly value="<?= isset($infoMatkul['kode_mk']) ? $infoMatkul['kode_mk'] : '' ?>">
@@ -377,6 +385,9 @@
                 document.getElementById('kelompok_mk').value = selectedItem.getAttribute('data-kelompok_mk') || '';
                 document.getElementById('sks_teori').value = selectedItem.getAttribute('data-sks_teori') || '';
                 document.getElementById('sks_praktik').value = selectedItem.getAttribute('data-sks_praktik') || '';
+                document.getElementById('tahun').value = selectedItem.getAttribute('data-tahun') || '';
+                document.getElementById('semester').value = selectedItem.getAttribute('data-semester') || '';
+                document.getElementById('smt_matkul').value = selectedItem.getAttribute('data-smt_matkul') || '';
             }
 
             // Function to clear all fields
@@ -387,6 +398,9 @@
                 document.getElementById('sks_praktik').value = '';
                 document.getElementById('fakultas').value = '';
                 document.getElementById('progdi').value = '';
+                document.getElementById('tahun').value = '';
+                document.getElementById('semester').value = '';
+                document.getElementById('smt_matkul').value = '';
             }
         });
     </script>

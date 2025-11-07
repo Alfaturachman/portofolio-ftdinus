@@ -36,6 +36,43 @@
                         </div>
                     </div>
 
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="filterTahun" class="form-label">Tahun Akademik</label>
+                            <select class="form-select" id="filterTahun">
+                                <option value="">Semua Tahun</option>
+                                <?php
+                                // Get unique years from matkulList
+                                $years = array_unique(array_column($matkulList, 'tahun'));
+                                sort($years);
+                                foreach ($years as $year):
+                                ?>
+                                    <option value="<?= $year ?>"><?= $year ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterSemester" class="form-label">Semester</label>
+                            <select class="form-select" id="filterSemester">
+                                <option value="">Semua Semester</option>
+                                <?php
+                                // Get unique semesters from matkulList
+                                $semesters = array_unique(array_column($matkulList, 'semester'));
+                                sort($semesters);
+                                foreach ($semesters as $semester):
+                                ?>
+                                    <option value="<?= $semester ?>"><?= $semester ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-secondary" id="resetFilter">
+                                <i class="fas fa-redo me-1"></i>Reset Filter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table Section -->
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover" id="matkulTable">
                             <thead class="table-light">
@@ -52,17 +89,17 @@
                             <tbody>
                                 <?php $no = 1;
                                 foreach ($matkulList as $matkul): ?>
-                                    <tr>
+                                    <tr data-tahun="<?= $matkul['tahun'] ?>" data-semester="<?= $matkul['semester'] ?>">
                                         <td><?= $no++ ?></td>
-                                        <td><?= $matkul['kode_matkul'] ?></td>
-                                        <td><?= $matkul['matkul'] ?></td>
+                                        <td><?= $matkul['kode_mk'] ?></td>
+                                        <td><?= $matkul['nama_mk'] ?></td>
                                         <td><?= $matkul['kelp_matkul'] ?></td>
-                                        <td><?= $matkul['kode_ts'] ?></td>
+                                        <td><?= $matkul['tahun'] ?></td>
                                         <td><?= $matkul['semester'] ?></td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <?php
-                                                $importKey = $matkul['kode_matkul'] . '_' . $matkul['kelp_matkul'] . '_' . $matkul['kode_ts'];
+                                                $importKey = $matkul['kode_mk'] . '_' . $matkul['kelp_matkul'] . '_' . $matkul['tahun'];
                                                 $isImported = isset($importStatus[$importKey]) && $importStatus[$importKey];
 
                                                 if ($isImported): ?>
@@ -70,13 +107,13 @@
                                                         <i class="fas fa-check-circle me-1"></i>Imported
                                                     </button>
                                                 <?php else: ?>
-                                                    <button class="btn btn-sm btn-success import-btn" data-kode="<?= $matkul['kode_matkul'] ?>"
-                                                        data-kelp="<?= $matkul['kelp_matkul'] ?>" data-ts="<?= $matkul['kode_ts'] ?>">
+                                                    <button class="btn btn-sm btn-success import-btn" data-kode="<?= $matkul['kode_mk'] ?>"
+                                                        data-kelp="<?= $matkul['kelp_matkul'] ?>" data-ts="<?= $matkul['tahun'] ?>">
                                                         Import
                                                     </button>
                                                 <?php endif; ?>
 
-                                                <a href="<?= base_url('portofolio-form/daftar/' . $matkul['kode_matkul']) ?>" class="btn btn-sm btn-primary">
+                                                <a href="<?= base_url('portofolio-form/daftar/' . $matkul['kode_mk'] . '/' . $matkul['kode_ts'] . '/' . $matkul['semester']) ?>" class="btn btn-sm btn-primary">
                                                     Detail
                                                 </a>
                                             </div>
@@ -145,6 +182,48 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterTahun = document.getElementById('filterTahun');
+        const filterSemester = document.getElementById('filterSemester');
+        const resetFilter = document.getElementById('resetFilter');
+        const tableRows = document.querySelectorAll('#matkulTable tbody tr');
+
+        function filterTable() {
+            const selectedTahun = filterTahun.value;
+            const selectedSemester = filterSemester.value;
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const rowTahun = row.getAttribute('data-tahun');
+                const rowSemester = row.getAttribute('data-semester');
+
+                const tahunMatch = !selectedTahun || rowTahun === selectedTahun;
+                const semesterMatch = !selectedSemester || rowSemester === selectedSemester;
+
+                if (tahunMatch && semesterMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                    // Update nomor urut
+                    row.querySelector('td:first-child').textContent = visibleCount;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Event listeners
+        filterTahun.addEventListener('change', filterTable);
+        filterSemester.addEventListener('change', filterTable);
+
+        resetFilter.addEventListener('click', function() {
+            filterTahun.value = '';
+            filterSemester.value = '';
+            filterTable();
+        });
+    });
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

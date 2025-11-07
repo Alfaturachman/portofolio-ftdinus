@@ -27,22 +27,22 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Get the current user's NPP from the session
+        // Ambil NPP user login
         $currentUserNPP = session()->get('UserSession.username');
 
         $portofolioModel = new PortofolioModel();
 
-        // Get data from matkul_diampu table grouped by kelp_matkul for the current user
-        $data['matkulList'] = $portofolioModel->getMatkulDiampuByUser($currentUserNPP);
+        // Ambil semua data portofolio milik dosen yang login
+        $data['matkulList'] = $portofolioModel->getAllPortofolio($currentUserNPP);
 
-        // Check import status for each course
+        // Cek status import untuk tiap mata kuliah (opsional, tergantung fungsi checkMahasiswaKelasExists)
         $importStatus = [];
         foreach ($data['matkulList'] as $matkul) {
-            $key = $matkul['kode_matkul'] . '_' . $matkul['kelp_matkul'] . '_' . $matkul['kode_ts'];
+            $key = $matkul['kode_mk'] . '_' . $matkul['tahun'] . '_' . $matkul['semester'];
             $importStatus[$key] = $portofolioModel->checkMahasiswaKelasExists(
-                $matkul['kode_matkul'],
-                $matkul['kelp_matkul'],
-                $matkul['kode_ts']
+                $matkul['kode_mk'],
+                $matkul['tahun'],
+                $matkul['semester']
             );
         }
         $data['importStatus'] = $importStatus;
@@ -50,7 +50,7 @@ class Portofolio extends BaseController
         return view('backend/portofolio-form/index', $data);
     }
 
-    public function daftar($kode_matkul)
+    public function daftar($kode_matkul, $kode_ts, $semester)
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
@@ -58,13 +58,20 @@ class Portofolio extends BaseController
 
         $portofolioModel = new PortofolioModel();
 
-        // Get the mata kuliah details
-        $matkulDetail = $portofolioModel->getMatkulDetail($kode_matkul);
+        // Ambil tahun & semester dari kode_ts
+        $detail = $portofolioModel->getMatkulByKodeTS($kode_matkul, $kode_ts);
 
-        // Get list of portofolios for this mata kuliah
-        $data['portofolioList'] = $portofolioModel->getPortofolioByKodeMK($kode_matkul);
-        $data['matkul'] = $matkulDetail;
-        $data['kode_matkul'] = $kode_matkul;
+        if (!$detail) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        }
+
+        $data = [
+            'portofolioList' => $portofolioModel->getPortofolio($kode_matkul, $detail['tahun'], $detail['semester']),
+            'matkul' => $detail,
+            'kode_matkul' => $kode_matkul,
+            'tahun' => $detail['tahun'],
+            'semester' => $detail['semester']
+        ];
 
         return view('backend/portofolio-form/daftar-portofolio', $data);
     }
@@ -155,10 +162,34 @@ class Portofolio extends BaseController
 
         // Get data from database from info_matkul table
         $db = \Config\Database::connect();
-        $mataKuliahData = $db->table('info_matkul')
-            ->select('matakuliah as nama_mk, kode_matkul as kode_mk, kelp_matkul as kelompok_mk, 
-                    fakultas, prodi as progdi, teori as sks_teori, praktek as sks_praktik')
-            ->groupBy(['kode_matkul', 'matakuliah', 'kelp_matkul', 'fakultas', 'prodi', 'teori', 'praktek'])
+        $mataKuliahData = $db->table('info_matkul im')
+            ->select('
+        im.matakuliah as nama_mk,
+        im.kode_matkul as kode_mk,
+        im.kelp_matkul as kelompok_mk,
+        im.fakultas,
+        im.smt_matkul,
+        im.prodi as progdi,
+        im.teori as sks_teori,
+        im.praktek as sks_praktik,
+        md.tahun,
+        md.semester,
+        md.dosen
+    ')
+            ->join('matkul_diampu md', 'md.kode_matkul = im.kode_matkul', 'left')
+            ->groupBy([
+                'im.kode_matkul',
+                'im.matakuliah',
+                'im.kelp_matkul',
+                'im.smt_matkul',
+                'im.fakultas',
+                'im.prodi',
+                'im.teori',
+                'im.praktek',
+                'md.tahun',
+                'md.semester',
+                'md.dosen'
+            ])
             ->get()
             ->getResultArray();
 
@@ -190,6 +221,9 @@ class Portofolio extends BaseController
             'kelompok_mk' => 'required',
             'sks_teori' => 'required|numeric',
             'sks_praktik' => 'required|numeric',
+            'tahun' => 'required',
+            'semester' => 'required',
+            'smt_matkul' => 'required',
             'mk_prasyarat' => 'permit_empty',
             'topik_mk' => 'permit_empty',
         ]);
@@ -209,6 +243,9 @@ class Portofolio extends BaseController
             'kelompok_mk' => $this->request->getPost('kelompok_mk'),
             'sks_teori' => $this->request->getPost('sks_teori'),
             'sks_praktik' => $this->request->getPost('sks_praktik'),
+            'tahun' => $this->request->getPost('tahun'),
+            'semester' => $this->request->getPost('semester'),
+            'smt_matkul' => $this->request->getPost('smt_matkul'),
             'mk_prasyarat' => $this->request->getPost('mk_prasyarat'),
             'topik_mk' => $this->request->getPost('topik_mk'),
         ];
@@ -1078,7 +1115,10 @@ class Portofolio extends BaseController
             'id_user' => $sessionData['UserSession']['id_user'],
             'kode_mk' => $sessionData['info_matkul']['kode_mk'],
             'nama_mk' => $sessionData['info_matkul']['nama_mk'],
-            'npp' => $sessionData['UserSession']['username']
+            'tahun' => $sessionData['info_matkul']['tahun'],
+            'semester' => $sessionData['info_matkul']['semester'],
+            'smt_matkul' => $sessionData['info_matkul']['smt_matkul'],
+            'npp' => $sessionData['UserSession']['username'],
         ];
         $portofolioId = $portofolioModel->insert($portofolioData);
 

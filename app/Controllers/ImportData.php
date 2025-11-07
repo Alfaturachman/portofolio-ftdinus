@@ -894,6 +894,231 @@ class ImportData extends BaseController
         exit;
     }
 
+    public function saveImportUser()
+    {
+        // Tetapkan batas memori yang cukup
+        ini_set('memory_limit', '512M');
+        
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Validate file 
+        $validationRules = [
+            'file_user' => [
+                'rules' => 'uploaded[file_user]|ext_in[file_user,xls,xlsx]|max_size[file_user,51200]',
+                'errors' => [
+                    'uploaded' => 'File harus diupload',
+                    'ext_in' => 'Format file harus xls atau xlsx',
+                    'max_size' => 'Ukuran file maksimal 50MB'
+                ]
+            ]
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->to('/import-data')->with('error', $this->validator->getError('file_user'));
+        }
+
+        $file = $this->request->getFile('file_user');
+        
+        if (!$file->isValid()) {
+            return redirect()->to('/import-data')->with('error', 'File gagal diupload');
+        }
+
+        $fileName = $file->getRandomName();
+        $file->move(WRITEPATH . 'uploads/excel/', $fileName);
+        $filePath = WRITEPATH . 'uploads/excel/' . $fileName;
+
+        try {
+            require_once ROOTPATH . 'vendor/autoload.php';
+            
+            // Gunakan Box/Spout untuk membaca file Excel secara streaming
+            $reader = \Box\Spout\Reader\Common\Creator\ReaderEntityFactory::createReaderFromFile($filePath);
+            
+            // Buka file
+            $reader->open($filePath);
+            
+            // Ambil header (baris pertama)
+            $headerRow = null;
+            $columnMap = [];
+            $headers = [];
+            
+            // Prepare untuk database
+            $model = new \App\Models\UserModel();
+            $successCount = 0;
+            $errorCount = 0;
+            $errorMessages = [];
+            $duplicateCount = 0;
+            $duplicateUsers = [];
+            
+            // Baca file baris demi baris
+            $isFirstRow = true;
+            $rowNumber = 0;
+            $batchData = [];
+            $batchSize = 500;
+            
+            // Iterate through all sheets
+            foreach ($reader->getSheetIterator() as $sheet) {
+                // Baca hanya sheet pertama
+                foreach ($sheet->getRowIterator() as $row) {
+                    $rowNumber++;
+                    
+                    // Baca header di baris pertama
+                    if ($isFirstRow) {
+                        $headerRow = $row->getCells();
+                        foreach ($headerRow as $colIndex => $cell) {
+                            $headerValue = $cell->getValue();
+                            $headers[$colIndex] = $headerValue;
+                            
+                            if (in_array($headerValue, [
+                                'username', 'password'
+                            ])) {
+                                $columnMap[$colIndex] = $headerValue;
+                            }
+                        }
+                        
+                        // Validasi required fields
+                        $requiredFields = ['username', 'password'];
+                        $missingFields = array_diff($requiredFields, array_values($columnMap));
+                        
+                        if (!empty($missingFields)) {
+                            $reader->close();
+                            @unlink($filePath);
+                            return redirect()->to('/import-data')->with('error', 'Format file tidak sesuai. Field yang diperlukan: ' . implode(', ', $missingFields));
+                        }
+                        
+                        $isFirstRow = false;
+                        continue;
+                    }
+                    
+                    // Proses data baris
+                    $rowData = [];
+                    $isEmpty = true;
+                    $cells = $row->getCells();
+                    
+                    foreach ($columnMap as $colIndex => $fieldName) {
+                        $cellValue = isset($cells[$colIndex]) ? $cells[$colIndex]->getValue() : '';
+                        
+                        if (!empty($cellValue) || $cellValue === '0') {
+                            $isEmpty = false;
+                        }
+                        
+                        $rowData[$fieldName] = $cellValue;
+                    }
+                    
+                    // Skip baris kosong
+                    if ($isEmpty) {
+                        continue;
+                    }
+                    
+                    // Validate required fields
+                    if (empty($rowData['username']) || empty($rowData['password'])) {
+                        $errorCount++;
+                        $errorMessages[] = "Error pada baris $rowNumber: Username dan password harus diisi.";
+                        continue;
+                    }
+
+                    // Check if username already exists
+                    $existingUser = $model->where('username', $rowData['username'])->first();
+                    if ($existingUser) {
+                        $duplicateCount++;
+                        $duplicateUsers[] = $rowData['username'] . "(baris $rowNumber)";
+                        continue;
+                    }
+
+                    // Encrypt password using the same method as UserModel
+                    $rowData['password'] = $model->encryptPassword($rowData['password']);
+
+                    // Tambahkan timestamp
+                    $rowData['ins_time'] = date('Y-m-d H:i:s');
+                    $rowData['upd_time'] = date('Y-m-d H:i:s');
+
+                    $batchData[] = $rowData;
+                    
+                    // Proses batch jika sudah mencapai ukuran batch
+                    if (count($batchData) >= $batchSize) {
+                        try {
+                            // Insert each record one by one to handle potential errors
+                            foreach ($batchData as $userData) {
+                                try {
+                                    $model->insert($userData);
+                                    $successCount++;
+                                } catch (\Exception $e) {
+                                    $errorCount++;
+                                    $errorMessages[] = "Error pada baris saat insert: " . $e->getMessage();
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            $errorCount++;
+                            $errorMessages[] = "Error pada batch sekitar baris " . ($rowNumber - count($batchData)) . ": " . $e->getMessage();
+                        }
+                        
+                        // Reset batch data
+                        $batchData = [];
+                        
+                        // Force garbage collection
+                        gc_collect_cycles();
+                    }
+                }
+                
+                // Kita hanya perlu sheet pertama
+                break;
+            }
+            
+            // Proses sisa data
+            if (count($batchData) > 0) {
+                try {
+                    // Insert remaining records
+                    foreach ($batchData as $userData) {
+                        try {
+                            $model->insert($userData);
+                            $successCount++;
+                        } catch (\Exception $e) {
+                            $errorCount++;
+                            $errorMessages[] = "Error pada batch terakhir: " . $e->getMessage();
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $errorCount++;
+                    $errorMessages[] = "Error pada batch terakhir: " . $e->getMessage();
+                }
+            }
+            
+            // Tutup reader
+            $reader->close();
+            
+            // Hapus file
+            @unlink($filePath);
+            
+            $message = "";
+            if ($successCount > 0) {
+                $message .= "Berhasil mengimpor $successCount data user ke database.";
+            }
+            
+            if ($duplicateCount > 0) {
+                $message .= " $duplicateCount user telah ada sebelumnya: " . implode(', ', $duplicateUsers);
+            }
+            
+            if ($errorCount > 0) {
+                $message .= " Terdapat error saat import data. " . implode('<br>', $errorMessages);
+                return redirect()->to('/import-data')->with('error', $message);
+            } else {
+                return redirect()->to('/import-data')->with('success', $message);
+            }
+            
+        } catch (\Exception $e) {
+            // Bersihkan resource
+            if (isset($reader) && $reader) {
+                $reader->close();
+            }
+            
+            @unlink($filePath);
+            return redirect()->to('/import-data')->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+
+
     public function downloadTemplateMatkulDiampu()
     {
         // Load library untuk membuat file Excel
@@ -938,6 +1163,64 @@ class ImportData extends BaseController
         
         // Set nama file
         $filename = 'template_matkul_diampu.xlsx';
+        
+        // Redirect output ke browser
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function downloadTemplateUser()
+    {
+        // Load library untuk membuat file Excel
+        require_once ROOTPATH . 'vendor/autoload.php';
+        
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Set header
+        $headers = [
+            'username', 'password'
+        ];
+        
+        $column = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($column . '1', $header);
+            $column++;
+        }
+        
+        // Styling header
+        $styleArray = [
+            'font' => [
+                'bold' => true,
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'CCCCCC',
+                ],
+            ],
+        ];
+        
+        $sheet->getStyle('A1:' . chr(64 + count($headers)) . '1')->applyFromArray($styleArray);
+        
+        // Contoh data - menambahkan satu baris contoh
+        $sheet->setCellValue('A2', 'admin');
+        $sheet->setCellValue('B2', 'password123');
+        $sheet->setCellValue('A3', 'user1');
+        $sheet->setCellValue('B3', 'password456');
+        
+        // Auto size kolom
+        foreach (range('A', chr(64 + count($headers))) as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+        
+        // Set nama file
+        $filename = 'template_user.xlsx';
         
         // Redirect output ke browser
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

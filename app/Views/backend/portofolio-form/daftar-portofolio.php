@@ -52,21 +52,21 @@
                             <tbody>
                                 <?php $no = 1;
                                 if (!empty($portofolioList)):
-                                foreach ($portofolioList as $porto): ?>
-                                    <tr>
-                                        <td><?= $no++ ?></td>
-                                        <td><?= $porto['kode_mk'] ?></td>
-                                        <td><?= $porto['nama_mk'] ?></td>
-                                        <td><?= $porto['npp'] ?></td>
-                                        <td><?= $porto['nama'] ?></td>
-                                        <td><?= date('d-m-Y H:i', strtotime($porto['ins_time'])) ?></td>
-                                        <td>
-                                            <a href="<?= base_url('cetak-pdf/' . $porto['id']) ?>" class="btn btn-sm btn-primary">
-                                                Cetak
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; 
+                                    foreach ($portofolioList as $porto): ?>
+                                        <tr>
+                                            <td><?= $no++ ?></td>
+                                            <td><?= $porto['kode_mk'] ?></td>
+                                            <td><?= $porto['nama_mk'] ?></td>
+                                            <td><?= $porto['npp'] ?></td>
+                                            <td><?= $porto['nama'] ?></td>
+                                            <td><?= formatTanggalIndo($porto['ins_time']) ?></td>
+                                            <td>
+                                                <a href="<?= base_url('cetak-pdf/' . $porto['id']) ?>" class="btn btn-sm btn-primary">
+                                                    Cetak
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach;
                                 else: ?>
                                     <tr>
                                         <td colspan="7" class="text-center">Tidak ada data portofolio</td>
@@ -82,40 +82,40 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-    const table = document.getElementById('portofolioTable');
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const table = document.getElementById('portofolioTable');
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
-    function searchTable() {
-        const filter = searchInput.value.toLowerCase();
-        
-        for (let i = 0; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName('td');
-            let found = false;
-            
-            for (let j = 0; j < cells.length; j++) {
-                const cellText = cells[j].textContent || cells[j].innerText;
-                
-                if (cellText.toLowerCase().indexOf(filter) > -1) {
-                    found = true;
-                    break;
+        function searchTable() {
+            const filter = searchInput.value.toLowerCase();
+
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cellText = cells[j].textContent || cells[j].innerText;
+
+                    if (cellText.toLowerCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
                 }
-            }
-            
-            rows[i].style.display = found ? '' : 'none';
-        }
-    }
 
-    searchButton.addEventListener('click', searchTable);
-    searchInput.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            searchTable();
+                rows[i].style.display = found ? '' : 'none';
+            }
         }
+
+        searchButton.addEventListener('click', searchTable);
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchTable();
+            }
+        });
     });
-});
 </script>
 
 <?= $this->include('backend/partials/footer') ?>

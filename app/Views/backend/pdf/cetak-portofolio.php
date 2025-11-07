@@ -95,8 +95,19 @@
     <div class="first-page" style="position: relative; min-height: 100vh; display: flex; flex-direction: column;">
         <div>
             <h1>PORTOFOLIO MATA KULIAH</h1>
-            <h2>NAMA MATA KULIAH</h2>
-            <h3>TAHUN AKADEMIK 20XX/20XX</h3>
+            <h2><?= $portofolioData['nama_matkul'] ?></h2>
+            <h3 id="tahunAkademik">TAHUN AKADEMIK 2024/2025</h3>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const now = new Date();
+                    const tahunAwal = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+                    const tahunAkhir = tahunAwal + 1;
+
+                    document.getElementById("tahunAkademik").textContent = `TAHUN AKADEMIK ${tahunAwal}/${tahunAkhir}`;
+                });
+            </script>
+
         </div>
 
         <div style="margin-top: 100px; margin-bottom: 100px;">

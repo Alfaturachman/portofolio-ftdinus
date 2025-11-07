@@ -14,16 +14,47 @@ class PortofolioModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['id_user', 'kode_mk', 'nama_mk', 'npp', 'ins_time', 'upd_time'];
+    protected $allowedFields = ['id_user', 'kode_mk', 'nama_mk', 'npp', 'tahun', 'semester', 'smt_matkul', 'ins_time', 'upd_time'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'ins_time';
     protected $updatedField  = 'upd_time';
 
-    public function getAllPortofolio()
+    public function getAllPortofolio($npp)
     {
-        return $this->select('portofolio.id, portofolio.kode_mk, portofolio.nama_mk, users.nama as dosen_nama, portofolio.npp, portofolio.ins_time')
+        return $this->select('
+            portofolio.id,
+            portofolio.kode_mk,
+            portofolio.nama_mk,
+            portofolio.tahun,
+            portofolio.semester,
+            portofolio.smt_matkul,
+            users.nama AS dosen_nama,
+            portofolio.npp,
+            portofolio.ins_time,
+            matkul_diampu.kelp_matkul,
+            matkul_diampu.id_kelas,
+            matkul_diampu.kode_ts
+        ')
             ->join('users', 'portofolio.npp = users.username')
+            ->join('matkul_diampu', '
+            matkul_diampu.kode_matkul = portofolio.kode_mk
+            AND matkul_diampu.tahun = portofolio.tahun
+            AND matkul_diampu.semester = portofolio.semester
+        ')
+            ->where('portofolio.npp', $npp)
+            ->orderBy('portofolio.ins_time', 'DESC')
+            ->findAll();
+    }
+
+    public function getPortofolio($kode_mk, $tahun, $semester)
+    {
+        return $this->select('portofolio.*, users.nama')
+            ->join('users', 'portofolio.npp = users.username', 'left')
+            ->where('portofolio.kode_mk', $kode_mk)
+            ->where('portofolio.tahun', $tahun)
+            ->where('portofolio.semester', $semester)
+            ->orderBy('portofolio.ins_time', 'DESC')
             ->findAll();
     }
 
@@ -31,7 +62,7 @@ class PortofolioModel extends Model
     {
         $db = \Config\Database::connect();
         $builder = $db->table('matkul_diampu');
-        
+
         // Fix: Include all selected columns in the GROUP BY clause
         return $builder->select('matkul_diampu.kode_matkul, matkul_diampu.matkul, matkul_diampu.kelp_matkul, matkul_diampu.tahun, matkul_diampu.semester, matkul_diampu.kode_ts')
             ->where('matkul_diampu.npp', $npp)
@@ -66,15 +97,36 @@ class PortofolioModel extends Model
             ->first();
     }
 
-    public function getMatkulDetail($kode_matkul)
+    public function getMatkulDetail($kode_matkul, $tahun, $semester)
     {
         $db = \Config\Database::connect();
         $builder = $db->table('matkul_diampu');
-        
-        return $builder->select('kode_matkul, matkul')
+
+        return $builder->select('kode_matkul, matkul, tahun, semester, npp')
             ->where('kode_matkul', $kode_matkul)
+            ->where('tahun', $tahun)
+            ->where('semester', $semester)
             ->get()
             ->getRowArray();
+    }
+
+    public function getMatkulByKodeTS($kode_mk, $kode_ts)
+    {
+        return $this->db->table('matkul_diampu')
+            ->where('kode_matkul', $kode_mk)
+            ->where('kode_ts', $kode_ts)
+            ->get()
+            ->getRowArray();
+    }
+
+
+    public function getPortofolioByMKTS($kode_mk, $tahun, $semester)
+    {
+        return $this->where('kode_mk', $kode_mk)
+            ->where('tahun', $tahun)
+            ->where('semester', $semester)
+            ->orderBy('ins_time', 'DESC')
+            ->findAll();
     }
 
     public function getPortofolioByKodeMK($kode_matkul)
@@ -89,14 +141,14 @@ class PortofolioModel extends Model
     {
         $db = \Config\Database::connect();
         $builder = $db->table('mahasiswa_kelas');
-        
+
         $result = $builder->where([
             'kode_matkul' => $kode_matkul,
             'kelp_matkul' => $kelp_matkul,
             'kode_ts' => $kode_ts
         ])
-        ->countAllResults();
-        
+            ->countAllResults();
+
         return $result > 0;
     }
 }

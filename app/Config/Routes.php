@@ -40,7 +40,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->get('hasil-asesmen', 'Portofolio::hasil_asesmen');
     $routes->get('evaluasi-perkuliahan', 'Portofolio::evaluasi_perkuliahan');
     $routes->get('tes-cetak', 'Portofolio::tes_cetak');
-    $routes->get('daftar/(:segment)', 'Portofolio::daftar/$1');
+    $routes->get('daftar/(:segment)/(:segment)/(:segment)', 'Portofolio::daftar/$1/$2/$3');
     $routes->get('getMahasiswaByKelas/(:segment)', 'Portofolio::getMahasiswaByKelas/$1');
 
     // Rute POST
