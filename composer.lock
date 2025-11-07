@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "8ceef860de70fd5560bdb15610dcfc9d",
-=======
     "content-hash": "540bca9189b3da9a19f684af02483af0",
->>>>>>> 31f2652da1b666e2eb39c0acd945345431712191
     "packages": [
         {
             "name": "box/spout",
@@ -1669,57 +1665,6 @@
             "time": "2020-02-19T11:40:30+00:00"
         },
         {
-<<<<<<< HEAD
-            "name": "smalot/pdfparser",
-            "version": "v2.11.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/smalot/pdfparser.git",
-                "reference": "ac8e6678b0940e4b2ccd5caadd3fb18e68093be6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/ac8e6678b0940e4b2ccd5caadd3fb18e68093be6",
-                "reference": "ac8e6678b0940e4b2ccd5caadd3fb18e68093be6",
-                "shasum": ""
-            },
-            "require": {
-                "ext-iconv": "*",
-                "ext-zlib": "*",
-                "php": ">=7.1",
-                "symfony/polyfill-mbstring": "^1.18"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Smalot\\PdfParser\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Sebastien MALOT",
-                    "email": "sebastien@malot.fr"
-                }
-            ],
-            "description": "Pdf parser library. Can read and extract information from pdf file.",
-            "homepage": "https://www.pdfparser.org",
-            "keywords": [
-                "extract",
-                "parse",
-                "parser",
-                "pdf",
-                "text"
-            ],
-            "support": {
-                "issues": "https://github.com/smalot/pdfparser/issues",
-                "source": "https://github.com/smalot/pdfparser/tree/v2.11.0"
-            },
-            "time": "2024-08-16T06:48:03+00:00"
-=======
             "name": "shuchkin/simplexlsx",
             "version": "1.1.13",
             "source": {
@@ -1772,7 +1717,6 @@
                 "source": "https://github.com/shuchkin/simplexlsx/tree/1.1.13"
             },
             "time": "2024-12-21T13:32:13+00:00"
->>>>>>> 31f2652da1b666e2eb39c0acd945345431712191
         },
         {
             "name": "symfony/deprecation-contracts",

@@ -75,8 +75,8 @@ class RancanganSoalModel extends Model
     public function getRancanganSoalByPortofolio($portofolioId)
     {
         return $this->where('id_porto', $portofolioId)
-                    ->orderBy('no_soal', 'ASC')
-                    ->findAll();
+            ->orderBy('no_soal', 'ASC')
+            ->findAll();
     }
 
     /**
@@ -88,10 +88,10 @@ class RancanganSoalModel extends Model
     public function getRancanganSoalWithCpmk($portofolioId)
     {
         return $this->select('rancangan_soal.*, cpmk.no_cpmk, cpmk.isi_cpmk')
-                    ->join('cpmk', 'cpmk.id = rancangan_soal.id_cpmk', 'left')
-                    ->where('rancangan_soal.id_porto', $portofolioId)
-                    ->orderBy('rancangan_soal.no_soal', 'ASC')
-                    ->findAll();
+            ->join('cpmk', 'cpmk.id = rancangan_soal.id_cpmk', 'left')
+            ->where('rancangan_soal.id_porto', $portofolioId)
+            ->orderBy('rancangan_soal.no_soal', 'ASC')
+            ->findAll();
     }
 
     /**
@@ -104,9 +104,9 @@ class RancanganSoalModel extends Model
     public function getRancanganSoalByAssessmentType($portofolioId, $assessmentType)
     {
         return $this->where('id_porto', $portofolioId)
-                    ->like('no_soal', $assessmentType, 'after')
-                    ->orderBy('no_soal', 'ASC')
-                    ->findAll();
+            ->like('no_soal', $assessmentType, 'after')
+            ->orderBy('no_soal', 'ASC')
+            ->findAll();
     }
 
     /**
@@ -118,7 +118,7 @@ class RancanganSoalModel extends Model
     public function getRancanganSoalGrouped($portofolioId)
     {
         $data = $this->getRancanganSoalWithCpmk($portofolioId);
-        
+
         $grouped = [
             'Tugas' => [],
             'UTS' => [],
@@ -127,7 +127,7 @@ class RancanganSoalModel extends Model
 
         foreach ($data as $item) {
             $noSoal = $item['no_soal'];
-            
+
             if (strpos($noSoal, 'Tugas') === 0) {
                 $grouped['Tugas'][] = $item;
             } elseif (strpos($noSoal, 'UTS') === 0) {
@@ -149,14 +149,14 @@ class RancanganSoalModel extends Model
     public function getRancanganSoalStats($portofolioId)
     {
         $builder = $this->db->table($this->table);
-        
+
         // Total soal
         $totalSoal = $builder->where('id_porto', $portofolioId)->countAllResults(false);
-        
+
         // Total soal yang tercentang (nilai = 1)
         $totalTercentang = $builder->where('id_porto', $portofolioId)
-                                  ->where('nilai', 1)
-                                  ->countAllResults(false);
+            ->where('nilai', 1)
+            ->countAllResults(false);
 
         // Total soal per kategori
         $stats = [
@@ -180,8 +180,8 @@ class RancanganSoalModel extends Model
     private function countSoalByType($portofolioId, $type)
     {
         return $this->where('id_porto', $portofolioId)
-                    ->like('no_soal', $type, 'after')
-                    ->countAllResults();
+            ->like('no_soal', $type, 'after')
+            ->countAllResults();
     }
 
     /**
@@ -205,11 +205,11 @@ class RancanganSoalModel extends Model
     public function getCpmkMappingForSoal($portofolioId, $noSoal)
     {
         return $this->select('rancangan_soal.*, cpmk.no_cpmk, cpmk.isi_cpmk')
-                    ->join('cpmk', 'cpmk.id = rancangan_soal.id_cpmk', 'left')
-                    ->where('rancangan_soal.id_porto', $portofolioId)
-                    ->where('rancangan_soal.no_soal', $noSoal)
-                    ->where('rancangan_soal.nilai', 1)
-                    ->findAll();
+            ->join('cpmk', 'cpmk.id = rancangan_soal.id_cpmk', 'left')
+            ->where('rancangan_soal.id_porto', $portofolioId)
+            ->where('rancangan_soal.no_soal', $noSoal)
+            ->where('rancangan_soal.nilai', 1)
+            ->findAll();
     }
 
     /**
@@ -224,10 +224,10 @@ class RancanganSoalModel extends Model
     public function updateNilaiSoal($portofolioId, $noSoal, $cpmkId, $nilai)
     {
         return $this->where('id_porto', $portofolioId)
-                    ->where('no_soal', $noSoal)
-                    ->where('id_cpmk', $cpmkId)
-                    ->set('nilai', $nilai)
-                    ->update();
+            ->where('no_soal', $noSoal)
+            ->where('id_cpmk', $cpmkId)
+            ->set('nilai', $nilai)
+            ->update();
     }
 
     /**
@@ -241,10 +241,10 @@ class RancanganSoalModel extends Model
     public function soalExists($portofolioId, $noSoal, $cpmkId)
     {
         $result = $this->where('id_porto', $portofolioId)
-                       ->where('no_soal', $noSoal)
-                       ->where('id_cpmk', $cpmkId)
-                       ->first();
-        
+            ->where('no_soal', $noSoal)
+            ->where('id_cpmk', $cpmkId)
+            ->first();
+
         return $result !== null;
     }
 
@@ -258,12 +258,29 @@ class RancanganSoalModel extends Model
     public function getUniqueSoalNumbers($portofolioId, $assessmentType)
     {
         $results = $this->select('no_soal')
-                        ->where('id_porto', $portofolioId)
-                        ->like('no_soal', $assessmentType, 'after')
-                        ->groupBy('no_soal')
-                        ->orderBy('no_soal', 'ASC')
-                        ->findAll();
+            ->where('id_porto', $portofolioId)
+            ->like('no_soal', $assessmentType, 'after')
+            ->groupBy('no_soal')
+            ->orderBy('no_soal', 'ASC')
+            ->findAll();
 
         return array_column($results, 'no_soal');
+    }
+
+    /**
+     * Get all soal for a specific portofolio
+     *
+     * @param int $idPorto
+     * @return array
+     */
+    public function getAssessmentSoalData($idPorto)
+    {
+        $builder = $this->db->table('rancangan_soal');
+        $builder->select('rancangan_soal.*, cpmk.no_cpmk');
+        $builder->join('cpmk', 'cpmk.id = rancangan_soal.id_cpmk', 'left');
+        $builder->where('rancangan_soal.id_porto', $idPorto);
+        $builder->orderBy('kategori_soal, no_soal');
+
+        return $builder->get()->getResultArray();
     }
 }

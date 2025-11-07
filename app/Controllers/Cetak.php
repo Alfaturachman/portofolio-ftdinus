@@ -17,6 +17,7 @@ use App\Models\MappingCpmkScpmkModel;
 use App\Models\RancanganAsesmenModel;
 use App\Models\RancanganAsesmenFileModel;
 use App\Models\PelaksanaanPerkuliahanModel;
+use App\Models\RancanganSoalModel;
 
 class Cetak extends BaseController
 {
@@ -35,6 +36,7 @@ class Cetak extends BaseController
         $subCpmkModel = new SubCpmkModel();
         $mappingModel = new MappingCpmkScpmkModel();
         $asesmenModel = new RancanganAsesmenModel();
+        $asesmenSoalModel = new RancanganSoalModel();
 
         // Ambil data dari model
         $portofolioData = $portofolioModel->getPortofolioCetakDetails($idPorto);
@@ -43,6 +45,9 @@ class Cetak extends BaseController
         $cpmkData = $cpmkModel->getCpmkByPorto($idPorto);
         $subCpmkData = $subCpmkModel->getSubCpmkByPorto($idPorto);
         $assessmentData = $asesmenModel->getAssessmentData($idPorto);
+        $assessmentSoalData = $asesmenSoalModel->getAssessmentSoalData($idPorto);
+
+        $chartImageBase64 = $this->generateChartImage($cpmkData);
 
         // Ambil data mapping
         $mappingData = $mappingModel->getMapping($idPorto);
@@ -55,10 +60,12 @@ class Cetak extends BaseController
             'cplPiData' => $cplPiData,
             'cplData' => $cplData,
             'cpmkData' => $cpmkData,
+            'chartImageBase64' => $chartImageBase64,
             'subCpmkData' => $subCpmkData,
             'mappingData' => $mappingData,
             'subCpmkNumbers' => $subCpmkNumbers,
-            'assessmentData' => $assessmentData
+            'assessmentData' => $assessmentData,
+            'assessmentSoalData' => $assessmentSoalData
         ];
     }
 
@@ -343,6 +350,106 @@ class Cetak extends BaseController
         }
 
         $pdf->Output($outputPath, 'F');
+    }
+
+    private function generateChartImage($cpmkData)
+    {
+        // Siapkan data untuk chart
+        $labels = [];
+        $values = [];
+        foreach ($cpmkData as $cpmk) {
+            $labels[] = 'CPMK ' . $cpmk['no_cpmk'];
+            $values[] = $cpmk['avg_cpmk'];
+        }
+
+        // Hitung nilai max secara dinamis untuk menentukan batas atas
+        $maxValue = max($values);
+
+        // Set yMin selalu 0 dan yMax dengan buffer
+        $yMin = 0.0; // Selalu mulai dari 0
+        $yMax = min(4, ceil(($maxValue + 0.5) * 2) / 2); // Bulatkan ke atas ke kelipatan 0.5 dengan buffer
+
+        // Pastikan yMax minimal 2.5 untuk memberikan ruang yang cukup
+        if ($yMax < 2.5) {
+            $yMax = 2.5;
+        }
+
+        // Konfigurasi chart menggunakan QuickCharts
+        $chartConfig = [
+            'type' => 'bar',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [
+                    [
+                        'label' => 'Nilai CPMK',
+                        'data' => $values,
+                        'backgroundColor' => 'rgba(15, 76, 146, 0.1)',
+                        'borderColor' => 'rgba(15, 76, 146, 1)',
+                        'borderWidth' => 1
+                    ]
+                ]
+            ],
+            'options' => [
+                'scales' => [
+                    'y' => [
+                        'beginAtZero' => true,
+                        'min' => 0.0,
+                        'max' => $yMax,
+                        'ticks' => [
+                            'stepSize' => 0.5,
+                            'callback' => 'function(value) { return value.toFixed(2); }'
+                        ],
+                        'grid' => [
+                            'drawOnChartArea' => true,
+                            'color' => 'rgba(0, 0, 0, 0.1)'
+                        ]
+                    ]
+                ],
+                'plugins' => [
+                    'legend' => [
+                        'position' => 'top'
+                    ],
+                    'tooltip' => [
+                        'callbacks' => [
+                            'label' => 'function(context) { return "Nilai: " + context.raw.toFixed(2); }'
+                        ]
+                    ],
+                    'annotation' => [
+                        'annotations' => [
+                            'line1' => [
+                                'type' => 'line',
+                                'yMin' => 2.00,
+                                'yMax' => 2.00,
+                                'borderColor' => 'red',
+                                'borderWidth' => 2,
+                                'borderDash' => [5, 5],
+                                'scaleID' => 'y',
+                                'label' => [
+                                    'display' => true,
+                                    'content' => 'Nilai minimum (2.00)',
+                                    'position' => 'end',
+                                    'backgroundColor' => 'rgba(255, 0, 0, 0.7)',
+                                    'font' => [
+                                        'size' => 12,
+                                        'weight' => 'bold'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        // Encode konfigurasi chart ke URL
+        $chartConfigEncoded = urlencode(json_encode($chartConfig));
+
+        // Generate URL gambar chart dari QuickChart
+        $chartUrl = "https://quickchart.io/chart?c={$chartConfigEncoded}&w=500&h=300";
+
+        // Ambil gambar chart sebagai base64
+        $imageData = file_get_contents($chartUrl);
+        return 'data:image/png;base64,' . base64_encode($imageData);
     }
 
     public function show($filename)

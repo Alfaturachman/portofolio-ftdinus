@@ -24,12 +24,11 @@ class RancanganAsesmenModel extends Model
 
     public function getAssessmentData($idPorto)
     {
-        // Assuming you have a table 'rancangan_asesmen' with these fields
         $builder = $this->db->table('rancangan_asesmen');
         $builder->select('rancangan_asesmen.*, cpmk.id as id_cpmk, cpmk.no_cpmk, sub_cpmk.id as id_scpmk, sub_cpmk.no_scpmk');
-        $builder->join('cpmk', 'cpmk.id = rancangan_asesmen.id_cpmk');
-        $builder->join('sub_cpmk', 'sub_cpmk.id = rancangan_asesmen.id_scpmk');
-        $builder->where('cpmk.id_porto', $idPorto);
+        $builder->join('cpmk', 'cpmk.id = rancangan_asesmen.id_cpmk', 'left');
+        $builder->join('sub_cpmk', 'sub_cpmk.id = rancangan_asesmen.id_scpmk', 'left');
+        $builder->where('rancangan_asesmen.id_porto', $idPorto);
 
         return $builder->get()->getResultArray();
     }

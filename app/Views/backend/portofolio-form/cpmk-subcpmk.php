@@ -364,8 +364,8 @@
         const cpmkData = {};
         const cplData = {}; // Untuk menyimpan data CPL
 
-        document.querySelectorAll('.cpmk-row').forEach(row => {
-            const cpmkNumber = row.dataset.cpmk;
+        document.querySelectorAll('.cpmk-row').forEach((row, index) => {
+            const cpmkNumber = index + 1; // Gunakan index + 1 sebagai nomor CPMK
             const narasi = row.querySelector('input[name^="cpmk["]').value;
             const selectedCpl = row.querySelector('select[name^="cpmk["]').value;
             const selectElement = row.querySelector('select[name^="cpmk["]');
@@ -373,6 +373,7 @@
             cpmkData[cpmkNumber] = {
                 narasi: narasi,
                 selectedCpl: selectedCpl,
+                no_cpmk: cpmkNumber, // Tambahkan field no_cpmk
                 sub: {}
             };
 
@@ -399,7 +400,7 @@
             }
 
             // Get sub-CPMK data for this CPMK
-            const subWrapper = document.getElementById(`subCpmkWrapper${cpmkNumber}`);
+            const subWrapper = document.getElementById(`subCpmkWrapper${row.dataset.cpmk}`);
             if (subWrapper) {
                 subWrapper.querySelectorAll('.row').forEach(subRow => {
                     const subNumber = subRow.querySelector('input[name^="no_cpmk["]').value;

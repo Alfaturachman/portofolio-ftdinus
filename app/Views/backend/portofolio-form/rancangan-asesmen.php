@@ -198,41 +198,41 @@
                                                 }
                                             }
                                         }
-                                        
+
                                         // Sort CPMK numbers
                                         sort($uniqueCpmkNumbers);
-                                        
+
                                         // Display one row per CPMK
                                         foreach ($uniqueCpmkNumbers as $cpmkNo):
                                     ?>
-                                        <tr>
-                                            <td class="align-middle">
-                                                <strong>CPMK <?= $cpmkNo ?></strong>
-                                            </td>
-                                            <!-- Modified checkbox input fields in the table -->
-                                            <td class="text-center">
-                                                <input type="checkbox"
-                                                    class="assessment-checkbox"
-                                                    name="assessment[<?= $cpmkNo ?>][tugas]"
-                                                    <?= isset($assessmentData[$cpmkNo]['tugas']) && $assessmentData[$cpmkNo]['tugas'] ? 'checked' : '' ?>>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="checkbox"
-                                                    class="assessment-checkbox"
-                                                    name="assessment[<?= $cpmkNo ?>][uts]"
-                                                    <?= isset($assessmentData[$cpmkNo]['uts']) && $assessmentData[$cpmkNo]['uts'] ? 'checked' : '' ?>>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="checkbox"
-                                                    class="assessment-checkbox"
-                                                    name="assessment[<?= $cpmkNo ?>][uas]"
-                                                    <?= isset($assessmentData[$cpmkNo]['uas']) && $assessmentData[$cpmkNo]['uas'] ? 'checked' : '' ?>>
-                                            </td>
-                                        </tr>
-                                    <?php
+                                            <tr>
+                                                <td class="align-middle">
+                                                    <strong>CPMK <?= $cpmkNo ?></strong>
+                                                </td>
+                                                <!-- Modified checkbox input fields in the table -->
+                                                <td class="text-center">
+                                                    <input type="checkbox"
+                                                        class="assessment-checkbox"
+                                                        name="assessment[<?= $cpmkNo ?>][tugas]"
+                                                        <?= isset($assessmentData[$cpmkNo]['tugas']) && $assessmentData[$cpmkNo]['tugas'] ? 'checked' : '' ?>>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox"
+                                                        class="assessment-checkbox"
+                                                        name="assessment[<?= $cpmkNo ?>][uts]"
+                                                        <?= isset($assessmentData[$cpmkNo]['uts']) && $assessmentData[$cpmkNo]['uts'] ? 'checked' : '' ?>>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="checkbox"
+                                                        class="assessment-checkbox"
+                                                        name="assessment[<?= $cpmkNo ?>][uas]"
+                                                        <?= isset($assessmentData[$cpmkNo]['uas']) && $assessmentData[$cpmkNo]['uas'] ? 'checked' : '' ?>>
+                                                </td>
+                                            </tr>
+                                        <?php
                                         endforeach;
                                     else:
-                                    ?>
+                                        ?>
                                         <tr>
                                             <td colspan="4" class="text-center">Tidak ada data pemetaan yang tersedia.</td>
                                         </tr>
@@ -382,55 +382,55 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('rpsForm');
         const checkboxes = document.querySelectorAll('.assessment-checkbox');
-        
+
         // Get all file upload sections
         const taskSection = document.getElementById('tugas-section');
         const utsSection = document.getElementById('uts-section');
         const uasSection = document.getElementById('uas-section');
-        
+
         // Function to update file upload sections visibility
         function updateFileUploadSections() {
             // Check if any task checkbox is checked
             const taskChecked = Array.from(document.querySelectorAll('input[name*="[tugas]"]'))
                 .some(checkbox => checkbox.checked);
-                
+
             // Check if any UTS checkbox is checked
             const utsChecked = Array.from(document.querySelectorAll('input[name*="[uts]"]'))
                 .some(checkbox => checkbox.checked);
-                
+
             // Check if any UAS checkbox is checked
             const uasChecked = Array.from(document.querySelectorAll('input[name*="[uas]"]'))
                 .some(checkbox => checkbox.checked);
-            
+
             // Show/hide sections based on checkbox status
             taskSection.style.display = taskChecked ? 'block' : 'none';
             utsSection.style.display = utsChecked ? 'block' : 'none';
             uasSection.style.display = uasChecked ? 'block' : 'none';
-            
+
             // Update required attribute for file inputs
             if (taskSection) {
                 const taskInputs = taskSection.querySelectorAll('input[type="file"]');
                 taskInputs.forEach(input => {
                     // Only set required if the section is visible and no file is already uploaded
-                    const fileAlreadyUploaded = input.nextElementSibling && 
+                    const fileAlreadyUploaded = input.nextElementSibling &&
                         input.nextElementSibling.classList.contains('bg-success');
                     input.required = taskChecked && !fileAlreadyUploaded;
                 });
             }
-            
+
             if (utsSection) {
                 const utsInputs = utsSection.querySelectorAll('input[type="file"]');
                 utsInputs.forEach(input => {
-                    const fileAlreadyUploaded = input.nextElementSibling && 
+                    const fileAlreadyUploaded = input.nextElementSibling &&
                         input.nextElementSibling.classList.contains('bg-success');
                     input.required = utsChecked && !fileAlreadyUploaded;
                 });
             }
-            
+
             if (uasSection) {
                 const uasInputs = uasSection.querySelectorAll('input[type="file"]');
                 uasInputs.forEach(input => {
-                    const fileAlreadyUploaded = input.nextElementSibling && 
+                    const fileAlreadyUploaded = input.nextElementSibling &&
                         input.nextElementSibling.classList.contains('bg-success');
                     input.required = uasChecked && !fileAlreadyUploaded;
                 });
@@ -512,7 +512,7 @@
 
             // Define file inputs based on visible sections
             let fileInputs = [];
-            
+
             if (taskChecked) {
                 fileInputs = [...fileInputs, 'soal_tugas', 'rubrik_tugas'];
             }
@@ -557,7 +557,7 @@
                     alert('Terjadi kesalahan saat menyimpan data asesmen.');
                 });
         });
-        
+
         // Call the update function on page load to set initial state
         updateFileUploadSections();
     });

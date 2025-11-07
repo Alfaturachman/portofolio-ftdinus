@@ -69,6 +69,7 @@ class Portofolio extends BaseController
         return view('backend/portofolio-form/daftar-portofolio', $data);
     }
 
+    // Method untuk menghandle file Uplod RPS (Rencana Pembelajaran Semester)
     public function upload_rps()
     {
         if (!session()->get('UserSession.logged_in')) {
@@ -83,6 +84,7 @@ class Portofolio extends BaseController
         ]);
     }
 
+    // Method untuk view uploaded PDF file
     public function view_uploaded_pdf($filename)
     {
         $path = WRITEPATH . 'uploads/rps/' . $filename;
@@ -97,6 +99,7 @@ class Portofolio extends BaseController
         }
     }
 
+    // Method untuk save uploaded RPS file
     public function saveUploadRps()
     {
         // Validasi file upload
@@ -143,6 +146,7 @@ class Portofolio extends BaseController
         ]);
     }
 
+    // Method form informasi mata kuliah
     public function info_matkul()
     {
         if (!session()->get('UserSession.logged_in')) {
@@ -1087,9 +1091,10 @@ class Portofolio extends BaseController
 
             // Simpan ke session
             session()->set('evaluasi_perkuliahan', $evaluasi);
-            session()->set('cpmk_nilai', $cpmk_nilai); // Tambahkan baris ini
+            session()->set('cpmk_nilai', $cpmk_nilai);
             session()->set('current_progress', 'evaluasi_perkuliahan');
 
+            // Simpan semua data yang diperlukan ke dalam database menggunakan direct route savePortofolio
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Data evaluasi perkuliahan berhasil disimpan',
@@ -1177,14 +1182,14 @@ class Portofolio extends BaseController
 
             $cpmkData = [
                 'id_porto' => $portofolioId,
-                'no_cpmk' => $cpmk['selectedCpl'],
+                'no_cpmk' => $cpmk['no_cpmk'],
                 'isi_cpmk' => $cpmk['narasi'],
-                'avg_cpmk' => $avgCpmk // Simpan nilai CPMK ke field avg_cpmk
+                'avg_cpmk' => $avgCpmk
             ];
             $cpmkId = $cpmkModel->insert($cpmkData);
-            $cpmkMapping[$noCpmk] = $cpmkId; // Simpan mapping antara no_cpmk dan ID database
+            $cpmkMapping[$noCpmk] = $cpmkId;
 
-            // Simpan Sub-CPMK untuk CPMK ini dan catat ID-nya
+            // Simpan Sub-CPMK untuk CPMK ini
             foreach ($cpmk['sub'] as $noSubCpmk => $subCpmk) {
                 $subCpmkData = [
                     'id_porto' => $portofolioId,
@@ -1192,7 +1197,7 @@ class Portofolio extends BaseController
                     'isi_scmpk' => $subCpmk
                 ];
                 $subCpmkId = $subCpmkModel->insert($subCpmkData);
-                $subCpmkMapping[$noSubCpmk] = $subCpmkId; // Simpan mapping antara no_scpmk dan ID database
+                $subCpmkMapping[$noSubCpmk] = $subCpmkId;
             }
         }
 
@@ -1267,7 +1272,7 @@ class Portofolio extends BaseController
             }
         }
 
-        // Simpan data ke tabel rancangan_soal (MODIFIED VERSION)
+        // Simpan data ke tabel rancangan_soal
         $rancanganSoalModel = new RancanganSoalModel();
         $soalMappingData = $sessionData['soal_mapping_data'] ?? [];
 
@@ -1312,7 +1317,7 @@ class Portofolio extends BaseController
             }
         }
 
-        // Simpan data ke tabel rancangan asesmen file
+        // Simpan data ke tabel rancangan_asesmen_file
         $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
         if (isset($sessionData['assessment_files']) && is_array($sessionData['assessment_files'])) {
             foreach ($sessionData['assessment_files'] as $kategori => $file) {
