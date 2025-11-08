@@ -27,6 +27,13 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika user masuk ke halaman index (tambah portofolio baru), pastikan session bersih
+        // Hapus mode edit dan session data terkait sebelum melanjutkan
+        $this->clearEditMode();
+        
+        // Bersihkan semua session data terkait proses sebelumnya
+        $this->clearSessionExceptUser();
+
         // Ambil NPP user login
         $currentUserNPP = session()->get('UserSession.username');
 
@@ -81,6 +88,12 @@ class Portofolio extends BaseController
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
         }
 
         // Cek apakah ada file yang disimpan di session
@@ -158,6 +171,12 @@ class Portofolio extends BaseController
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
         }
 
         // Get data from database from info_matkul table
@@ -256,8 +275,20 @@ class Portofolio extends BaseController
         // Log informasi penyimpanan data
         log_message('info', 'Data Mata Kuliah disimpan ke session: ' . json_encode($data));
 
-        // Redirect ke halaman berikutnya dengan pesan sukses
-        return redirect()->to('portofolio-form/cpl-pi')->with('message', 'Data mata kuliah berhasil disimpan.');
+        // Periksa apakah ini mode edit
+        if (session()->get('edit_mode')) {
+            $idPorto = session()->get('edit_portofolio_id');
+            // Redirect ke halaman selanjutnya dalam proses edit
+            return redirect()->to('portofolio-form/cpl-pi-edit/' . $idPorto)->with('message', 'Data mata kuliah berhasil diperbarui.');
+        } else {
+            // Jika secara tidak sengaja masuk dalam mode edit dari proses sebelumnya
+            if (session()->get('edit_mode')) {
+                $this->clearEditMode();
+                $this->clearSessionExceptUser();
+            }
+            // Redirect ke halaman berikutnya dengan pesan sukses (proses tambah baru)
+            return redirect()->to('portofolio-form/cpl-pi')->with('message', 'Data mata kuliah berhasil disimpan.');
+        }
     }
 
     public function view_pdf(): object
@@ -281,6 +312,12 @@ class Portofolio extends BaseController
     {
         if (!session()->get('UserSession.logged_in')) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
         }
 
         // Get kode_matkul from session
@@ -324,6 +361,63 @@ class Portofolio extends BaseController
         ]);
     }
 
+    // Method untuk halaman edit CPL-PI
+    public function cpl_pi_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!session()->get('edit_mode') || session()->get('edit_portofolio_id') != $idPorto) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Get CPL-PI data from session (already loaded during edit)
+        $cplPiData = session()->get('cpl_pi_data') ?? [];
+
+        // If session data is empty, it means we need to load from the database again
+        if (empty($cplPiData)) {
+            // We would need to fetch from database here if necessary
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['cpl'])) {
+                foreach ($portofolioData['cpl'] as $cpl) {
+                    $pi_list = [];
+                    foreach ($cpl['pi_list'] as $pi) {
+                        $pi_list[] = $pi['isi_ikcp'];
+                    }
+                    $cplPiData[$cpl['no_cpl']] = [
+                        'cpl_indo' => $cpl['isi_cpl'],
+                        'pi_list' => $pi_list
+                    ];
+                }
+                session()->set('cpl_pi_data', $cplPiData);
+            }
+        }
+
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/portofolio-form/cpl-pi', [
+            'pdfUrl' => $pdfUrl,
+            'cplPiData' => $cplPiData,
+            'idPorto' => $idPorto // Tambahkan ID portofolio untuk edit
+        ]);
+    }
+    
+    /**
+     * Function to verify edit access
+     * 
+     * @param int $idPorto
+     * @return bool
+     */
+    private function verifyEditAccess($idPorto)
+    {
+        return session()->get('edit_mode') && session()->get('edit_portofolio_id') == $idPorto;
+    }
+
     // Add new method to get CPL-PI data from session
     public function getCplPiFromSession()
     {
@@ -342,6 +436,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Get CPL-PI data from session
         $cplPiData = session()->get('cpl_pi_data') ?? [];
 
@@ -357,6 +457,90 @@ class Portofolio extends BaseController
         return view('backend/portofolio-form/cpmk-subcpmk', [
             'pdfUrl' => $pdfUrl,
             'cplPiData' => $cplPiData  // Pass CPL data to the view
+        ]);
+    }
+
+    // Method untuk halaman edit CPMK-subCPMK
+    public function cpmk_subcpmk_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Get CPL-PI data from session
+        $cplPiData = session()->get('cpl_pi_data') ?? [];
+
+        // If session data is empty, get from database or stored during edit
+        if (empty($cplPiData)) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['cpl'])) {
+                foreach ($portofolioData['cpl'] as $cpl) {
+                    $pi_list = [];
+                    foreach ($cpl['pi_list'] as $pi) {
+                        $pi_list[] = $pi['isi_ikcp'];
+                    }
+                    $cplPiData[$cpl['no_cpl']] = [
+                        'cpl_indo' => $cpl['isi_cpl'],
+                        'pi_list' => $pi_list
+                    ];
+                }
+                session()->set('cpl_pi_data', $cplPiData);
+            }
+        }
+
+        // Get CPMK data from session
+        $cpmkData = session()->get('cpmk_data') ?? [];
+
+        // If CPMK session data is empty, get from stored data during edit
+        if (empty($cpmkData)) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['cpmk'])) {
+                $cpmkArray = [];
+                $globalSubCpmkCounter = 1;
+                
+                foreach ($portofolioData['cpmk'] as $cpmkId => $cpmk) {
+                    $subCpmkList = [];
+                    foreach ($cpmk['sub_cpmk'] as $subCpmk) {
+                        $subCpmkList[$subCpmk['no_scpmk']] = $subCpmk['isi_scmpk'];
+                        if ($subCpmk['no_scpmk'] > $globalSubCpmkCounter) {
+                            $globalSubCpmkCounter = $subCpmk['no_scpmk'];
+                        }
+                    }
+                    $cpmkArray[$cpmk['no_cpmk']] = [
+                        'id' => $cpmk['id'],
+                        'no_cpmk' => $cpmk['no_cpmk'],
+                        'narasi' => $cpmk['isi_cpmk'],
+                        'avg_cpmk' => $cpmk['avg_cpmk'],
+                        'sub' => $subCpmkList
+                    ];
+                }
+                
+                $cpmkData = [
+                    'cpmk' => $cpmkArray,
+                    'globalSubCpmkCounter' => $globalSubCpmkCounter
+                ];
+                
+                session()->set('cpmk_data', $cpmkData);
+            }
+        }
+
+        // Get PDF URL from session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/portofolio-form/cpmk-subcpmk', [
+            'pdfUrl' => $pdfUrl,
+            'cplPiData' => $cplPiData,  // Pass CPL data to the view
+            'cpmkData' => $cpmkData,    // Pass CPMK data to the view
+            'idPorto' => $idPorto       // Tambahkan ID portofolio untuk edit
         ]);
     }
 
@@ -441,6 +625,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Cek apakah ada file yang disimpan di session
         $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
 
@@ -449,11 +639,87 @@ class Portofolio extends BaseController
         ]);
     }
 
+    // Method untuk halaman edit pemetaan
+    public function pemetaan_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Ambil data dari database jika session kosong (saat pertama kali masuk edit)
+        if (!session()->get('cpmk_data') || !session()->get('cpl_pi_data')) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData) {
+                // Siapkan data CPMK
+                $cpmkData = [];
+                $globalSubCpmkCounter = 1;
+                foreach ($portofolioData['cpmk'] as $cpmkId => $cpmk) {
+                    $subCpmkList = [];
+                    foreach ($cpmk['sub_cpmk'] as $subCpmk) {
+                        $subCpmkList[$subCpmk['no_scpmk']] = $subCpmk['isi_scmpk'];
+                        if ($subCpmk['no_scpmk'] > $globalSubCpmkCounter) {
+                            $globalSubCpmkCounter = $subCpmk['no_scpmk'];
+                        }
+                    }
+                    $cpmkData[$cpmk['no_cpmk']] = [
+                        'id' => $cpmk['id'],
+                        'no_cpmk' => $cpmk['no_cpmk'],
+                        'narasi' => $cpmk['isi_cpmk'],
+                        'selectedCpl' => 1, // Default, nanti akan diupdate saat load mapping
+                        'sub' => $subCpmkList
+                    ];
+                }
+                
+                $cpmkSessionData = [
+                    'cpmk' => $cpmkData,
+                    'globalSubCpmkCounter' => $globalSubCpmkCounter
+                ];
+                
+                session()->set('cpmk_data', $cpmkSessionData);
+
+                // Siapkan data CPL-PI
+                $cplPiData = [];
+                foreach ($portofolioData['cpl'] as $noCpl => $cpl) {
+                    $piList = [];
+                    foreach ($cpl['pi_list'] as $pi) {
+                        $piList[] = $pi['isi_ikcp'];
+                    }
+                    $cplPiData[$noCpl] = [
+                        'cpl_indo' => $cpl['isi_cpl'],
+                        'pi_list' => $piList
+                    ];
+                }
+                session()->set('cpl_pi_data', $cplPiData);
+
+                // Siapkan data mapping CPMK-SubCPMK jika ada
+                if (isset($portofolioData['mapping_cpmk_scpmk'])) {
+                    session()->set('mapping_data', $portofolioData['mapping_cpmk_scpmk']);
+                }
+            }
+        }
+
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/portofolio-form/pemetaan', [
+            'pdfUrl' => $pdfUrl,
+            'idPorto' => $idPorto
+        ]);
+    }
+
     public function saveMappingToSession()
     {
         try {
             $json = $this->request->getJSON();
             $mappingData = $json->mapping ?? null;
+            $idPorto = $json->idPorto ?? null; // Tambahkan untuk mode edit
 
             if (!$mappingData || empty((array)$mappingData)) {
                 throw new \Exception('Data pemetaan kosong atau tidak valid.');
@@ -463,7 +729,10 @@ class Portofolio extends BaseController
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Data pemetaan berhasil disimpan'
+                'message' => 'Data pemetaan berhasil disimpan',
+                'redirect' => $idPorto ? 
+                    base_url('portofolio-form/rancangan-asesmen-edit/' . $idPorto) : 
+                    base_url('portofolio-form/rancangan-asesmen')
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -479,6 +748,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Check if mapping data exists in session
         if (!session()->get('mapping_data')) {
             return redirect()->to('/portofolio-form/pemetaan')
@@ -486,6 +761,57 @@ class Portofolio extends BaseController
         }
 
         return view('backend/portofolio-form/rancangan-asesmen');
+    }
+
+    // Method untuk halaman edit rancangan asesmen
+    public function rancangan_asesmen_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Check if mapping data exists in session
+        if (!session()->get('mapping_data')) {
+            // Get data from stored session during edit
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['cpmk'])) {
+                // Get CPMK data for assessment
+                $cpmkData = [];
+                foreach ($portofolioData['cpmk'] as $cpmk) {
+                    $cpmkData[$cpmk['no_cpmk']] = [
+                        'no_cpmk' => $cpmk['no_cpmk'],
+                        'narasi' => $cpmk['isi_cpmk']
+                    ];
+                }
+                
+                // Initialize assessment data if not in session
+                if (!session()->get('assessment_data')) {
+                    $assessmentData = [];
+                    foreach ($cpmkData as $cpmkId => $cpmk) {
+                        $assessmentData[$cpmkId] = [
+                            'tugas' => 0,
+                            'uts' => 0,
+                            'uas' => 0
+                        ];
+                    }
+                    session()->set('assessment_data', $assessmentData);
+                }
+            }
+
+            return redirect()->to('/portofolio-form/pemetaan-edit/' . $idPorto)
+                ->with('error', 'Silakan lengkapi pemetaan terlebih dahulu.');
+        }
+
+        return view('backend/portofolio-form/rancangan-asesmen', [
+            'idPorto' => $idPorto
+        ]);
     }
 
     public function saveAssessmentToSession()
@@ -629,6 +955,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Check if assessment data exists in session
         if (!session()->get('assessment_data')) {
             return redirect()->to('/portofolio-form/rancangan-asesmen')
@@ -654,6 +986,102 @@ class Portofolio extends BaseController
         }
 
         return view('backend/portofolio-form/rancangan-soal');
+    }
+
+    // Method untuk halaman edit rancangan soal
+    public function rancangan_soal_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Check if assessment data exists in session
+        if (!session()->get('assessment_data')) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['assessment'])) {
+                $assessmentData = [];
+                foreach ($portofolioData['assessment'] as $assessment) {
+                    $cpmkNo = $assessment['no_cpmk'];
+                    if (!isset($assessmentData[$cpmkNo])) {
+                        $assessmentData[$cpmkNo] = [
+                            'tugas' => 0,
+                            'uts' => 0,
+                            'uas' => 0,
+                        ];
+                    }
+                    if ($assessment['tugas'] == 1) $assessmentData[$cpmkNo]['tugas'] = 1;
+                    if ($assessment['uts'] == 1) $assessmentData[$cpmkNo]['uts'] = 1;
+                    if ($assessment['uas'] == 1) $assessmentData[$cpmkNo]['uas'] = 1;
+                }
+                session()->set('assessment_data', $assessmentData);
+            }
+            
+            return redirect()->to('/portofolio-form/rancangan-asesmen-edit/' . $idPorto)
+                ->with('error', 'Silakan lengkapi rancangan asesmen terlebih dahulu.');
+        }
+
+        // Initialize soal_mapping data in session if not exists
+        if (!session()->has('soal_mapping_data')) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['soal'])) {
+                $soalMapping = [
+                    'tugas' => [],
+                    'uts' => [],
+                    'uas' => []
+                ];
+                
+                $groupedSoal = [];
+                foreach ($portofolioData['soal'] as $soal) {
+                    $kategori = $soal['kategori_soal'];
+                    $noSoal = $soal['no_soal'];
+                    $cpmkNo = $soal['no_cpmk'];
+
+                    if (!isset($groupedSoal[$kategori][$noSoal])) {
+                        $groupedSoal[$kategori][$noSoal] = [
+                            'soal_no' => $noSoal,
+                            'cpmk_mappings' => []
+                        ];
+                    }
+
+                    $groupedSoal[$kategori][$noSoal]['cpmk_mappings'][$cpmkNo] = $soal['nilai'];
+                }
+
+                foreach ($groupedSoal as $kategori => $kategoriSoal) {
+                    foreach ($kategoriSoal as $noSoal => $data) {
+                        $soalMapping[$kategori][] = $data;
+                    }
+                }
+                
+                session()->set('soal_mapping_data', $soalMapping);
+            } else {
+                // Create default mapping if no data exists
+                $soalMapping = [
+                    'tugas' => [
+                        ['soal_no' => 1, 'cpmk_mappings' => []]
+                    ],
+                    'uts' => [
+                        ['soal_no' => 1, 'cpmk_mappings' => []]
+                    ],
+                    'uas' => [
+                        ['soal_no' => 1, 'cpmk_mappings' => []]
+                    ]
+                ];
+                session()->set('soal_mapping_data', $soalMapping);
+            }
+        }
+
+        return view('backend/portofolio-form/rancangan-soal', [
+            'idPorto' => $idPorto
+        ]);
     }
 
     public function saveSoalMapping()
@@ -936,6 +1364,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Check if previous data exists in session
         if (!session()->get('assessment_data')) {
             return redirect()->to('/portofolio-form/rancangan-asesmen')
@@ -943,6 +1377,58 @@ class Portofolio extends BaseController
         }
 
         return view('backend/portofolio-form/pelaksanaan-perkuliahan');
+    }
+
+    // Method untuk halaman edit pelaksanaan perkuliahan
+    public function pelaksanaan_perkuliahan_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Check if previous data exists in session
+        if (!session()->get('assessment_data')) {
+            return redirect()->to('/portofolio-form/rancangan-asesmen-edit/' . $idPorto)
+                ->with('error', 'Silakan lengkapi rancangan asesmen terlebih dahulu.');
+        }
+
+        // Check if pelaksanaan files exist in session
+        if (!session()->get('pelaksanaan_files')) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['pelaksanaan'])) {
+                $pelaksanaanFiles = [];
+                if ($portofolioData['pelaksanaan']['file_kontrak']) {
+                    $pelaksanaanFiles['kontrak_kuliah'] = [
+                        'name' => basename($portofolioData['pelaksanaan']['file_kontrak']),
+                        'path' => $portofolioData['pelaksanaan']['file_kontrak']
+                    ];
+                }
+                if ($portofolioData['pelaksanaan']['file_realisasi']) {
+                    $pelaksanaanFiles['realisasi_mengajar'] = [
+                        'name' => basename($portofolioData['pelaksanaan']['file_realisasi']),
+                        'path' => $portofolioData['pelaksanaan']['file_realisasi']
+                    ];
+                }
+                if ($portofolioData['pelaksanaan']['file_kehadiran']) {
+                    $pelaksanaanFiles['kehadiran_mahasiswa'] = [
+                        'name' => basename($portofolioData['pelaksanaan']['file_kehadiran']),
+                        'path' => $portofolioData['pelaksanaan']['file_kehadiran']
+                    ];
+                }
+                session()->set('pelaksanaan_files', $pelaksanaanFiles);
+            }
+        }
+
+        return view('backend/portofolio-form/pelaksanaan-perkuliahan', [
+            'idPorto' => $idPorto
+        ]);
     }
 
     public function savePelaksanaanPerkuliahan()
@@ -1006,6 +1492,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Check if previous data exists in session
         if (!session()->get('pelaksanaan_files')) {
             return redirect()->to('/portofolio-form/pelaksanaan-perkuliahan')
@@ -1013,6 +1505,70 @@ class Portofolio extends BaseController
         }
 
         return view('backend/portofolio-form/hasil-asesmen');
+    }
+
+    // Method untuk halaman edit hasil asesmen
+    public function hasil_asesmen_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Check if previous data exists in session
+        if (!session()->get('pelaksanaan_files')) {
+            return redirect()->to('/portofolio-form/pelaksanaan-perkuliahan-edit/' . $idPorto)
+                ->with('error', 'Silakan lengkapi pelaksanaan perkuliahan terlebih dahulu.');
+        }
+
+        // Check if hasil asesmen files exist in session
+        if (!session()->get('hasil_asesmen_files')) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['hasil_asesmen'])) {
+                $hasilAsesmenFiles = [];
+                if ($portofolioData['hasil_asesmen']['file_tugas']) {
+                    $hasilAsesmenFiles['jawaban_tugas'] = [
+                        'name' => basename($portofolioData['hasil_asesmen']['file_tugas']),
+                        'path' => $portofolioData['hasil_asesmen']['file_tugas']
+                    ];
+                }
+                if ($portofolioData['hasil_asesmen']['file_uts']) {
+                    $hasilAsesmenFiles['jawaban_uts'] = [
+                        'name' => basename($portofolioData['hasil_asesmen']['file_uts']),
+                        'path' => $portofolioData['hasil_asesmen']['file_uts']
+                    ];
+                }
+                if ($portofolioData['hasil_asesmen']['file_uas']) {
+                    $hasilAsesmenFiles['jawaban_uas'] = [
+                        'name' => basename($portofolioData['hasil_asesmen']['file_uas']),
+                        'path' => $portofolioData['hasil_asesmen']['file_uas']
+                    ];
+                }
+                if ($portofolioData['hasil_asesmen']['file_nilai_mk']) {
+                    $hasilAsesmenFiles['nilai_mata_kuliah'] = [
+                        'name' => basename($portofolioData['hasil_asesmen']['file_nilai_mk']),
+                        'path' => $portofolioData['hasil_asesmen']['file_nilai_mk']
+                    ];
+                }
+                if ($portofolioData['hasil_asesmen']['file_nilai_cpmk']) {
+                    $hasilAsesmenFiles['nilai_cpmk'] = [
+                        'name' => basename($portofolioData['hasil_asesmen']['file_nilai_cpmk']),
+                        'path' => $portofolioData['hasil_asesmen']['file_nilai_cpmk']
+                    ];
+                }
+                session()->set('hasil_asesmen_files', $hasilAsesmenFiles);
+            }
+        }
+
+        return view('backend/portofolio-form/hasil-asesmen', [
+            'idPorto' => $idPorto
+        ]);
     }
 
     public function saveHasilAsesmen()
@@ -1081,6 +1637,12 @@ class Portofolio extends BaseController
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Jika dalam mode edit, bersihkan session dan mulai dari awal untuk mencegah konflik data
+        if (session()->get('edit_mode')) {
+            $this->clearEditMode();
+            $this->clearSessionExceptUser();
+        }
+
         // Check if previous data exists in session
         if (!session()->get('hasil_asesmen_files')) {
             return redirect()->to('/portofolio-form/hasil-asesmen')
@@ -1104,6 +1666,81 @@ class Portofolio extends BaseController
             'cpmk_data' => $cpmk_data,
             'cpmk_nilai' => $cpmk_nilai,
             'pdfUrl' => $pdfUrl
+        ]);
+    }
+
+    // Method untuk halaman edit evaluasi perkuliahan
+    public function evaluasi_perkuliahan_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Check if previous data exists in session
+        if (!session()->get('hasil_asesmen_files')) {
+            return redirect()->to('/portofolio-form/hasil-asesmen-edit/' . $idPorto)
+                ->with('error', 'Silakan lengkapi hasil asesmen terlebih dahulu.');
+        }
+
+        // Ambil data evaluasi dari session
+        $evaluasi_perkuliahan = session()->get('evaluasi_perkuliahan') ?? '';
+
+        // Ambil data CPMK dari session
+        $cpmk_data = session()->get('cpmk_data')['cpmk'] ?? [];
+
+        // Ambil nilai CPMK yang sudah disimpan (jika ada)
+        $cpmk_nilai = session()->get('cpmk_nilai') ?? [];
+
+        // Ambil PDF URL dari session jika ada
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
+
+        // Jika belum ada data CPMK dari session, ambil dari database
+        if (empty($cpmk_data)) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['cpmk'])) {
+                $cpmkArray = [];
+                foreach ($portofolioData['cpmk'] as $cpmkId => $cpmk) {
+                    $cpmkArray[$cpmk['no_cpmk']] = [
+                        'id' => $cpmk['id'],
+                        'no_cpmk' => $cpmk['no_cpmk'],
+                        'narasi' => $cpmk['isi_cpmk'],
+                        'avg_cpmk' => $cpmk['avg_cpmk']
+                    ];
+                }
+                
+                $cpmkData = [
+                    'cpmk' => $cpmkArray
+                ];
+                
+                session()->set('cpmk_data', $cpmkData);
+                $cpmk_data = $cpmkArray;
+            }
+        }
+
+        // Jika belum ada evaluasi dari session, ambil dari database
+        if (empty($evaluasi_perkuliahan)) {
+            $portofolioModel = new PortofolioModel();
+            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+            
+            if ($portofolioData && isset($portofolioData['evaluasi'])) {
+                $evaluasi_perkuliahan = $portofolioData['evaluasi']['isi_evaluasi'];
+                session()->set('evaluasi_perkuliahan', $evaluasi_perkuliahan);
+            }
+        }
+
+        return view('backend/portofolio-form/evaluasi-perkuliahan', [
+            'evaluasi_perkuliahan' => $evaluasi_perkuliahan,
+            'cpmk_data' => $cpmk_data,
+            'cpmk_nilai' => $cpmk_nilai,
+            'pdfUrl' => $pdfUrl,
+            'idPorto' => $idPorto
         ]);
     }
 
@@ -1468,10 +2105,24 @@ class Portofolio extends BaseController
             }
         }
     }
+    
+    /**
+     * Function to clear edit mode and related session data
+     */
+    public function clearEditMode()
+    {
+        $session = session();
+        
+        // Remove edit mode specific data
+        $session->remove('edit_mode');
+        $session->remove('edit_portofolio_id');
+    }
 
     public function deleteSession()
     {
         session()->remove('info_matkul');
+        // Juga hapus mode edit jika ada
+        $this->clearEditMode();
         log_message('info', 'Session info_matkul telah dihapus.');
         return redirect()->to('portofolio-form/');
     }
@@ -1479,5 +2130,418 @@ class Portofolio extends BaseController
     public function tes_cetak()
     {
         return view('backend/pdf/test-cetak');
+    }
+
+    // Method untuk edit portofolio
+    public function edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $portofolioModel = new PortofolioModel();
+        $portofolioData = $portofolioModel->getPortofolioForEdit($idPorto);
+
+        if (!$portofolioData) {
+            return redirect()->back()->with('error', 'Data portofolio tidak ditemukan.');
+        }
+
+        // Hapus semua session data yang terkait dengan proses tambah portofolio sebelumnya
+        $this->clearSessionExceptUser();
+
+        // Tandai bahwa ini mode edit
+        session()->set('edit_mode', true);
+        session()->set('edit_portofolio_id', $idPorto);
+
+        // Load data ke session untuk digunakan di form
+        foreach ($portofolioData as $key => $value) {
+            session()->set($key, $value);
+        }
+
+        // Redirect ke halaman pertama edit (info_matkul)
+        return redirect()->to('portofolio-form/info-matkul-edit/' . $idPorto);
+    }
+
+    // Method untuk menangani update portofolio
+    public function update($idPorto)
+    {
+        $session = session();
+        $sessionData = $session->get();
+
+        // Update data ke tabel portofolio
+        $portofolioModel = new PortofolioModel();
+        $portofolioData = [
+            'kode_mk' => $sessionData['info_matkul']['kode_mk'],
+            'nama_mk' => $sessionData['info_matkul']['nama_mk'],
+            'tahun' => $sessionData['info_matkul']['tahun'],
+            'semester' => $sessionData['info_matkul']['semester'],
+            'smt_matkul' => $sessionData['info_matkul']['smt_matkul'],
+        ];
+        $portofolioModel->update($idPorto, $portofolioData);
+
+        // Update data RPS jika ada
+        $rpsModel = new RpsModel();
+        $rpsData = $rpsModel->where('id_porto', $idPorto)->first();
+        if ($rpsData) {
+            $rpsModel->update($rpsData['id'], [
+                'file_rps' => $sessionData['uploaded_rps']
+            ]);
+        } else {
+            // Insert jika belum ada
+            $rpsModel->insert([
+                'id_porto' => $idPorto,
+                'file_rps' => $sessionData['uploaded_rps']
+            ]);
+        }
+
+        // Update data identitas matkul
+        $identitasMatkulModel = new IdentitasMatkulModel();
+        $identitasData = $identitasMatkulModel->where('id_porto', $idPorto)->first();
+        if ($identitasData) {
+            $identitasMatkulModel->update($identitasData['id'], [
+                'prasyarat_mk' => $sessionData['info_matkul']['mk_prasyarat'],
+                'topik_perkuliahan' => $sessionData['info_matkul']['topik_mk']
+            ]);
+        } else {
+            // Insert jika belum ada
+            $identitasMatkulModel->insert([
+                'id_porto' => $idPorto,
+                'prasyarat_mk' => $sessionData['info_matkul']['mk_prasyarat'],
+                'topik_perkuliahan' => $sessionData['info_matkul']['topik_mk']
+            ]);
+        }
+
+        // Hapus dan simpan ulang data CPL
+        $cplModel = new CplModel();
+        $piModel = new PiModel();
+        // Hapus data lama
+        $existingCpl = $cplModel->where('id_porto', $idPorto)->findAll();
+        foreach ($existingCpl as $cpl) {
+            $piModel->where('id_cpl', $cpl['id'])->delete();
+        }
+        $cplModel->where('id_porto', $idPorto)->delete();
+
+        // Simpan data CPL dan PI baru
+        foreach ($sessionData['cpl_pi_data'] as $noCpl => $cpl) {
+            $cplData = [
+                'id_porto' => $idPorto,
+                'no_cpl' => $noCpl,
+                'isi_cpl' => $cpl['cpl_indo']
+            ];
+            $cplId = $cplModel->insert($cplData);
+
+            $piCounter = 1;
+            foreach ($cpl['pi_list'] as $pi) {
+                if ($pi !== "\N") {
+                    $piData = [
+                        'id_cpl' => $cplId,
+                        'no_pi' => $piCounter,
+                        'isi_ikcp' => $pi
+                    ];
+                    $piModel->insert($piData);
+                    $piCounter++;
+                }
+            }
+        }
+
+        // Hapus dan simpan ulang data CPMK dan Sub-CPMK
+        $cpmkModel = new CpmkModel();
+        $subCpmkModel = new SubCpmkModel();
+        $mappingCpmkScpmkModel = new MappingCpmkScpmkModel();
+        // Hapus data lama
+        $existingCpmk = $cpmkModel->where('id_porto', $idPorto)->findAll();
+        foreach ($existingCpmk as $cpmk) {
+            $subCpmkModel->where('id_porto', $idPorto)->delete();
+        }
+        $cpmkModel->where('id_porto', $idPorto)->delete();
+        $mappingCpmkScpmkModel->where('id_porto', $idPorto)->delete(); // Perlu join untuk mapping
+
+        // Simpan data CPMK dan Sub-CPMK baru
+        $cpmkMapping = []; // Untuk menyimpan mapping antara no_cpmk dan ID database
+        $subCpmkMapping = []; // Untuk menyimpan mapping antara no_scpmk dan ID database
+
+        foreach ($sessionData['cpmk_data']['cpmk'] as $noCpmk => $cpmk) {
+            $cpmkData = [
+                'id_porto' => $idPorto,
+                'no_cpmk' => $cpmk['no_cpmk'],
+                'isi_cpmk' => $cpmk['narasi'],
+                'avg_cpmk' => $cpmk['avg_cpmk'] ?? null
+            ];
+            $cpmkId = $cpmkModel->insert($cpmkData);
+            $cpmkMapping[$noCpmk] = $cpmkId;
+
+            foreach ($cpmk['sub'] as $noSubCpmk => $subCpmk) {
+                $subCpmkData = [
+                    'id_porto' => $idPorto,
+                    'no_scpmk' => $noSubCpmk,
+                    'isi_scmpk' => $subCpmk
+                ];
+                $subCpmkId = $subCpmkModel->insert($subCpmkData);
+                $subCpmkMapping[$noSubCpmk] = $subCpmkId;
+            }
+        }
+
+        // Simpan data mapping CPMK-SubCPMK
+        $mappingCpmkScpmkModel = new MappingCpmkScpmkModel();
+        $mappingData = $sessionData['mapping_data'] ?? [];
+        foreach ($mappingData as $cplId => $cpmkMappings) {
+            foreach ($cpmkMappings as $innerKey => $subCpmkValues) {
+                foreach ($subCpmkValues as $sessionScpmkId => $nilai) {
+                    $actualCpmkId = $cpmkMapping[$innerKey] ?? null;
+                    $actualScpmkId = $subCpmkMapping[$sessionScpmkId] ?? null;
+
+                    if ($actualCpmkId && $actualScpmkId && $nilai == 1) {
+                        $mappingData = [
+                            'id_cpmk' => $actualCpmkId,
+                            'id_scpmk' => $actualScpmkId,
+                            'nilai' => $nilai
+                        ];
+                        $mappingCpmkScpmkModel->insert($mappingData);
+                    }
+                }
+            }
+        }
+
+        // Update data rancangan asesmen
+        $rancanganAsesmenModel = new RancanganAsesmenModel();
+        // Hapus data lama
+        $rancanganAsesmenModel->where('id_porto', $idPorto)->delete();
+
+        // Simpan data baru
+        $assessmentData = $sessionData['assessment_data'] ?? [];
+        foreach ($assessmentData as $sessionCpmkId => $assessmentTypes) {
+            $actualCpmkId = $cpmkMapping[$sessionCpmkId] ?? null;
+            if ($actualCpmkId && is_array($assessmentTypes)) {
+                $rancanganAsesmenData = [
+                    'id_porto' => $idPorto,
+                    'id_cpmk' => $actualCpmkId,
+                    'id_scpmk' => null,
+                    'tugas' => isset($assessmentTypes['tugas']) && $assessmentTypes['tugas'] ? 1 : 0,
+                    'uts' => isset($assessmentTypes['uts']) && $assessmentTypes['uts'] ? 1 : 0,
+                    'uas' => isset($assessmentTypes['uas']) && $assessmentTypes['uas'] ? 1 : 0
+                ];
+                $rancanganAsesmenModel->insert($rancanganAsesmenData);
+            }
+        }
+
+        // Update data rancangan soal
+        $rancanganSoalModel = new RancanganSoalModel();
+        // Hapus data lama
+        $rancanganSoalModel->where('id_porto', $idPorto)->delete();
+
+        // Simpan data baru
+        $soalMappingData = $sessionData['soal_mapping_data'] ?? [];
+        foreach ($soalMappingData as $assessmentType => $soalList) {
+            $kategoriSoal = '';
+            switch ($assessmentType) {
+                case 'tugas':
+                    $kategoriSoal = 'Tugas';
+                    break;
+                case 'uts':
+                    $kategoriSoal = 'UTS';
+                    break;
+                case 'uas':
+                    $kategoriSoal = 'UAS';
+                    break;
+            }
+
+            foreach ($soalList as $soal) {
+                $soalNo = $soal['soal_no'];
+                $cpmkMappings = $soal['cpmk_mappings'] ?? [];
+
+                foreach ($cpmkMappings as $sessionCpmkNo => $isChecked) {
+                    $actualCpmkId = $cpmkMapping[$sessionCpmkNo] ?? null;
+
+                    if ($actualCpmkId) {
+                        $rancanganSoalData = [
+                            'id_porto' => $idPorto,
+                            'id_cpmk' => $actualCpmkId,
+                            'kategori_soal' => $kategoriSoal,
+                            'no_soal' => $soalNo,
+                            'nilai' => $isChecked ? 1 : 0
+                        ];
+
+                        $rancanganSoalModel->insert($rancanganSoalData);
+                    }
+                }
+            }
+        }
+
+        // Update data rancangan asesmen file
+        $rancanganAsesmenFileModel = new RancanganAsesmenFileModel();
+        // Hapus data lama
+        $rancanganAsesmenFileModel->where('id_porto', $idPorto)->delete();
+
+        // Simpan data baru
+        if (isset($sessionData['assessment_files']) && is_array($sessionData['assessment_files'])) {
+            foreach ($sessionData['assessment_files'] as $kategori => $file) {
+                $kategoriFile = '';
+                $kategoriAsesmen = '';
+
+                if (strpos($kategori, 'soal_') === 0) {
+                    $kategoriFile = 'Soal';
+                } elseif (strpos($kategori, 'rubrik_') === 0) {
+                    $kategoriFile = 'Rubrik';
+                } else {
+                    $kategoriFile = 'Lainnya';
+                }
+
+                if (strpos($kategori, '_tugas') !== false) {
+                    $kategoriAsesmen = 'Tugas';
+                } elseif (strpos($kategori, '_uts') !== false) {
+                    $kategoriAsesmen = 'UTS';
+                } elseif (strpos($kategori, '_uas') !== false) {
+                    $kategoriAsesmen = 'UAS';
+                } else {
+                    $kategoriAsesmen = 'Lainnya';
+                }
+
+                $rancanganAsesmenFileData = [
+                    'id_porto' => $idPorto,
+                    'kategori' => $kategoriAsesmen,
+                    'kategori_file' => $kategoriFile,
+                    'file_pdf' => $file['path']
+                ];
+                $rancanganAsesmenFileModel->insert($rancanganAsesmenFileData);
+            }
+        }
+
+        // Update data pelaksanaan perkuliahan
+        $pelaksanaanModel = new PelaksanaanPerkuliahanModel();
+        $pelaksanaanData = $pelaksanaanModel->where('id_porto', $idPorto)->first();
+        if ($pelaksanaanData) {
+            $pelaksanaanModel->update($pelaksanaanData['id'], [
+                'file_kontrak' => isset($sessionData['pelaksanaan_files']['kontrak_kuliah']) ? $sessionData['pelaksanaan_files']['kontrak_kuliah']['path'] : null,
+                'file_realisasi' => isset($sessionData['pelaksanaan_files']['realisasi_mengajar']) ? $sessionData['pelaksanaan_files']['realisasi_mengajar']['path'] : null,
+                'file_kehadiran' => isset($sessionData['pelaksanaan_files']['kehadiran_mahasiswa']) ? $sessionData['pelaksanaan_files']['kehadiran_mahasiswa']['path'] : null
+            ]);
+        } else {
+            $pelaksanaanModel->insert([
+                'id_porto' => $idPorto,
+                'file_kontrak' => isset($sessionData['pelaksanaan_files']['kontrak_kuliah']) ? $sessionData['pelaksanaan_files']['kontrak_kuliah']['path'] : null,
+                'file_realisasi' => isset($sessionData['pelaksanaan_files']['realisasi_mengajar']) ? $sessionData['pelaksanaan_files']['realisasi_mengajar']['path'] : null,
+                'file_kehadiran' => isset($sessionData['pelaksanaan_files']['kehadiran_mahasiswa']) ? $sessionData['pelaksanaan_files']['kehadiran_mahasiswa']['path'] : null
+            ]);
+        }
+
+        // Update data hasil asesmen
+        $hasilAsesmenModel = new HasilAsesmenModel();
+        $hasilAsesmenData = $hasilAsesmenModel->where('id_porto', $idPorto)->first();
+        if ($hasilAsesmenData) {
+            $hasilAsesmenModel->update($hasilAsesmenData['id'], [
+                'file_tugas' => isset($sessionData['hasil_asesmen_files']['jawaban_tugas']) ? $sessionData['hasil_asesmen_files']['jawaban_tugas']['path'] : null,
+                'file_uts' => isset($sessionData['hasil_asesmen_files']['jawaban_uts']) ? $sessionData['hasil_asesmen_files']['jawaban_uts']['path'] : null,
+                'file_uas' => isset($sessionData['hasil_asesmen_files']['jawaban_uas']) ? $sessionData['hasil_asesmen_files']['jawaban_uas']['path'] : null,
+                'file_nilai_mk' => isset($sessionData['hasil_asesmen_files']['nilai_mata_kuliah']) ? $sessionData['hasil_asesmen_files']['nilai_mata_kuliah']['path'] : null,
+                'file_nilai_cpmk' => isset($sessionData['hasil_asesmen_files']['nilai_cpmk']) ? $sessionData['hasil_asesmen_files']['nilai_cpmk']['path'] : null
+            ]);
+        } else {
+            $hasilAsesmenModel->insert([
+                'id_porto' => $idPorto,
+                'file_tugas' => isset($sessionData['hasil_asesmen_files']['jawaban_tugas']) ? $sessionData['hasil_asesmen_files']['jawaban_tugas']['path'] : null,
+                'file_uts' => isset($sessionData['hasil_asesmen_files']['jawaban_uts']) ? $sessionData['hasil_asesmen_files']['jawaban_uts']['path'] : null,
+                'file_uas' => isset($sessionData['hasil_asesmen_files']['jawaban_uas']) ? $sessionData['hasil_asesmen_files']['jawaban_uas']['path'] : null,
+                'file_nilai_mk' => isset($sessionData['hasil_asesmen_files']['nilai_mata_kuliah']) ? $sessionData['hasil_asesmen_files']['nilai_mata_kuliah']['path'] : null,
+                'file_nilai_cpmk' => isset($sessionData['hasil_asesmen_files']['nilai_cpmk']) ? $sessionData['hasil_asesmen_files']['nilai_cpmk']['path'] : null
+            ]);
+        }
+
+        // Update data evaluasi perkuliahan
+        $evaluasiPerkuliahanModel = new EvaluasiPerkuliahanModel();
+        $evaluasiData = $evaluasiPerkuliahanModel->where('id_porto', $idPorto)->first();
+        if ($evaluasiData) {
+            $evaluasiPerkuliahanModel->update($evaluasiData['id'], [
+                'isi_evaluasi' => $sessionData['evaluasi_perkuliahan']
+            ]);
+        } else {
+            $evaluasiPerkuliahanModel->insert([
+                'id_porto' => $idPorto,
+                'isi_evaluasi' => $sessionData['evaluasi_perkuliahan']
+            ]);
+        }
+
+        // Clear session data except user session
+        $this->clearSessionExceptUser();
+
+        // Hapus mode edit dari session
+        session()->remove('edit_mode');
+        session()->remove('edit_portofolio_id');
+
+        // Redirect ke halaman daftar portofolio dengan informasi MK
+        $portofolio = $portofolioModel->find($idPorto);
+        if ($portofolio) {
+            return redirect()->to('/portofolio-form/daftar/' . $portofolio['kode_mk'] . '/' . $portofolio['tahun'] . '/' . $portofolio['semester'])
+                ->with('success', 'Portofolio berhasil diperbarui.');
+        } else {
+            return redirect()->to('/portofolio-form')->with('success', 'Portofolio berhasil diperbarui.');
+        }
+    }
+
+    // Method untuk halaman edit info matkul
+    public function info_matkul_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!session()->get('edit_mode') || session()->get('edit_portofolio_id') != $idPorto) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Get data from database from info_matkul table
+        $db = \Config\Database::connect();
+        $mataKuliahData = $db->table('info_matkul im')
+            ->select('
+        im.matakuliah as nama_mk,
+        im.kode_matkul as kode_mk,
+        im.kelp_matkul as kelompok_mk,
+        im.fakultas,
+        im.smt_matkul,
+        im.prodi as progdi,
+        im.teori as sks_teori,
+        im.praktek as sks_praktik,
+        md.tahun,
+        md.semester,
+        md.dosen
+    ')
+            ->join('matkul_diampu md', 'md.kode_matkul = im.kode_matkul', 'left')
+            ->groupBy([
+                'im.kode_matkul',
+                'im.matakuliah',
+                'im.kelp_matkul',
+                'im.smt_matkul',
+                'im.fakultas',
+                'im.prodi',
+                'im.teori',
+                'im.praktek',
+                'md.tahun',
+                'md.semester',
+                'md.dosen'
+            ])
+            ->get()
+            ->getResultArray();
+
+        // Data tambahan dari session (jika ada)
+        $infoMatkul = session()->get('info_matkul') ?? [];
+
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
+
+        // Kirim data ke view dengan menambahkan ID portofolio
+        return view('backend/portofolio-form/info-matkul', [
+            'mataKuliah' => $mataKuliahData,
+            'infoMatkul' => $infoMatkul,
+            'pdfUrl' => $pdfUrl,
+            'idPorto' => $idPorto // Tambahkan ID portofolio untuk edit
+        ]);
+    }
+    
+    public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
+    {
+        parent::initController($request, $response, $logger);
+        
+        // Load helper if it exists
+        helper('tanggal');
     }
 }

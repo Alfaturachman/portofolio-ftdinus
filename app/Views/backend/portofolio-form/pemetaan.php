@@ -307,12 +307,25 @@
 
                         <!-- Replace the anchor tag with a submit button -->
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </button>
+                            <?php if (isset($idPorto)): ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk-edit/' . $idPorto) ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <?php if (isset($idPorto)): ?>
+                                        Perbarui & Lanjutkan <i class="ti ti-arrow-right"></i>
+                                    <?php else: ?>
+                                        Selanjutnya <i class="ti ti-arrow-right"></i>
+                                    <?php endif; ?>
+                                </button>
+                            <?php else: ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpmk-subcpmk') ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>
@@ -359,15 +372,22 @@
         }
 
         function saveMappingToSession(mappingData) {
+            // Include idPorto if in edit mode
+            const payload = {
+                mapping: mappingData
+            };
+            
+            <?php if (isset($idPorto)): ?>
+                payload.idPorto = <?= $idPorto ?>;
+            <?php endif; ?>
+
             fetch('<?= base_url('portofolio-form/saveMappingToSession') ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        mapping: mappingData
-                    })
+                    body: JSON.stringify(payload)
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -390,20 +410,31 @@
 
             console.log('Submitting mapping data:', mappingData);
 
+            // Include idPorto if in edit mode
+            const payload = {
+                mapping: mappingData
+            };
+            
+            <?php if (isset($idPorto)): ?>
+                payload.idPorto = <?= $idPorto ?>;
+            <?php endif; ?>
+
             fetch('<?= base_url('portofolio-form/saveMappingToSession') ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        mapping: mappingData
-                    })
+                    body: JSON.stringify(payload)
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = '<?= base_url('portofolio-form/rancangan-asesmen') ?>';
+                        <?php if (isset($idPorto)): ?>
+                            window.location.href = '<?= base_url('portofolio-form/rancangan-asesmen-edit/' . $idPorto) ?>';
+                        <?php else: ?>
+                            window.location.href = '<?= base_url('portofolio-form/rancangan-asesmen') ?>';
+                        <?php endif; ?>
                     } else {
                         alert(`Gagal menyimpan data pemetaan: ${data.message}`);
                     }

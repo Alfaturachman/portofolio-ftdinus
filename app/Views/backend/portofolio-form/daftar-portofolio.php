@@ -61,9 +61,14 @@
                                             <td><?= $porto['nama'] ?></td>
                                             <td><?= formatTanggalIndo($porto['ins_time']) ?></td>
                                             <td>
-                                                <a href="<?= base_url('cetak-pdf/' . $porto['id']) ?>" class="btn btn-sm btn-primary">
-                                                    Cetak
-                                                </a>
+                                                <div class="d-flex justify-content-around">
+                                                    <a href="<?= base_url('portofolio-form/edit/' . $porto['id']) ?>" class="btn btn-sm btn-warning me-1" title="Edit">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+                                                    <a href="<?= base_url('cetak-pdf/' . $porto['id']) ?>" class="btn btn-sm btn-primary" title="Cetak">
+                                                        <i class="fas fa-print"></i> Cetak
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach;

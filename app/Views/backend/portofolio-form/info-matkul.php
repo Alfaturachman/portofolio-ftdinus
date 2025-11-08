@@ -202,6 +202,12 @@
 
                     <form action="<?= base_url('portofolio-form/saveInfoMatkul') ?>" method="post">
                         <?= csrf_field(); ?>
+                        
+                        <!-- Hidden field to indicate edit mode -->
+                        <?php if (isset($idPorto)): ?>
+                            <input type="hidden" name="id_porto" value="<?= $idPorto ?>">
+                        <?php endif; ?>
+                        
                         <?php if (!empty($pdfUrl)): ?>
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
                                 <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
@@ -283,11 +289,21 @@
                             <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($infoMatkul['topik_mk']) ? $infoMatkul['topik_mk'] : '' ?></textarea>
                         </div>
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
+                            <?php if (isset($idPorto)): ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                            <?php else: ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                            <?php endif; ?>
                             <button type="submit" class="btn btn-primary">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
+                                <?php if (isset($idPorto)): ?>
+                                    Perbarui & Lanjutkan <i class="ti ti-arrow-right"></i>
+                                <?php else: ?>
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                <?php endif; ?>
                             </button>
                         </div>
                     </form>

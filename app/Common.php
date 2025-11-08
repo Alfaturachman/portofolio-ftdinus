@@ -13,3 +13,5 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+// Tidak ada fungsi khusus ditambahkan disini untuk menghindari konflik dengan helper

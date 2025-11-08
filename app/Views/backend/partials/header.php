@@ -74,6 +74,31 @@
                                 <span class="hide-menu">Import Data</span>
                             </a>
                         </li>
+                        <!-- Tambahkan menu Master User hanya untuk admin -->
+                        <?php 
+                        if(session()->has('UserSession') && session('UserSession')['logged_in']) {
+                            $userModel = new \App\Models\UserModel();
+                            $currentUser = $userModel->find(session('UserSession')['id_user']);
+                            if($currentUser && $currentUser['role'] === 'admin'):
+                        ?>
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">MASTER</span>
+                        </li>
+                        <li class="sidebar-item <?= (strpos(current_url(), 'users') !== false) ? 'selected' : '' ?>">
+                            <a class="sidebar-link <?= (current_url() == base_url('users')) ? 'active' : '' ?>" 
+                                href="<?= base_url('users') ?>" 
+                                aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-users"></i>
+                                </span>
+                                <span class="hide-menu">Master User</span>
+                            </a>
+                        </li>
+                        <?php 
+                            endif;
+                        }
+                        ?>
                     </ul>
                 </nav>
                 <!-- End Sidebar navigation -->

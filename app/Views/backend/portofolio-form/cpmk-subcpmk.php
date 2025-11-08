@@ -186,12 +186,21 @@
                     <button class="btn btn-success" onclick="addCPMK()">Tambah CPMK</button>
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpl-pi') ?>">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
-                            <a class="btn btn-primary" href="<?= base_url('portofolio-form/pemetaan') ?>">
-                                Selanjutnya <i class="ti ti-arrow-right"></i>
-                            </a>
+                            <?php if (isset($idPorto)): ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpl-pi-edit/' . $idPorto) ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                                <a class="btn btn-primary" href="<?= base_url('portofolio-form/pemetaan-edit/' . $idPorto) ?>">
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                </a>
+                            <?php else: ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/cpl-pi') ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                                <a class="btn btn-primary" href="<?= base_url('portofolio-form/pemetaan') ?>">
+                                    Selanjutnya <i class="ti ti-arrow-right"></i>
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>

@@ -30,7 +30,7 @@
                         </div>
                     </div>
 
-                    <table class="table table-bordered">
+                    <table class="table table-bordered" id="portofolio-table">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 5%">No</th>
@@ -42,8 +42,28 @@
                                 <th style="width: 10%">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-
+                        <tbody id="portofolio-tbody">
+                            <?php if (isset($portofolioList) && !empty($portofolioList)): ?>
+                                <?php foreach ($portofolioList as $index => $item): ?>
+                                    <tr>
+                                        <td><?= $index + 1 ?></td>
+                                        <td><?= esc($item['kode_mk']) ?></td>
+                                        <td><?= esc($item['nama_mk']) ?></td>
+                                        <td><?= esc($item['dosen_nama']) ?></td>
+                                        <td><?= esc($item['npp']) ?></td>
+                                        <td><?= date('d/m/Y', strtotime($item['ins_time'])) ?></td>
+                                        <td class="text-center">
+                                            <a href="<?= base_url('portofolio-form/edit/' . $item['id']) ?>" class="btn btn-warning btn-sm" title="Edit">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="7" class="text-center">Tidak ada data portofolio ditemukan</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

@@ -61,6 +61,19 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->post('saveEvaluasiPerkuliahan', 'Portofolio::saveEvaluasiPerkuliahan');
 
     $routes->post('save-portofolio', 'Portofolio::savePortofolio');
+    
+    // Rute edit portofolio
+    $routes->get('edit/(:num)', 'Portofolio::edit/$1');
+    $routes->post('update/(:num)', 'Portofolio::update/$1');
+    $routes->get('info-matkul-edit/(:num)', 'Portofolio::info_matkul_edit/$1');
+    $routes->get('cpl-pi-edit/(:num)', 'Portofolio::cpl_pi_edit/$1');
+    $routes->get('cpmk-subcpmk-edit/(:num)', 'Portofolio::cpmk_subcpmk_edit/$1');
+    $routes->get('pemetaan-edit/(:num)', 'Portofolio::pemetaan_edit/$1');
+    $routes->get('rancangan-asesmen-edit/(:num)', 'Portofolio::rancangan_asesmen_edit/$1');
+    $routes->get('rancangan-soal-edit/(:num)', 'Portofolio::rancangan_soal_edit/$1');
+    $routes->get('pelaksanaan-perkuliahan-edit/(:num)', 'Portofolio::pelaksanaan_perkuliahan_edit/$1');
+    $routes->get('hasil-asesmen-edit/(:num)', 'Portofolio::hasil_asesmen_edit/$1');
+    $routes->get('evaluasi-perkuliahan-edit/(:num)', 'Portofolio::evaluasi_perkuliahan_edit/$1');
 });
 
 // Rute untuk mengakses file PDF yang diupload
@@ -81,6 +94,8 @@ $routes->get('/cetak', 'Cetak::cetakPortofolioPdf');
 
 $routes->get('/generate-pdf', 'Cetak::generatePdf');
 
+
+
 $routes->group('import-data', function ($routes) {
     // Rute GET
     $routes->get('/', 'ImportData::index');
@@ -95,3 +110,15 @@ $routes->group('import-data', function ($routes) {
 $routes->get('downloads/template_cpl_pi.xlsx', 'ImportData::downloadTemplateCplPi');
 $routes->get('downloads/template_matkul.xlsx', 'ImportData::downloadTemplateMatkul');
 $routes->get('downloads/template_matkul_diampu.xlsx', 'ImportData::downloadTemplateMatkulDiampu');
+
+// Rute untuk manajemen user (hanya untuk admin)
+$routes->group('users', ['filter' => 'adminRole'], function ($routes) {
+    $routes->get('/', 'UserController::index');
+    $routes->get('create', 'UserController::create');
+    $routes->post('store', 'UserController::store');
+    $routes->get('edit/(:num)', 'UserController::edit/$1');
+    $routes->post('update/(:num)', 'UserController::update/$1');
+    $routes->get('delete/(:num)', 'UserController::delete/$1');
+    $routes->get('change-password/(:num)', 'UserController::changePassword/$1');
+    $routes->post('update-password/(:num)', 'UserController::updatePassword/$1');
+});
