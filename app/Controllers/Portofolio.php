@@ -700,54 +700,158 @@ class Portofolio extends BaseController
     }
 
     // Method untuk halaman edit pemetaan
-public function pemetaan_edit($idPorto)
-{
-    if (!session()->get('UserSession.logged_in')) {
-        return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+    public function pemetaan_edit($idPorto)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Membersihkan session yang tidak aktif jika melebihi batas waktu
+        $this->cleanupInactiveSession();
+
+        // Pastikan ini mode edit dan ID sesuai
+        if (!$this->verifyEditAccess($idPorto)) {
+            return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
+        }
+
+        // Ambil data dari database
+        $portofolioModel = new PortofolioModel();
+        $portofolioData = $portofolioModel->getPortofolioById($idPorto);
+
+        // Jika data ditemukan dari database
+        if ($portofolioData) {
+            // Siapkan dan simpan data CPMK ke session
+            if (isset($portofolioData['cpmk'])) {
+                $cpmkData = [];
+                $globalSubCpmkCounter = 1;
+
+                foreach ($portofolioData['cpmk'] as $cpmkItem) {
+                    // Ambil sub CPMK
+                    $subCpmkList = [];
+                    if (isset($cpmkItem['sub_cpmk']) && is_array($cpmkItem['sub_cpmk'])) {
+                        foreach ($cpmkItem['sub_cpmk'] as $subCpmk) {
+                            $subNo = $subCpmk['no_scpmk'];
+                            $subData = $subCpmk['isi_scmpk'] ?? $subCpmk['narasi'];
+                            $subCpmkList[$subNo] = $subData;
+
+                            // Update global counter
+                            if ($subNo > $globalSubCpmkCounter) {
+                                $globalSubCpmkCounter = $subNo;
+                            }
+                        }
+                    }
+
+                    $cpmkNo = $cpmkItem['no_cpmk'] ?? null;
+                    if ($cpmkNo !== null) {
+                        $cpmkData[$cpmkNo] = [
+                            'id' => $cpmkItem['id'] ?? null,
+                            'no_cpmk' => $cpmkNo, // Use the value we confirmed exists
+                            'narasi' => $cpmkItem['isi_cpmk'] ?? $cpmkItem['narasi'] ?? '',
+                            'selectedCpl' => $cpmkItem['selected_cpl'] ?? $cpmkItem['selectedCpl'] ?? 1,
+                            'sub' => $subCpmkList
+                        ];
+                    }
+                }
+
+                $cpmkSessionData = [
+                    'cpmk' => $cpmkData,
+                    'globalSubCpmkCounter' => $globalSubCpmkCounter
+                ];
+
+                session()->set('cpmk_data', $cpmkSessionData);
+            }
+
+            // Siapkan dan simpan data CPL-PI ke session
+            if (isset($portofolioData['cpl'])) {
+                $cplPiData = [];
+                foreach ($portofolioData['cpl'] as $cplItem) {
+                    $piList = [];
+                    if (isset($cplItem['pi_list']) && is_array($cplItem['pi_list'])) {
+                        foreach ($cplItem['pi_list'] as $piItem) {
+                            $piList[] = $piItem['isi_ikcp'] ?? $piItem['narasi'];
+                        }
+                    }
+
+                    // Gunakan no_cpl sebagai key, hanya jika salah satu dari keduanya ada
+                    $cplNo = $cplItem['no_cpl'] ?? $cplItem['noCpl'] ?? null;
+                    if ($cplNo !== null) {
+                        $cplPiData[$cplNo] = [
+                            'cpl_indo' => $cplItem['isi_cpl'] ?? $cplItem['narasi'] ?? '',
+                            'pi_list' => $piList
+                        ];
+                    }
+                }
+
+                session()->set('cpl_pi_data', $cplPiData);
+            }
+
+            // Siapkan dan simpan data mapping ke session
+            if (isset($portofolioData['mapping_cpmk_scpmk']) && is_array($portofolioData['mapping_cpmk_scpmk'])) {
+                $rawMappingData = $portofolioData['mapping_cpmk_scpmk'];
+                $transformedMappingData = [];
+
+                // Buat lookup map untuk CPMK ID → nomor
+                $cpmkIdToNumberMap = [];
+
+                if (!empty($portofolioData['cpmk']) && is_array($portofolioData['cpmk'])) {
+                    foreach ($portofolioData['cpmk'] as $cpmkItem) {
+                        $cpmkId = $cpmkItem['id'] ?? null;
+                        $cpmkNumber = $cpmkItem['no_cpmk'] ?? $cpmkItem['noCpmk'] ?? null;
+
+                        if ($cpmkId && $cpmkNumber) {
+                            $cpmkIdToNumberMap[$cpmkId] = $cpmkNumber;
+                        }
+                    }
+                }
+
+                // Buat lookup map untuk Sub-CPMK ID → nomor
+                $subCpmkIdToNumberMap = [];
+                if (!empty($portofolioData['cpmk'])) {
+                    foreach ($portofolioData['cpmk'] as $cpmkItem) {
+                        if (!empty($cpmkItem['sub_cpmk'])) {
+                            foreach ($cpmkItem['sub_cpmk'] as $subCpmk) {
+                                $subCpmkId = $subCpmk['id'] ?? null;
+                                $subCpmkNumber = $subCpmk['no_scpmk'] ?? $subCpmk['noScpmk'] ?? null;
+                                if ($subCpmkId && $subCpmkNumber) {
+                                    $subCpmkIdToNumberMap[$subCpmkId] = $subCpmkNumber;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Transformasi data dari ID → nomor
+                foreach ($rawMappingData as $mapItem) {
+                    // Pastikan format datanya konsisten
+                    $idCpmk = $mapItem['id_cpmk'] ?? $mapItem['cpmk_id'] ?? null;
+                    $idScpmk = $mapItem['id_sub_cpmk'] ?? $mapItem['scpmk_id'] ?? null;
+                    $value = $mapItem['value'] ?? 1;
+                    // Get CPL number directly from the mapping data
+                    $cplNumber = $mapItem['no_cpl'] ?? 1; // Use the CPL directly from the mapping data
+                    $cpmkNumber = $cpmkIdToNumberMap[$idCpmk] ?? null;
+                    $subCpmkNumber = $subCpmkIdToNumberMap[$idScpmk] ?? null;
+
+                    if ($cplNumber && $cpmkNumber && $subCpmkNumber) {
+                        $transformedMappingData[$cplNumber][$cpmkNumber][$subCpmkNumber] = $value;
+                    }
+                }
+
+                // Simpan ke session
+                session()->set('mapping_data', $transformedMappingData);
+            }
+        }
+
+        // Update waktu aktifitas terakhir sebelum menampilkan view
+        $this->updateLastActivity();
+
+        // Cek apakah ada file yang disimpan di session
+        $pdfUrl = session()->get('uploaded_rps') ? base_url('uploads/rps/' . session()->get('uploaded_rps')) : '';
+
+        return view('backend/portofolio-form/pemetaan', [
+            'pdfUrl' => $pdfUrl,
+            'idPorto' => $idPorto
+        ]);
     }
-
-    // Validasi mode edit
-    if (!session()->get('edit_mode') || session()->get('edit_portofolio_id') != $idPorto) {
-        return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
-    }
-
-    $db = \Config\Database::connect();
-
-    // === 1. Ambil data CPL berdasarkan portofolio ===
-    $cpl = $db->table('cpl')
-        ->where('id_porto', $idPorto)
-        ->get()
-        ->getResultArray();
-
-    // === 2. Ambil data CPMK berdasarkan portofolio ===
-    $cpmk = $db->table('cpmk')
-        ->where('id_porto', $idPorto)
-        ->get()
-        ->getResultArray();
-
-    // === 3. Ambil data mapping dari database ===
-    $mappingRows = $db->table('mapping_cpmk_scpmk')
-        ->where('id_portofolio', $idPorto)
-        ->get()
-        ->getResultArray();
-
-    // === 4. Konversi ke array bertingkat [cpl][cpmk] = nilai (1/0) ===
-    $mappingData = [];
-    foreach ($mappingRows as $row) {
-        $mappingData[$row['id_cpl']][$row['id_cpmk']] = (int)$row['nilai'];
-    }
-
-    // === 5. Simpan ke session ===
-    session()->set('cpl_data', $cpl);
-    session()->set('cpmk_data', $cpmk);
-    session()->set('mapping_data', $mappingData);
-
-    // === 6. Kirim ke view ===
-    return view('backend/portofolio-form/pemetaan', [
-        'idPorto' => $idPorto
-    ]);
-}
-
 
     public function saveMappingToSession()
     {

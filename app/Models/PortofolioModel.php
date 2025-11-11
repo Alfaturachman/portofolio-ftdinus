@@ -185,91 +185,80 @@ class PortofolioModel extends Model
      */
     public function getPortofolioById($idPorto)
     {
-        // Get main portfolio data
         $portfolio = $this->where('id', $idPorto)->first();
         if (!$portfolio) {
             return null;
         }
 
-        // Get RPS data
-        $rpsModel = new \App\Models\RpsModel();
-        $rps = $rpsModel->where('id_porto', $idPorto)->first();
-        $portfolio['rps'] = $rps;
+        // RPS & Identitas
+        $portfolio['rps'] = (new \App\Models\RpsModel())->where('id_porto', $idPorto)->first();
+        $portfolio['identitas_matkul'] = (new \App\Models\IdentitasMatkulModel())->where('id_porto', $idPorto)->first();
 
-        // Get identitas matkul
-        $identitasMatkulModel = new \App\Models\IdentitasMatkulModel();
-        $identitasMatkul = $identitasMatkulModel->where('id_porto', $idPorto)->first();
-        $portfolio['identitas_matkul'] = $identitasMatkul;
-
-        // Get CPL and PI data
+        // === CPL dan PI ===
         $cplModel = new \App\Models\CplModel();
-        $cplPiModel = new \App\Models\PiModel();
-        $cplData = $cplModel->where('id_porto', $idPorto)->orderBy('no_cpl', 'ASC')->findAll();
+        $piModel  = new \App\Models\PiModel();
+        $cplData  = $cplModel->where('id_porto', $idPorto)->orderBy('no_cpl', 'ASC')->findAll();
+
         $cplList = [];
         foreach ($cplData as $cpl) {
-            $piList = $cplPiModel->where('id_cpl', $cpl['id'])->orderBy('no_pi', 'ASC')->findAll();
+            $piList = $piModel->where('id_cpl', $cpl['id'])->orderBy('no_pi', 'ASC')->findAll();
             $cplList[$cpl['no_cpl']] = [
                 'id' => $cpl['id'],
+                'no_cpl' => $cpl['no_cpl'],
                 'isi_cpl' => $cpl['isi_cpl'],
                 'pi_list' => $piList
             ];
         }
         $portfolio['cpl'] = $cplList;
 
-        // Get CPMK and Sub-CPMK data
+        // === CPMK dan Sub-CPMK ===
         $cpmkModel = new \App\Models\CpmkModel();
         $subCpmkModel = new \App\Models\SubCpmkModel();
+        $mapModel = new \App\Models\MappingCpmkScpmkModel();
+
         $cpmkData = $cpmkModel->where('id_porto', $idPorto)->orderBy('no_cpmk', 'ASC')->findAll();
+        $subCpmkData = $subCpmkModel->where('id_porto', $idPorto)->orderBy('no_scpmk', 'ASC')->findAll();
+        $mappingData = $mapModel->findAll();
+
         $cpmkList = [];
         foreach ($cpmkData as $cpmk) {
-            $subCpmkList = $subCpmkModel->where('id_porto', $idPorto)->orderBy('no_scpmk', 'ASC')->findAll();
+            $relatedSub = [];
+            foreach ($mappingData as $map) {
+                if ($map['id_cpmk'] == $cpmk['id']) {
+                    foreach ($subCpmkData as $sub) {
+                        if ($sub['id'] == $map['id_scpmk']) {
+                            $relatedSub[] = $sub;
+                        }
+                    }
+                }
+            }
+
             $cpmkList[$cpmk['id']] = [
                 'id' => $cpmk['id'],
                 'no_cpmk' => $cpmk['no_cpmk'],
                 'isi_cpmk' => $cpmk['isi_cpmk'],
                 'avg_cpmk' => $cpmk['avg_cpmk'],
-                'sub_cpmk' => $subCpmkList
+                'selected_cpl' => 1, // default (belum ada di tabel)
+                'sub_cpmk' => $relatedSub
             ];
         }
         $portfolio['cpmk'] = $cpmkList;
 
-        // Get mapping CPMK-SubCPMK data
-        $mappingCpmkScpmkModel = new \App\Models\MappingCpmkScpmkModel();
-        $mappingData = $mappingCpmkScpmkModel->getMapping($idPorto);
+        // Simpan mapping
         $portfolio['mapping_cpmk_scpmk'] = $mappingData;
 
-        // Get assessment data
-        $rancanganAsesmenModel = new \App\Models\RancanganAsesmenModel();
-        $assessmentData = $rancanganAsesmenModel->getAssessmentData($idPorto);
-        $portfolio['assessment'] = $assessmentData;
-
-        // Get assessment file data
-        $rancanganAsesmenFileModel = new \App\Models\RancanganAsesmenFileModel();
-        $assessmentFileData = $rancanganAsesmenFileModel->where('id_porto', $idPorto)->findAll();
-        $portfolio['assessment_files'] = $assessmentFileData;
-
-        // Get soal data
-        $rancanganSoalModel = new \App\Models\RancanganSoalModel();
-        $soalData = $rancanganSoalModel->getRancanganSoalWithCpmk($idPorto);
-        $portfolio['soal'] = $soalData;
-
-        // Get pelaksanaan perkuliahan data
-        $pelaksanaanModel = new \App\Models\PelaksanaanPerkuliahanModel();
-        $pelaksanaanData = $pelaksanaanModel->where('id_porto', $idPorto)->first();
-        $portfolio['pelaksanaan'] = $pelaksanaanData;
-
-        // Get hasil asesmen data
-        $hasilAsesmenModel = new \App\Models\HasilAsesmenModel();
-        $hasilAsesmenData = $hasilAsesmenModel->where('id_porto', $idPorto)->first();
-        $portfolio['hasil_asesmen'] = $hasilAsesmenData;
-
-        // Get evaluasi perkuliahan data
-        $evaluasiPerkuliahanModel = new \App\Models\EvaluasiPerkuliahanModel();
-        $evaluasiData = $evaluasiPerkuliahanModel->where('id_porto', $idPorto)->first();
-        $portfolio['evaluasi'] = $evaluasiData;
+        // Rancangan asesmen, soal, pelaksanaan, hasil, evaluasi
+        $portfolio['assessment'] = (new \App\Models\RancanganAsesmenModel())->getAssessmentData($idPorto);
+        $portfolio['assessment_files'] = (new \App\Models\RancanganAsesmenFileModel())->where('id_porto', $idPorto)->findAll();
+        $portfolio['soal'] = (new \App\Models\RancanganSoalModel())->getRancanganSoalWithCpmk($idPorto);
+        $portfolio['pelaksanaan'] = (new \App\Models\PelaksanaanPerkuliahanModel())->where('id_porto', $idPorto)->first();
+        $portfolio['hasil_asesmen'] = (new \App\Models\HasilAsesmenModel())->where('id_porto', $idPorto)->first();
+        $portfolio['evaluasi'] = (new \App\Models\EvaluasiPerkuliahanModel())->where('id_porto', $idPorto)->first();
 
         return $portfolio;
     }
+
+
 
     /**
      * Get portfolio data in the format required by edit forms
@@ -333,6 +322,7 @@ class PortofolioModel extends Model
                 'no_cpmk' => $cpmk['no_cpmk'],
                 'narasi' => $cpmk['isi_cpmk'],
                 'avg_cpmk' => $cpmk['avg_cpmk'],
+                'selectedCpl' => $cpmk['selected_cpl'] ?? $cpmk['selectedCpl'] ?? 1,
                 'sub' => $subCpmkList
             ];
         }
@@ -491,13 +481,36 @@ class PortofolioModel extends Model
     {
         $db = \Config\Database::connect();
 
-        // Try to get with selected_cpl field, fallback to default if column doesn't exist
-        $query = $db->table('mapping_cpmk_scpmk m')
-            ->select('m.id_cpmk, m.id_scpmk, m.nilai, c.no_cpmk, COALESCE(c.selected_cpl, c.selectedCpl, 1) as selected_cpl')
-            ->join('cpmk c', 'c.id = m.id_cpmk')
-            ->where('c.id_porto', $idPorto);
+        // Check if selected_cpl column exists in the cpmk table
+        $columns = $db->getFieldNames('cpmk');
+        $hasSelectedCpl = in_array('selected_cpl', $columns);
+        $hasSelectedCplAlt = in_array('selectedCpl', $columns);
 
-        $result = $query->get()->getResultArray();
+        if ($hasSelectedCpl) {
+            // Use selected_cpl column if it exists
+            $result = $db->table('mapping_cpmk_scpmk m')
+                ->select('m.id_cpmk, m.id_scpmk, m.nilai, c.no_cpmk, c.selected_cpl as selected_cpl')
+                ->join('cpmk c', 'c.id = m.id_cpmk')
+                ->where('c.id_porto', $idPorto)
+                ->get()
+                ->getResultArray();
+        } elseif ($hasSelectedCplAlt) {
+            // Use selectedCpl column if it exists
+            $result = $db->table('mapping_cpmk_scpmk m')
+                ->select('m.id_cpmk, m.id_scpmk, m.nilai, c.no_cpmk, c.selectedCpl as selected_cpl')
+                ->join('cpmk c', 'c.id = m.id_cpmk')
+                ->where('c.id_porto', $idPorto)
+                ->get()
+                ->getResultArray();
+        } else {
+            // Fallback: get mapping data without CPL information from CPMK, assign default CPL
+            $result = $db->table('mapping_cpmk_scpmk m')
+                ->select('m.id_cpmk, m.id_scpmk, m.nilai, c.no_cpmk, 1 as selected_cpl')
+                ->join('cpmk c', 'c.id = m.id_cpmk')
+                ->where('c.id_porto', $idPorto)
+                ->get()
+                ->getResultArray();
+        }
 
         $mapping = [];
         foreach ($result as $row) {
@@ -506,7 +519,7 @@ class PortofolioModel extends Model
                 'id_sub_cpmk' => $row['id_scpmk'],
                 'value' => $row['nilai'],
                 'no_cpmk' => $row['no_cpmk'],
-                'no_cpl' => $row['selected_cpl'] // Will be 1 if the field doesn't exist
+                'no_cpl' => $row['selected_cpl']
             ];
         }
 
