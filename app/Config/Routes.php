@@ -28,7 +28,7 @@ $routes->group('portofolio-form', function ($routes) {
     // Rute GET
     $routes->get('/', 'Portofolio::index');
     $routes->get('view-pdf', 'Portofolio::view_pdf');
-    $routes->get('upload-rps', 'Portofolio::upload_rps');
+
     $routes->get('info-matkul', 'Portofolio::info_matkul');
     $routes->get('cpl-pi', 'Portofolio::cpl_pi');
     $routes->get('cpmk-subcpmk', 'Portofolio::cpmk_subcpmk');
@@ -44,6 +44,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->get('getMahasiswaByKelas/(:segment)', 'Portofolio::getMahasiswaByKelas/$1');
 
     // Rute POST
+
     $routes->post('saveUploadRps', 'Portofolio::saveUploadRps');
     $routes->post('saveInfoMatkul', 'Portofolio::saveInfoMatkul');
     $routes->post('saveTopikPerkuliahan', 'Portofolio::saveTopikPerkuliahan');
@@ -61,7 +62,7 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->post('saveEvaluasiPerkuliahan', 'Portofolio::saveEvaluasiPerkuliahan');
 
     $routes->post('save-portofolio', 'Portofolio::savePortofolio');
-    
+
     // Rute edit portofolio
     $routes->get('edit/(:num)', 'Portofolio::edit/$1');
     $routes->post('update/(:num)', 'Portofolio::update/$1');

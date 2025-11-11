@@ -21,7 +21,7 @@
                     <div class="d-block align-items-center justify-content-center mb-4">
                         <div class="d-flex justify-content-between mb-3">
                             <div>
-                                <a class="btn btn-primary" href="<?= base_url('portofolio-form/upload-rps') ?>">
+                                <a class="btn btn-primary" href="<?= base_url('portofolio-form/info-matkul') ?>">
                                     Tambah Portofolio
                                 </a>
                             </div>

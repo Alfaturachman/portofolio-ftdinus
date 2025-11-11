@@ -130,7 +130,7 @@
         </div>
 
         <div style="position: absolute; bottom: 0; width: 100%; text-align: center; margin-bottom: 2cm;">
-            <h4>PROGRAM STUDI TEKNIK ELEKTRO</h4>
+            <h4>PROGRAM STUDI <?= $portofolioData['prodi'] ?></h4>
             <h4>FAKULTAS TEKNIK UNIVERSITAS DIAN NUSWANTORO</h4>
         </div>
     </div>

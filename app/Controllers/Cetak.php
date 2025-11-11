@@ -85,9 +85,7 @@ class Cetak extends BaseController
             return $this->response->setStatusCode(404, 'File RPS tidak ditemukan dalam database');
         }
 
-        // Pastikan path file sesuai dengan direktori upload
         $existingRpsPdf = WRITEPATH . 'uploads/rps/' . $rpsData['file_rps'];
-
         if (!file_exists($existingRpsPdf)) {
             return $this->response->setStatusCode(404, 'File PDF yang dimaksud tidak ditemukan di server');
         }
@@ -100,204 +98,241 @@ class Cetak extends BaseController
         $pelaksanaanPerkuliahanModel = new PelaksanaanPerkuliahanModel();
         $pelaksanaanData = $pelaksanaanPerkuliahanModel->where('id_porto', $idPorto)->first();
 
-        // 5. Ambil file hasil asesmen dari database
+        // 6. Ambil file hasil asesmen dari database
         $hasilAsesmenModel = new HasilAsesmenModel();
         $hasilAsesmenData = $hasilAsesmenModel->where('id_porto', $idPorto)->first();
 
-        // 6. Kelompokkan file berdasarkan kategori
+        // 7. Kelompokkan file berdasarkan kategori
         $filePaths = [
-            'RPS' => $existingRpsPdf,
-            'TUGAS' => null,
-            'UTS' => null,
-            'UAS' => null,
-            'HASIL_TUGAS' => null,
-            'HASIL_UTS' => null,
-            'HASIL_UAS' => null,
-            'NILAI_MATA_KULIAH' => null,
-            'NILAI_CPMK' => null
+            'RPS'                => $existingRpsPdf,
+            'TUGAS'              => null,
+            'UTS'                => null,
+            'UAS'                => null,
+            'HASIL_TUGAS'        => null,
+            'HASIL_UTS'          => null,
+            'HASIL_UAS'          => null,
+            'NILAI_MATA_KULIAH'  => null,
+            'NILAI_CPMK'         => null,
         ];
 
-        // Tambahkan file rancangan asesment
+        // Tambahkan file rancangan asesmen
         foreach ($additionalFiles as $file) {
-            $filePath = WRITEPATH . '' . $file['file_pdf'];
-            if (file_exists($filePath)) {
-                // Tentukan kategori file (misalnya dari field kategori pada database)
-                if (isset($file['kategori'])) {
-                    switch (strtoupper($file['kategori'])) {
-                        case 'TUGAS':
-                            $filePaths['TUGAS'] = $filePath;
-                            break;
-                        case 'UTS':
-                            $filePaths['UTS'] = $filePath;
-                            break;
-                        case 'UAS':
-                            $filePaths['UAS'] = $filePath;
-                            break;
-                        case 'HASIL_TUGAS':
-                            $filePaths['HASIL_TUGAS'] = $filePath;
-                            break;
-                        case 'HASIL_UTS':
-                            $filePaths['HASIL_UTS'] = $filePath;
-                            break;
-                        case 'HASIL_UAS':
-                            $filePaths['HASIL_UAS'] = $filePath;
-                            break;
-                        case 'NILAI_MATA_KULIAH':
-                            $filePaths['NILAI_MATA_KULIAH'] = $filePath;
-                            break;
-                        case 'NILAI_CPMK':
-                            $filePaths['NILAI_CPMK'] = $filePath;
-                            break;
-                        default:
-                            // File tambahan lainnya bisa disimpan untuk digunakan nanti
-                            break;
+            $filePath = WRITEPATH . $file['file_pdf'];
+            if (file_exists($filePath) && isset($file['kategori'])) {
+                switch (strtoupper($file['kategori'])) {
+                    case 'TUGAS':
+                        $filePaths['TUGAS'] = $filePath;
+                        break;
+                    case 'UTS':
+                        $filePaths['UTS'] = $filePath;
+                        break;
+                    case 'UAS':
+                        $filePaths['UAS'] = $filePath;
+                        break;
+                    case 'HASIL_TUGAS':
+                        $filePaths['HASIL_TUGAS'] = $filePath;
+                        break;
+                    case 'HASIL_UTS':
+                        $filePaths['HASIL_UTS'] = $filePath;
+                        break;
+                    case 'HASIL_UAS':
+                        $filePaths['HASIL_UAS'] = $filePath;
+                        break;
+                    case 'NILAI_MATA_KULIAH':
+                        $filePaths['NILAI_MATA_KULIAH'] = $filePath;
+                        break;
+                    case 'NILAI_CPMK':
+                        $filePaths['NILAI_CPMK'] = $filePath;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        // Tambahkan file pelaksanaan perkuliahan
+        if ($pelaksanaanData) {
+            $pelaksanaanFields = [
+                'file_kontrak'   => 'KONTRAK',
+                'file_realisasi' => 'REALISASI',
+                'file_kehadiran' => 'KEHADIRAN'
+            ];
+
+            foreach ($pelaksanaanFields as $dbField => $key) {
+                if (!empty($pelaksanaanData[$dbField])) {
+                    $path = WRITEPATH . $pelaksanaanData[$dbField];
+                    if (file_exists($path)) {
+                        $filePaths[$key] = $path;
                     }
                 }
             }
         }
 
-        // Tambahkan file pelaksanaan perkuliahan jika ada
-        if ($pelaksanaanData) {
-            if (!empty($pelaksanaanData['file_kontrak'])) {
-                $kontrakPath = WRITEPATH . '' . $pelaksanaanData['file_kontrak'];
-                if (file_exists($kontrakPath)) {
-                    $filePaths['KONTRAK'] = $kontrakPath;
-                }
-            }
-
-            if (!empty($pelaksanaanData['file_realisasi'])) {
-                $realisasiPath = WRITEPATH . '' . $pelaksanaanData['file_realisasi'];
-                if (file_exists($realisasiPath)) {
-                    $filePaths['REALISASI'] = $realisasiPath;
-                }
-            }
-
-            if (!empty($pelaksanaanData['file_kehadiran'])) {
-                $kehadiranPath = WRITEPATH . '' . $pelaksanaanData['file_kehadiran'];
-                if (file_exists($kehadiranPath)) {
-                    $filePaths['KEHADIRAN'] = $kehadiranPath;
-                }
-            }
-        }
-
-        // Tambahkan file hasil asesmen jika ada
+        // Tambahkan file hasil asesmen
         if ($hasilAsesmenData) {
-            if (!empty($hasilAsesmenData['file_tugas'])) {
-                $tugasPath = WRITEPATH . '' . $hasilAsesmenData['file_tugas'];
-                if (file_exists($tugasPath)) {
-                    $filePaths['HASIL_TUGAS'] = $tugasPath;
-                }
-            }
+            $hasilFields = [
+                'file_tugas'        => 'HASIL_TUGAS',
+                'file_uts'          => 'HASIL_UTS',
+                'file_uas'          => 'HASIL_UAS',
+                'file_nilai_mk'     => 'NILAI_MATA_KULIAH',
+                'file_nilai_cpmk'   => 'NILAI_CPMK',
+            ];
 
-            if (!empty($hasilAsesmenData['file_uts'])) {
-                $utsPath = WRITEPATH . '' . $hasilAsesmenData['file_uts'];
-                if (file_exists($utsPath)) {
-                    $filePaths['HASIL_UTS'] = $utsPath;
-                }
-            }
-
-            if (!empty($hasilAsesmenData['file_uas'])) {
-                $uasPath = WRITEPATH . '' . $hasilAsesmenData['file_uas'];
-                if (file_exists($uasPath)) {
-                    $filePaths['HASIL_UAS'] = $uasPath;
-                }
-            }
-
-            if (!empty($hasilAsesmenData['file_nilai_mk'])) {
-                $nilaiMkPath = WRITEPATH . '' . $hasilAsesmenData['file_nilai_mk'];
-                if (file_exists($nilaiMkPath)) {
-                    $filePaths['NILAI_MATA_KULIAH'] = $nilaiMkPath;
-                }
-            }
-
-            if (!empty($hasilAsesmenData['file_nilai_cpmk'])) {
-                $nilaiCpmkPath = WRITEPATH . '' . $hasilAsesmenData['file_nilai_cpmk'];
-                if (file_exists($nilaiCpmkPath)) {
-                    $filePaths['NILAI_CPMK'] = $nilaiCpmkPath;
+            foreach ($hasilFields as $dbField => $key) {
+                if (!empty($hasilAsesmenData[$dbField])) {
+                    $path = WRITEPATH . $hasilAsesmenData[$dbField];
+                    if (file_exists($path)) {
+                        $filePaths[$key] = $path;
+                    }
                 }
             }
         }
 
-        // 7. Konfigurasi Dompdf untuk membuat PDF dari HTML
+        // 8. Konfigurasi Dompdf untuk membuat PDF dari HTML
         $options = new Options();
         $options->set('defaultFont', 'Times New Roman');
         $dompdf = new Dompdf($options);
 
-        // Simpan HTML dengan marker untuk posisi penyisipan
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        // 8. Simpan hasil PDF sementara
+        // 9. Simpan hasil PDF sementara
         $generatedPdfPath = WRITEPATH . 'uploads/generated.pdf';
         file_put_contents($generatedPdfPath, $dompdf->output());
 
-        // 9. Cari posisi marker untuk penyisipan semua dokumen
-        $insertPositions = [
-            'INSERT_PDF_RPS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_RPS', '6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER'),
-            'INSERT_PDF_TUGAS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_TUGAS', '7.1 TUGAS'),
-            'INSERT_PDF_UTS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_UTS', '7.2 UJIAN TENGAH SEMESTER'),
-            'INSERT_PDF_UAS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_UAS', '7.3 UJIAN AKHIR SEMESTER'),
-            'INSERT_PDF_HASIL_TUGAS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_HASIL_TUGAS', '1. HASIL TUGAS'),
-            'INSERT_PDF_HASIL_UTS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_HASIL_UTS', '2. HASIL UJIAN TENGAH SEMESTER'),
-            'INSERT_PDF_HASIL_UAS' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_HASIL_UAS', '3. HASIL UJIAN AKHIR SEMESTER'),
-            'INSERT_PDF_NILAI_MATA_KULIAH' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_NILAI_MATA_KULIAH', '4. NILAI MATA KULIAH'),
-            'INSERT_PDF_NILAI_CPMK' => $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_NILAI_CPMK', '5. NILAI CPMK')
+        // 10. Marker untuk posisi penyisipan file tambahan
+        $markersToFind = [
+            'INSERT_PDF_RPS'                => ['search' => 'INSERT_PDF_RPS', 'heading' => '6. DOKUMEN RENCANA PEMBELAJARAN SEMESTER'],
+            'INSERT_PDF_TUGAS'              => ['search' => 'INSERT_PDF_TUGAS', 'heading' => '7.1 TUGAS'],
+            'INSERT_PDF_UTS'                => ['search' => 'INSERT_PDF_UTS', 'heading' => '7.2 UJIAN TENGAH SEMESTER'],
+            'INSERT_PDF_UAS'                => ['search' => 'INSERT_PDF_UAS', 'heading' => '7.3 UJIAN AKHIR SEMESTER'],
+            'INSERT_PDF_HASIL_TUGAS'        => ['search' => 'INSERT_PDF_HASIL_TUGAS', 'heading' => '1. HASIL TUGAS'],
+            'INSERT_PDF_HASIL_UTS'          => ['search' => 'INSERT_PDF_HASIL_UTS', 'heading' => '2. HASIL UJIAN TENGAH SEMESTER'],
+            'INSERT_PDF_HASIL_UAS'          => ['search' => 'INSERT_PDF_HASIL_UAS', 'heading' => '3. HASIL UJIAN AKHIR SEMESTER'],
+            'INSERT_PDF_NILAI_MATA_KULIAH'  => ['search' => 'INSERT_PDF_NILAI_MATA_KULIAH', 'heading' => '4. NILAI MATA KULIAH'],
+            'INSERT_PDF_NILAI_CPMK'         => ['search' => 'INSERT_PDF_NILAI_CPMK', 'heading' => '5. NILAI CPMK'],
         ];
 
-        // Tambahkan marker untuk file pelaksanaan perkuliahan jika diperlukan
         if (isset($filePaths['KONTRAK'])) {
-            $insertPositions['INSERT_PDF_KONTRAK'] = $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_KONTRAK', 'KONTRAK PERKULIAHAN');
+            $markersToFind['INSERT_PDF_KONTRAK'] = ['search' => 'INSERT_PDF_KONTRAK', 'heading' => 'KONTRAK PERKULIAHAN'];
         }
-
         if (isset($filePaths['REALISASI'])) {
-            $insertPositions['INSERT_PDF_REALISASI'] = $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_REALISASI', 'REALISASI PERKULIAHAN');
+            $markersToFind['INSERT_PDF_REALISASI'] = ['search' => 'INSERT_PDF_REALISASI', 'heading' => 'REALISASI PERKULIAHAN'];
         }
-
         if (isset($filePaths['KEHADIRAN'])) {
-            $insertPositions['INSERT_PDF_KEHADIRAN'] = $this->findInsertPosition($generatedPdfPath, 'INSERT_PDF_KEHADIRAN', 'KEHADIRAN PERKULIAHAN');
+            $markersToFind['INSERT_PDF_KEHADIRAN'] = ['search' => 'INSERT_PDF_KEHADIRAN', 'heading' => 'KEHADIRAN PERKULIAHAN'];
         }
 
-        // 10. Gabungkan semua file PDF dengan posisi yang sesuai
-        $mergedPdfPath = WRITEPATH . 'uploads/merged.pdf';
-        $this->mergePdfsWithMultipleInsertPoints($generatedPdfPath, $filePaths, $insertPositions, $mergedPdfPath);
+        // 11. Cari semua posisi marker hanya sekali
+        $insertPositions = $this->findAllInsertPositions($generatedPdfPath, $markersToFind);
 
-        // 11. Beri respons ke browser untuk mengunduh hasil merge
+        // 12. Gabungkan semua file PDF
+        $mergedPdfPath = WRITEPATH . 'uploads/merged.pdf';
+        $repairedPdfPath = WRITEPATH . 'uploads/repaired_temp.pdf';
+
+        $this->mergePdfsWithMultipleInsertPoints(
+            $generatedPdfPath,
+            $filePaths,
+            $insertPositions,
+            $mergedPdfPath,
+            $repairedPdfPath
+        );
+
+        // 13. Bersihkan file sementara setelah diunduh
+        register_shutdown_function(function () use ($generatedPdfPath, $mergedPdfPath, $repairedPdfPath) {
+            foreach ([$generatedPdfPath, $mergedPdfPath, $repairedPdfPath] as $file) {
+                if (file_exists($file)) {
+                    @unlink($file);
+                }
+            }
+        });
+
+        // 14. Kembalikan hasil PDF ke browser
         return $this->response->download($mergedPdfPath, null);
     }
 
-    private function findInsertPosition($pdfPath, $searchText, $headingText)
+    /**
+     * Fungsi baru yang efisien untuk mem-parsing PDF SATU KALI
+     * dan menemukan semua posisi marker.
+     */
+    private function findAllInsertPositions($pdfPath, $markers)
     {
+        // Atur batas memori di sini, HANYA SEKALI untuk satu proses parsing berat
+        ini_set('memory_limit', '512M');
+
         $parser = new \Smalot\PdfParser\Parser();
         $pdf = $parser->parseFile($pdfPath);
         $pages = $pdf->getPages();
+        $pageCount = count($pages);
 
-        for ($i = 0; $i < count($pages); $i++) {
+        $positions = [];
+        $foundMarkers = []; // Untuk melacak marker yang sudah ditemukan
+
+        // Inisialisasi semua posisi marker ke halaman terakhir (sebagai fallback)
+        foreach ($markers as $markerKey => $texts) {
+            $positions[$markerKey] = $pageCount;
+        }
+
+        // Loop setiap halaman PDF (satu kali)
+        for ($i = 0; $i < $pageCount; $i++) {
             $text = $pages[$i]->getText();
-            if (strpos($text, $searchText) !== false) {
-                return $i + 1;
+            $currentPage = $i + 1; // Halaman dimulai dari 1
+
+            // Periksa semua marker di halaman ini
+            foreach ($markers as $markerKey => $texts) {
+                // Jika marker ini sudah ditemukan di halaman sebelumnya, lewati
+                if (in_array($markerKey, $foundMarkers)) {
+                    continue;
+                }
+
+                $searchText = $texts['search'];
+                $headingText = $texts['heading'];
+
+                // Cek apakah searchText atau headingText ada di halaman ini
+                if (strpos($text, $searchText) !== false || strpos($text, $headingText) !== false) {
+                    $positions[$markerKey] = $currentPage;
+                    $foundMarkers[] = $markerKey; // Tandai bahwa marker ini sudah ditemukan
+                }
             }
         }
 
-        // Fallback: cari teks judul bagian
-        for ($i = 0; $i < count($pages); $i++) {
-            $text = $pages[$i]->getText();
-            if (strpos($text, $headingText) !== false) {
-                return $i + 1;
-            }
-        }
-
-        // Jika tidak ditemukan, gunakan nilai default
-        return count($pages); // Default ke akhir dokumen jika tidak ditemukan
+        return $positions;
     }
 
-    private function mergePdfsWithMultipleInsertPoints($mainPdf, $filePaths, $insertPositions, $outputPath)
+
+    /**
+     * FUNGSI BARU UNTUK MEMPERBAIKI PDF
+     * Menggunakan Ghostscript untuk mengonversi PDF ke format yang kompatibel (PDF 1.4)
+     * Ini memerlukan Ghostscript (gs) terinstal di server.
+     */
+    private function repairPdf($sourcePath, $tempPath)
     {
+        // Perintah Ghostscript untuk mengonversi PDF ke format yang kompatibel (PDF 1.4)
+        // Ini sering memperbaiki masalah kompresi atau versi PDF
+        $command = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dQUIET -dBATCH -sOutputFile=" . escapeshellarg($tempPath) . " " . escapeshellarg($sourcePath);
+
+        @shell_exec($command);
+
+        // Cek apakah file hasil perbaikan berhasil dibuat dan punya isi
+        if (file_exists($tempPath) && filesize($tempPath) > 0) {
+            return $tempPath; // Gunakan file yang sudah diperbaiki
+        }
+
+        // Kembalikan file asli jika perbaikan gagal (misal: gs tidak terinstal)
+        return $sourcePath;
+    }
+
+    private function mergePdfsWithMultipleInsertPoints($mainPdf, $filePaths, $insertPositions, $outputPath, $repairedPdfPath)
+    {
+        // Atur batas memori juga untuk proses merge Fpdi, karena ini juga berat
+        ini_set('memory_limit', '1024M');
+
         $pdf = new Fpdi();
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
 
-        // Hitung jumlah halaman dari PDF utama
+        // Hitung jumlah halaman dari PDF utama SEKALI saja di awal
         $mainPageCount = $pdf->setSourceFile($mainPdf);
 
         // Urutkan posisi insert dari awal ke akhir dokumen
@@ -309,30 +344,68 @@ class Cetak extends BaseController
         // Iterasi melalui semua posisi insert yang diurutkan
         foreach ($insertPositions as $markerType => $position) {
             // Tambahkan halaman dari PDF utama hingga posisi insert saat ini
-            $pdf->setSourceFile($mainPdf);
-            for ($pageNo = $lastAddedPage + 1; $pageNo <= min($position, $mainPageCount); $pageNo++) {
-                $template = $pdf->importPage($pageNo);
-                $size = $pdf->getTemplateSize($template);
-                $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                $pdf->AddPage($orientation);
-                $pdf->useTemplate($template, 0, 0, null, null, true);
+            $startPage = $lastAddedPage + 1;
+            $endPage = min($position, $mainPageCount);
+
+            if ($startPage <= $endPage) {
+                // *** PERBAIKAN: Set source ke main PDF sebelum import halaman main PDF ***
+                $pdf->setSourceFile($mainPdf);
+
+                for ($pageNo = $startPage; $pageNo <= $endPage; $pageNo++) {
+                    $template = $pdf->importPage($pageNo);
+                    $size = $pdf->getTemplateSize($template);
+                    $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+                    $pdf->AddPage($orientation);
+                    $pdf->useTemplate($template, 0, 0, null, null, true);
+                }
             }
 
             // Update halaman terakhir yang sudah ditambahkan
-            $lastAddedPage = $position;
+            $lastAddedPage = $endPage;
 
             // Tentukan jenis file berdasarkan marker
             $fileType = str_replace('INSERT_PDF_', '', $markerType);
 
             // Sisipkan file PDF yang sesuai jika tersedia
             if (isset($filePaths[$fileType]) && $filePaths[$fileType] !== null && file_exists($filePaths[$fileType])) {
-                $insertFilePageCount = $pdf->setSourceFile($filePaths[$fileType]);
-                for ($pageNo = 1; $pageNo <= $insertFilePageCount; $pageNo++) {
-                    $template = $pdf->importPage($pageNo);
-                    $size = $pdf->getTemplateSize($template);
-                    $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                    $pdf->AddPage($orientation);
-                    $pdf->useTemplate($template, 0, 0, null, null, true);
+
+                // Coba "perbaiki" PDF terlebih dahulu ke format yang kompatibel
+                $sourceFileToUse = $this->repairPdf($filePaths[$fileType], $repairedPdfPath);
+
+                try {
+                    // *** PERBAIKAN KRUSIAL: Set source file ke file yang BERBEDA (bukan main PDF) ***
+                    $insertFilePageCount = $pdf->setSourceFile($sourceFileToUse);
+
+                    // Import semua halaman dari file yang akan disisipkan
+                    for ($pageNo = 1; $pageNo <= $insertFilePageCount; $pageNo++) {
+                        $template = $pdf->importPage($pageNo);
+                        $size = $pdf->getTemplateSize($template);
+                        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+                        $pdf->AddPage($orientation);
+                        $pdf->useTemplate($template, 0, 0, null, null, true);
+                    }
+                } catch (\Exception $e) {
+                    // Tangani error jika PDF yang akan disisipkan rusak
+                    // Buat halaman placeholder yang berisi pesan error
+                    $pdf->AddPage('P');
+                    $pdf->SetFont('Helvetica', 'B', 12);
+                    $pdf->SetTextColor(255, 0, 0); // Merah
+                    $pdf->MultiCell(0, 10, "Error: Gagal menyisipkan file PDF untuk {$fileType}.\nFile: {$filePaths[$fileType]}\n\nPesan error: " . $e->getMessage(), 0, 'C');
+                    $pdf->SetTextColor(0, 0, 0); // Reset ke hitam
+                }
+
+                // Hapus file perbaikan sementara jika ada
+                if (file_exists($repairedPdfPath)) {
+                    @unlink($repairedPdfPath);
+                }
+            } else {
+                // Debug: File tidak ditemukan
+                if (!isset($filePaths[$fileType])) {
+                    error_log("File type {$fileType} tidak ada dalam array filePaths");
+                } elseif ($filePaths[$fileType] === null) {
+                    error_log("File type {$fileType} bernilai NULL");
+                } elseif (!file_exists($filePaths[$fileType])) {
+                    error_log("File {$filePaths[$fileType]} tidak ditemukan di server");
                 }
             }
         }
@@ -363,7 +436,7 @@ class Cetak extends BaseController
         }
 
         // Hitung nilai max secara dinamis untuk menentukan batas atas
-        $maxValue = max($values);
+        $maxValue = !empty($values) ? max($values) : 0;
 
         // Set yMin selalu 0 dan yMax dengan buffer
         $yMin = 0.0; // Selalu mulai dari 0

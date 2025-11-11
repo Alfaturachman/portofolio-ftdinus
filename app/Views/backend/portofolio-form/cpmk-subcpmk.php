@@ -59,16 +59,6 @@
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
                     <div class="d-flex justify-content-between align-items-baseline">
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
                         <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -442,7 +432,11 @@
             .then(data => {
                 if (data.success) {
                     console.log('Data berhasil disimpan:', data.message);
-                    window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
+                    <?php if (isset($idPorto)): ?>
+                        window.location.href = '<?= base_url('portofolio-form/pemetaan-edit/' . $idPorto) ?>';
+                    <?php else: ?>
+                        window.location.href = '<?= base_url('portofolio-form/pemetaan') ?>';
+                    <?php endif; ?>
                 } else {
                     alert('Gagal menyimpan data CPMK. Silakan coba lagi.');
                 }

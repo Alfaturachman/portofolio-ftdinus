@@ -14,7 +14,7 @@ class PortofolioModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['id_user', 'kode_mk', 'nama_mk', 'npp', 'tahun', 'semester', 'smt_matkul', 'ins_time', 'upd_time'];
+    protected $allowedFields = ['id_user', 'kode_mk', 'nama_mk', 'kelp_mk', 'npp', 'tahun', 'semester', 'smt_matkul', 'ins_time', 'upd_time'];
 
     protected $useTimestamps = true;
     protected $createdField  = 'ins_time';
@@ -22,29 +22,46 @@ class PortofolioModel extends Model
 
     public function getAllPortofolio($npp)
     {
-        return $this->select('
-            portofolio.id,
+        $sql = "
+        SELECT 
+            MIN(portofolio.id) as id,
             portofolio.kode_mk,
+            portofolio.kelp_mk,
             portofolio.nama_mk,
             portofolio.tahun,
             portofolio.semester,
             portofolio.smt_matkul,
             users.nama AS dosen_nama,
             portofolio.npp,
-            portofolio.ins_time,
+            MAX(portofolio.ins_time) as ins_time,
             matkul_diampu.kelp_matkul,
             matkul_diampu.id_kelas,
             matkul_diampu.kode_ts
-        ')
-            ->join('users', 'portofolio.npp = users.username')
-            ->join('matkul_diampu', '
-            matkul_diampu.kode_matkul = portofolio.kode_mk
+        FROM portofolio
+        JOIN users 
+            ON portofolio.npp = users.username
+        JOIN matkul_diampu 
+            ON matkul_diampu.kode_matkul = portofolio.kode_mk
+            AND matkul_diampu.kelp_matkul = portofolio.kelp_mk
             AND matkul_diampu.tahun = portofolio.tahun
             AND matkul_diampu.semester = portofolio.semester
-        ')
-            ->where('portofolio.npp', $npp)
-            ->orderBy('portofolio.ins_time', 'DESC')
-            ->findAll();
+        WHERE portofolio.npp = ?
+        GROUP BY 
+            portofolio.kode_mk,
+            portofolio.kelp_mk,
+            portofolio.nama_mk,
+            portofolio.tahun,
+            portofolio.semester,
+            portofolio.smt_matkul,
+            users.nama,
+            portofolio.npp,
+            matkul_diampu.kelp_matkul,
+            matkul_diampu.id_kelas,
+            matkul_diampu.kode_ts
+        ORDER BY ins_time DESC
+    ";
+
+        return $this->db->query($sql, [$npp])->getResultArray();
     }
 
     public function getPortofolio($kode_mk, $tahun, $semester)
@@ -78,6 +95,13 @@ class PortofolioModel extends Model
         portofolio.kode_mk,
         matkul_diampu.matkul AS nama_matkul,
         matkul_diampu.kelp_matkul,
+        info_matkul.smt_matkul,
+        info_matkul.jenis_matkul,
+        info_matkul.tipe_matkul,
+        info_matkul.kurikulum,
+        info_matkul.prodi,
+        info_matkul.jenjang,
+        info_matkul.fakultas,
         info_matkul.teori,
         info_matkul.praktek,
         users.id AS user_id,
@@ -461,5 +485,31 @@ class PortofolioModel extends Model
         $formattedData['uploaded_rps'] = $portfolioData['rps']['file_rps'] ?? '';
 
         return $formattedData;
+    }
+
+    private function getMappingWithCplInfo($idPorto)
+    {
+        $db = \Config\Database::connect();
+
+        // Try to get with selected_cpl field, fallback to default if column doesn't exist
+        $query = $db->table('mapping_cpmk_scpmk m')
+            ->select('m.id_cpmk, m.id_scpmk, m.nilai, c.no_cpmk, COALESCE(c.selected_cpl, c.selectedCpl, 1) as selected_cpl')
+            ->join('cpmk c', 'c.id = m.id_cpmk')
+            ->where('c.id_porto', $idPorto);
+
+        $result = $query->get()->getResultArray();
+
+        $mapping = [];
+        foreach ($result as $row) {
+            $mapping[] = [
+                'id_cpmk' => $row['id_cpmk'],
+                'id_sub_cpmk' => $row['id_scpmk'],
+                'value' => $row['nilai'],
+                'no_cpmk' => $row['no_cpmk'],
+                'no_cpl' => $row['selected_cpl'] // Will be 1 if the field doesn't exist
+            ];
+        }
+
+        return $mapping;
     }
 }

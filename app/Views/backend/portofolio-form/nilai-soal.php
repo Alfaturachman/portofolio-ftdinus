@@ -61,17 +61,6 @@
                     
                     <!-- Step navigation -->
                     <div class="d-flex justify-content-between align-items-baseline">
-                        <!-- Step circles and lines - same as in rancangan-soal -->
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
                         <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">

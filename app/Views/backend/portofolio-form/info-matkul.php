@@ -82,6 +82,31 @@
         color: #6c757d;
         font-style: italic;
     }
+    
+    .upload-section {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+    }
+    
+    .upload-section.drag-over {
+        border-color: #0f4c92;
+        background-color: #e7f3ff;
+    }
+    
+    .upload-preview {
+        margin-top: 20px;
+        max-height: 400px;
+        overflow: auto;
+    }
+    
+    .pdf-preview-btn {
+        margin-top: 10px;
+        display: inline-block;
+    }
 </style>
 
 <?= $this->include('backend/partials/header') ?>
@@ -95,16 +120,6 @@
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
                     <div class="d-flex justify-content-between align-items-baseline">
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
                         <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -188,113 +203,151 @@
         </div>
     </div>
 
-    <!-- Informasi Mata Kuliah -->
+    <!-- Upload RPS dan Informasi Mata Kuliah -->
     <div class="row">
         <div class="col d-flex align-items-stretch">
             <div class="card w-100">
                 <div class="card-body">
                     <div class="d-block align-items-center justify-content-center mb-4">
                         <h4 class="fw-bolder mb-3">Informasi Mata Kuliah</h4>
-                        <div id="alert" class="alert alert-primary" role="alert">
-                            Silahkan untuk mengisi informasi mata kuliah di bawah sebelum melanjutkan!
-                        </div>
+                        <?php if (isset($rpsFile)): ?>
+                            <div id="alert" class="alert alert-success" role="alert">
+                                Upload RPS sudah berhasil, silahkan untuk melengkapi informasi mata kuliah!
+                            </div>
+                        <?php else: ?>
+                            <div id="alert" class="alert alert-primary" role="alert">
+                                Silahkan untuk mengupload file RPS dan mengisi informasi mata kuliah di bawah sebelum melanjutkan!
+                            </div>
+                        <?php endif; ?>
                     </div>
 
-                    <form action="<?= base_url('portofolio-form/saveInfoMatkul') ?>" method="post">
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
+                    <?php endif; ?>
+
+                    <?php if (session()->getFlashdata('success')): ?>
+                        <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
+                    <?php endif; ?>
+
+                    <form action="<?= base_url('portofolio-form/saveInfoMatkul') ?>" method="post" enctype="multipart/form-data">
                         <?= csrf_field(); ?>
-                        
+
                         <!-- Hidden field to indicate edit mode -->
                         <?php if (isset($idPorto)): ?>
                             <input type="hidden" name="id_porto" value="<?= $idPorto ?>">
                         <?php endif; ?>
-                        
-                        <?php if (!empty($pdfUrl)): ?>
-                            <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
-                                <iframe src="<?= esc($pdfUrl) ?>" width="100%" height="100%" style="border: none;"></iframe>
+
+                        <!-- Upload RPS Section -->
+                        <div class="upload-section" id="uploadSection">
+                            <div class="mb-3">
+                                <label for="rps_file" class="form-label">Upload File RPS (PDF)</label>
+                                <input type="file" class="form-control" id="rps_file" name="rps_file" accept="application/pdf">
+                                <p class="mt-2" style="color: #5a6a85!important;">*format file: PDF, ukuran maksimal 10MB</p>
                             </div>
-                        <?php else: ?>
+                            
+                            <?php if (isset($rpsFile)): ?>
+                                <div class="alert alert-success mt-3">
+                                    File RPS telah diupload: <?= basename($rpsFile) ?>
+                                    <button type="button" class="btn btn-sm btn-info pdf-preview-btn" onclick="showPdfModal('<?= base_url('uploads/rps/' . basename($rpsFile)) ?>')">
+                                        <i class="ti ti-file-text"></i> Lihat RPS
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if (isset($rpsFile) || !empty($pdfUrl)): ?>
+                            <div class="upload-preview" style="height: 400px; border: 1px solid #ccc; margin-top: 20px;">
+                                <iframe src="<?= !empty($pdfUrl) ? esc($pdfUrl) : base_url('uploads/rps/' . basename($rpsFile)) ?>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
                         <?php endif; ?>
-                        <div class="form-group">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="fakultas" class="form-label">Fakultas</label>
-                                    <input type="text" class="form-control" id="fakultas" name="fakultas" readonly value="<?= isset($infoMatkul['fakultas']) ? $infoMatkul['fakultas'] : '' ?>">
-                                </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label for="progdi" class="form-label">Program Studi</label>
-                                    <input type="text" class="form-control" id="progdi" name="progdi" readonly value="<?= isset($infoMatkul['progdi']) ? $infoMatkul['progdi'] : '' ?>">
+                        <!-- Informasi Mata Kuliah -->
+                        <div class="mt-4">
+                            <h5 class="fw-bolder mb-3">Data Mata Kuliah</h5>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fakultas" class="form-label">Fakultas</label>
+                                        <input type="text" class="form-control" id="fakultas" name="fakultas" readonly value="<?= isset($infoMatkul['fakultas']) ? $infoMatkul['fakultas'] : '' ?>">
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="progdi" class="form-label">Program Studi</label>
+                                        <input type="text" class="form-control" id="progdi" name="progdi" readonly value="<?= isset($infoMatkul['progdi']) ? $infoMatkul['progdi'] : '' ?>">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Replace the select and script sections in the view -->
-                        <div class="form-group mb-3">
-                            <label for="nama_mk_display" class="form-label">Nama Mata Kuliah</label>
-                            <div class="custom-select-container">
-                                <input type="text" class="form-control" id="nama_mk_display" placeholder="Cari mata kuliah..." autocomplete="off">
-                                <input type="hidden" id="nama_mk" name="nama_mk" value="<?= isset($infoMatkul['nama_mk']) ? $infoMatkul['nama_mk'] : '' ?>">
-                                <div class="custom-select-dropdown" id="custom_select_dropdown" style="display: none;">
-                                    <ul class="list-group">
-                                        <?php foreach ($mataKuliah as $mk): ?>
-                                            <li class="list-group-item custom-select-item"
-                                                data-value="<?= htmlspecialchars($mk['nama_mk']) ?>"
-                                                data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
-                                                data-progdi="<?= htmlspecialchars($mk['progdi']) ?>"
-                                                data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
-                                                data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
-                                                data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
-                                                data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>"
-                                                data-tahun="<?= htmlspecialchars($mk['tahun']) ?>"
-                                                data-semester="<?= htmlspecialchars($mk['semester']) ?>"
-                                                data-smt_matkul="<?= htmlspecialchars($mk['smt_matkul']) ?>">
-                                                <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?> (<?= $mk['tahun'] ?> - <?= $mk['semester'] ?> - Smt <?= $mk['smt_matkul'] ?>)
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
+                            <!-- Replace the select and script sections in the view -->
+                            <div class="form-group mb-3">
+                                <label for="nama_mk_display" class="form-label">Nama Mata Kuliah</label>
+                                <div class="custom-select-container">
+                                    <input type="text" class="form-control" id="nama_mk_display" placeholder="Cari mata kuliah..." autocomplete="off">
+                                    <input type="hidden" id="nama_mk" name="nama_mk" value="<?= isset($infoMatkul['nama_mk']) ? $infoMatkul['nama_mk'] : '' ?>">
+                                    <div class="custom-select-dropdown" id="custom_select_dropdown" style="display: none;">
+                                        <ul class="list-group">
+                                            <?php foreach ($mataKuliah as $mk): ?>
+                                                <li class="list-group-item custom-select-item"
+                                                    data-value="<?= htmlspecialchars($mk['nama_mk']) ?>"
+                                                    data-fakultas="<?= htmlspecialchars($mk['fakultas']) ?>"
+                                                    data-progdi="<?= htmlspecialchars($mk['progdi']) ?>"
+                                                    data-kode_mk="<?= htmlspecialchars($mk['kode_mk']) ?>"
+                                                    data-kelompok_mk="<?= htmlspecialchars($mk['kelompok_mk']) ?>"
+                                                    data-sks_teori="<?= htmlspecialchars($mk['sks_teori']) ?>"
+                                                    data-sks_praktik="<?= htmlspecialchars($mk['sks_praktik']) ?>"
+                                                    data-tahun="<?= htmlspecialchars($mk['tahun']) ?>"
+                                                    data-semester="<?= htmlspecialchars($mk['semester']) ?>"
+                                                    data-smt_matkul="<?= htmlspecialchars($mk['smt_matkul']) ?>">
+                                                    <?= $mk['nama_mk'] ?> - <?= $mk['kode_mk'] ?> - <?= $mk['kelompok_mk'] ?> (<?= $mk['tahun'] ?> - <?= $mk['semester'] ?> - Smt <?= $mk['smt_matkul'] ?>)
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <input type="hidden" id="tahun" name="tahun" value="<?= isset($infoMatkul['tahun']) ? $infoMatkul['tahun'] : '' ?>">
+                            <input type="hidden" id="semester" name="semester" value="<?= isset($infoMatkul['semester']) ? $infoMatkul['semester'] : '' ?>">
+                            <input type="hidden" id="smt_matkul" name="smt_matkul" value="<?= isset($infoMatkul['smt_matkul']) ? $infoMatkul['smt_matkul'] : '' ?>">
+
+                            <div class="form-group mb-3">
+                                <label for="kode_mk" class="form-label">Kode MK</label>
+                                <input type="text" class="form-control" id="kode_mk" name="kode_mk" readonly value="<?= isset($infoMatkul['kode_mk']) ? $infoMatkul['kode_mk'] : '' ?>">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="kelompok_mk" class="form-label">Kelompok MK</label>
+                                <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" readonly value="<?= isset($infoMatkul['kelompok_mk']) ? $infoMatkul['kelompok_mk'] : '' ?>">
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="sks_teori" class="form-label">SKS Teori</label>
+                                        <input type="number" class="form-control" id="sks_teori" name="sks_teori" readonly value="<?= isset($infoMatkul['sks_teori']) ? $infoMatkul['sks_teori'] : '' ?>">
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="sks_praktik" class="form-label">SKS Praktik</label>
+                                        <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" readonly value="<?= isset($infoMatkul['sks_praktik']) ? $infoMatkul['sks_praktik'] : '' ?>">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="mk_prasyarat" class="form-label">Mata Kuliah Prasyarat</label>
+                                <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= isset($infoMatkul['mk_prasyarat']) ? $infoMatkul['mk_prasyarat'] : '' ?></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
+                                <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($infoMatkul['topik_mk']) ? $infoMatkul['topik_mk'] : '' ?></textarea>
                             </div>
                         </div>
 
-                        <input type="hidden" id="tahun" name="tahun" value="<?= isset($infoMatkul['tahun']) ? $infoMatkul['tahun'] : '' ?>">
-                        <input type="hidden" id="semester" name="semester" value="<?= isset($infoMatkul['semester']) ? $infoMatkul['semester'] : '' ?>">
-                        <input type="hidden" id="smt_matkul" name="smt_matkul" value="<?= isset($infoMatkul['smt_matkul']) ? $infoMatkul['smt_matkul'] : '' ?>">
-
-                        <div class="form-group mb-3">
-                            <label for="kode_mk" class="form-label">Kode MK</label>
-                            <input type="text" class="form-control" id="kode_mk" name="kode_mk" readonly value="<?= isset($infoMatkul['kode_mk']) ? $infoMatkul['kode_mk'] : '' ?>">
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="kelompok_mk" class="form-label">Kelompok MK</label>
-                            <input type="text" class="form-control" id="kelompok_mk" name="kelompok_mk" readonly value="<?= isset($infoMatkul['kelompok_mk']) ? $infoMatkul['kelompok_mk'] : '' ?>">
-                        </div>
-                        <div class="form-group">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="sks_teori" class="form-label">SKS Teori</label>
-                                    <input type="number" class="form-control" id="sks_teori" name="sks_teori" readonly value="<?= isset($infoMatkul['sks_teori']) ? $infoMatkul['sks_teori'] : '' ?>">
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="sks_praktik" class="form-label">SKS Praktik</label>
-                                    <input type="number" class="form-control" id="sks_praktik" name="sks_praktik" readonly value="<?= isset($infoMatkul['sks_praktik']) ? $infoMatkul['sks_praktik'] : '' ?>">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="mk_prasyarat" class="form-label">Mata Kuliah Prasyarat</label>
-                            <textarea class="form-control" id="mk_prasyarat" name="mk_prasyarat" rows="3" placeholder="Masukkan mata kuliah prasyarat jika ada"><?= isset($infoMatkul['mk_prasyarat']) ? $infoMatkul['mk_prasyarat'] : '' ?></textarea>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="topik_mk" class="form-label">Topik Perkuliahan</label>
-                            <textarea class="form-control" id="topik_mk" name="topik_mk" rows="3" placeholder="Masukkan topik perkuliahan"><?= isset($infoMatkul['topik_mk']) ? $infoMatkul['topik_mk'] : '' ?></textarea>
-                        </div>
                         <div class="d-flex justify-content-between pt-3">
                             <?php if (isset($idPorto)): ?>
-                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>" onclick="return confirm('Yakin ingin kembali? Data yang belum disimpan akan hilang jika proses belum selesai.')">
                                     <i class="ti ti-arrow-left"></i> Kembali
                                 </a>
                             <?php else: ?>
-                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/upload-rps') ?>">
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/') ?>" onclick="return confirm('Yakin ingin kembali? Data yang belum disimpan akan hilang jika proses belum selesai.')">
                                     <i class="ti ti-arrow-left"></i> Kembali
                                 </a>
                             <?php endif; ?>
@@ -312,7 +365,127 @@
         </div>
     </div>
 
+    <!-- Modal untuk preview PDF -->
+    <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfModalLabel">Preview RPS</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfPreview" width="100%" height="600px" style="border: none;"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // AJAX Upload RPS File
+        document.getElementById('rps_file').addEventListener('change', function() {
+            const fileInput = this;
+            const formData = new FormData();
+            formData.append('rps_file', fileInput.files[0]);
+
+            // Cek apakah file dipilih
+            if (fileInput.files.length === 0) {
+                showModal('Harap pilih file untuk diupload.');
+                return;
+            }
+
+            // AJAX Request
+            fetch('<?= base_url('portofolio-form/saveUploadRps') ?>', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Perbarui tampilan setelah upload berhasil
+                        document.getElementById('alert').className = 'alert alert-success';
+                        document.getElementById('alert').innerHTML = 'Upload RPS sudah berhasil, silahkan untuk melengkapi informasi mata kuliah!';
+                        
+                        // Update informasi file yang diupload
+                        const filename = data.pdfUrl.split('/').pop();
+                        const uploadSection = document.querySelector('.upload-section');
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success mt-3';
+                        alertDiv.innerHTML = `File RPS telah diupload: ${filename}
+                            <button type="button" class="btn btn-sm btn-info pdf-preview-btn" onclick="showPdfModal('${data.pdfUrl}')">
+                                <i class="ti ti-file-text"></i> Lihat RPS
+                            </button>`;
+                        uploadSection.appendChild(alertDiv);
+                        
+                        // Update preview RPS
+                        const previewContainer = document.querySelector('.upload-preview');
+                        if (previewContainer) {
+                            previewContainer.innerHTML = `<iframe src="${data.pdfUrl}" width="100%" height="100%" style="border: none;"></iframe>`;
+                        } else {
+                            const newPreview = document.createElement('div');
+                            newPreview.className = 'upload-preview';
+                            newPreview.style.height = '400px';
+                            newPreview.style.border = '1px solid #ccc';
+                            newPreview.style.marginTop = '20px';
+                            newPreview.innerHTML = `<iframe src="${data.pdfUrl}" width="100%" height="100%" style="border: none;"></iframe>`;
+                            document.querySelector('form').insertAdjacentElement('afterend', newPreview);
+                        }
+                        
+                        // Reset file input
+                        fileInput.value = '';
+                    } else {
+                        showModal('Gagal mengupload file: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showModal('Terjadi kesalahan saat mengupload file.');
+                });
+        });
+
+        function showModal(message) {
+            // Create modal element dynamically if it doesn't exist
+            let modal = document.getElementById('messageModal');
+            if (!modal) {
+                // Create modal HTML
+                const modalHtml = `
+                    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="messageModalLabel">Pesan</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" id="modalMessage">
+                                    <!-- Pesan akan dimasukkan di sini -->
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                modal = document.getElementById('messageModal');
+            }
+            
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        function showPdfModal(pdfUrl) {
+            const pdfPreview = document.getElementById('pdfPreview');
+            pdfPreview.src = pdfUrl;
+            
+            const pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
+            pdfModal.show();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('nama_mk_display');
             const hiddenInput = document.getElementById('nama_mk');
@@ -417,6 +590,46 @@
                 document.getElementById('tahun').value = '';
                 document.getElementById('semester').value = '';
                 document.getElementById('smt_matkul').value = '';
+            }
+
+            // Add drag and drop functionality for upload section
+            const uploadSection = document.getElementById('uploadSection');
+            const fileInput = document.getElementById('rps_file');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadSection.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadSection.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadSection.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadSection.classList.add('drag-over');
+            }
+
+            function unhighlight() {
+                uploadSection.classList.remove('drag-over');
+            }
+
+            uploadSection.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length) {
+                    fileInput.files = files;
+                }
             }
         });
     </script>

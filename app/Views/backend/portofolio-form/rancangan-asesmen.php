@@ -59,16 +59,6 @@
                         <h5 class="fw-bolder mb-0">Portofolio Form - Progress</h5>
                     </div>
                     <div class="d-flex justify-content-between align-items-baseline">
-                        <!-- Upload RPS -->
-                        <div class="d-flex flex-column align-items-center text-center px-2">
-                            <div class="step-circle active">
-                                <i class="ti ti-upload"></i>
-                            </div>
-                            <small class="d-block mt-2 step-label">Upload RPS</small>
-                        </div>
-
-                        <div class="step-line active"></div>
-
                         <!-- Informasi Matkul -->
                         <div class="d-flex flex-column align-items-center text-center px-2">
                             <div class="step-circle active">
@@ -362,9 +352,15 @@
                         </div>
 
                         <div class="d-flex justify-content-between pt-3">
-                            <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
-                                <i class="ti ti-arrow-left"></i> Kembali
-                            </a>
+                            <?php if (isset($idPorto)): ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan-edit/' . $idPorto) ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                            <?php else: ?>
+                                <a class="btn btn-secondary" href="<?= base_url('portofolio-form/pemetaan') ?>">
+                                    <i class="ti ti-arrow-left"></i> Kembali
+                                </a>
+                            <?php endif; ?>
                             <div>
                                 <button type="submit" id="submitBtn" class="btn btn-primary">
                                     Selanjutnya <i class="ti ti-arrow-right"></i>
