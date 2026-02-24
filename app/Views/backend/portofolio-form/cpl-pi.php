@@ -153,6 +153,52 @@
                             Silahkan untuk mengisi CPL dan indikator kinerja di bawah sebelum melanjutkan!
                         </div>
                     </div>
+                    
+                    <!-- Kurikulum Filter -->
+                    <?php if (!empty($kurikulumList) && count($kurikulumList) > 1): ?>
+                    <div class="mb-4">
+                        <div class="alert alert-info d-flex align-items-start" role="alert">
+                            <i class="ti ti-info-circle me-2 fs-4"></i>
+                            <div>
+                                <strong>Informasi Kurikulum:</strong>
+                                <p class="mb-0 mt-1">
+                                    Mata kuliah ini memiliki <strong><?= count($kurikulumList) ?> kurikulum</strong> yang tersedia. 
+                                    Silakan pilih kurikulum yang ingin ditampilkan untuk melihat CPL dan PI yang sesuai.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row align-items-end">
+                            <div class="col-md-6">
+                                <label for="kurikulumFilter" class="form-label fw-bold">Filter Kurikulum</label>
+                                <select class="form-select" id="kurikulumFilter" name="kurikulum">
+                                    <?php foreach ($kurikulumList as $kurikulum): ?>
+                                        <option value="<?= esc($kurikulum) ?>" 
+                                            <?= ($kurikulum === $selectedKurikulum) ? 'selected' : '' ?>>
+                                            <?= esc($kurikulum) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="text-muted">
+                                    <i class="ti ti-info-circle"></i> 
+                                    Kurikulum aktif: <strong><?= esc($selectedKurikulum) ?></strong>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <?php elseif (!empty($kurikulumList)): ?>
+                    <div class="mb-4">
+                        <div class="alert alert-success d-flex align-items-start" role="alert">
+                            <i class="ti ti-check me-2 fs-4"></i>
+                            <div>
+                                <strong>Kurikulum:</strong>
+                                <p class="mb-0 mt-1">
+                                    Mata kuliah ini menggunakan <strong><?= esc($kurikulumList[0]) ?></strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
                     <form id="topicForm" action="<?= base_url('form/submit') ?>" method="post">
                         <?php if (!empty($pdfUrl)): ?>
                             <div class="mb-3" style="height: 600px; border: 1px solid #ccc; margin-top: 20px;">
@@ -216,5 +262,103 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const kurikulumFilter = document.getElementById('kurikulumFilter');
+        const tableBody = document.querySelector('table.table-bordered tbody');
+        
+        if (kurikulumFilter) {
+            kurikulumFilter.addEventListener('change', function() {
+                const selectedKurikulum = this.value;
+                
+                // Show loading state
+                const originalContent = tableBody.innerHTML;
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 mb-0">Memuat data CPL & PI untuk kurikulum ${selectedKurikulum}...</p>
+                        </td>
+                    </tr>
+                `;
+                
+                // Fetch data via AJAX
+                fetch('<?= base_url('portofolio-form/api/get-cpl-pi') ?>?kode_matkul=<?= $kodeMatkul ?? '' ?>&kurikulum=' + encodeURIComponent(selectedKurikulum))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            renderCplPiTable(data.cplPiData);
+                            
+                            // Update URL without reload
+                            const url = new URL(window.location);
+                            url.searchParams.set('kurikulum', selectedKurikulum);
+                            window.history.pushState({}, '', url);
+                        } else {
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="3" class="text-center text-danger">
+                                        <i class="ti ti-alert-circle fs-1"></i>
+                                        <p class="mt-2">Gagal memuat data CPL & PI</p>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="3" class="text-center text-danger">
+                                    <i class="ti ti-alert-circle fs-1"></i>
+                                    <p class="mt-2">Terjadi kesalahan saat memuat data</p>
+                                </td>
+                            </tr>
+                        `;
+                    });
+            });
+        }
+    });
+    
+    function renderCplPiTable(cplPiData) {
+        const tableBody = document.querySelector('table.table-bordered tbody');
+        let html = '';
+        
+        const cplEntries = Object.entries(cplPiData);
+        
+        if (cplEntries.length === 0) {
+            html = `
+                <tr>
+                    <td colspan="3" class="text-center">Tidak ada data CPL dan PI untuk kurikulum ini.</td>
+                </tr>
+            `;
+        } else {
+            cplEntries.forEach(([cplNo, cplData]) => {
+                const rowCount = Math.max(cplData.pi_list.length, 1);
+                
+                // First row with CPL and first PI
+                html += `<tr>`;
+                html += `<td rowspan="${rowCount}" style="white-space: nowrap;"><strong>CPL ${cplNo}</strong></td>`;
+                html += `<td rowspan="${rowCount}">${cplData.cpl_indo}</td>`;
+                
+                if (cplData.pi_list && cplData.pi_list.length > 0) {
+                    html += `<td>${cplData.pi_list[0]}</td>`;
+                } else {
+                    html += `<td>-</td>`;
+                }
+                html += `</tr>`;
+                
+                // Remaining PI rows
+                for (let i = 1; i < cplData.pi_list.length; i++) {
+                    html += `<tr><td>${cplData.pi_list[i]}</td></tr>`;
+                }
+            });
+        }
+        
+        tableBody.innerHTML = html;
+    }
+</script>
 
 <?= $this->include('backend/partials/footer') ?>

@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ImportCplPiModel;
 use App\Models\ImportMatkulModel;
-
+use App\Models\ImportMatkulDiampuModel;
 use App\Libraries\ChunkReadFilter;
 
 
@@ -19,7 +19,18 @@ class ImportData extends BaseController
         // Get the current user's NPP from the session
         $currentUserNPP = session()->get('UserSession.username');
 
-        return view('backend/import-data/index');
+        // Load data for all tabs
+        $cplPiModel = new ImportCplPiModel();
+        $matkulModel = new ImportMatkulModel();
+        $matkulDiampuModel = new ImportMatkulDiampuModel();
+
+        $data = [
+            'dataCplPi' => $cplPiModel->orderBy('id', 'DESC')->findAll(),
+            'dataMatkul' => $matkulModel->orderBy('id', 'DESC')->findAll(),
+            'dataMatkulDiampu' => $matkulDiampuModel->orderBy('id', 'DESC')->findAll(),
+        ];
+
+        return view('backend/import-data/index', $data);
     }
 
     public function saveImportCplPi()
@@ -791,6 +802,432 @@ class ImportData extends BaseController
             // Clean up resources
             @unlink($filePath);
             return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    // ==================== CPL-PI CRUD METHODS ====================
+
+    /**
+     * Get CPL-PI data for DataTable
+     */
+    public function getDataCplPi()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'error' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        $model = new ImportCplPiModel();
+        $builder = $model->db->table($model->table);
+
+        // Get search value
+        $search = $this->request->getGet('search');
+        $length = $this->request->getGet('length') ?? 10;
+        $start = $this->request->getGet('start') ?? 0;
+        $orderColumn = $this->request->getGet('order_column') ?? 'id';
+        $orderDir = $this->request->getGet('order_dir') ?? 'DESC';
+
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('matkul', $search)
+                ->orLike('kode_matkul', $search)
+                ->orLike('cpl_indo', $search)
+                ->orLike('isi_pi', $search)
+                ->groupEnd();
+        }
+
+        // Get total count
+        $total = $builder->countAllResults(false);
+
+        // Get filtered data
+        $builder->orderBy($orderColumn, $orderDir);
+        $data = $builder->limit($length, $start)->get()->getResultArray();
+
+        return $this->response->setJSON([
+            'data' => $data,
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total
+        ]);
+    }
+
+    /**
+     * Get single CPL-PI data by ID
+     */
+    public function getCplPi($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'error' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        $model = new ImportCplPiModel();
+        $data = $model->find($id);
+
+        if (!$data) {
+            return $this->response->setJSON([
+                'error' => 'Data not found'
+            ])->setStatusCode(404);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
+    /**
+     * Update CPL-PI data
+     */
+    public function updateCplPi($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $model = new ImportCplPiModel();
+        $existingData = $model->find($id);
+
+        if (!$existingData) {
+            return redirect()->to('/import-data')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Validate input
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'kode_matkul' => 'required',
+            'no_cpl' => 'required',
+            'cpl_indo' => 'required',
+            'no_pi' => 'required',
+            'isi_pi' => 'required'
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('error', $validation->getErrors());
+        }
+
+        // Prepare update data
+        $updateData = [
+            'matkul' => $this->request->getPost('matkul'),
+            'kode_matkul' => $this->request->getPost('kode_matkul'),
+            'no_cpl' => $this->request->getPost('no_cpl'),
+            'cpl_indo' => $this->request->getPost('cpl_indo'),
+            'cpl_inggris' => $this->request->getPost('cpl_inggris'),
+            'no_pi' => $this->request->getPost('no_pi'),
+            'isi_pi' => $this->request->getPost('isi_pi'),
+            'upd_time' => date('Y-m-d H:i:s')
+        ];
+
+        if ($model->update($id, $updateData)) {
+            return redirect()->to('/import-data')->with('success', 'Data CPL-PI berhasil diperbarui');
+        } else {
+            return redirect()->back()->with('error', 'Gagal memperbarui data CPL-PI');
+        }
+    }
+
+    /**
+     * Delete CPL-PI data
+     */
+    public function deleteCplPi($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $model = new ImportCplPiModel();
+        $data = $model->find($id);
+
+        if (!$data) {
+            return redirect()->to('/import-data')->with('error', 'Data tidak ditemukan');
+        }
+
+        if ($model->delete($id)) {
+            return redirect()->to('/import-data')->with('success', 'Data CPL-PI berhasil dihapus');
+        } else {
+            return redirect()->to('/import-data')->with('error', 'Gagal menghapus data CPL-PI');
+        }
+    }
+
+    // ==================== MATA KULIAH CRUD METHODS ====================
+
+    /**
+     * Get Mata Kuliah data for DataTable
+     */
+    public function getDataMatkul()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'error' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        $model = new ImportMatkulModel();
+        $builder = $model->db->table($model->table);
+
+        // Get search value
+        $search = $this->request->getGet('search');
+        $length = $this->request->getGet('length') ?? 10;
+        $start = $this->request->getGet('start') ?? 0;
+        $orderColumn = $this->request->getGet('order_column') ?? 'id';
+        $orderDir = $this->request->getGet('order_dir') ?? 'DESC';
+
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('matakuliah', $search)
+                ->orLike('kode_matkul', $search)
+                ->orLike('kelp_matkul', $search)
+                ->orLike('kurikulum', $search)
+                ->groupEnd();
+        }
+
+        // Get total count
+        $total = $builder->countAllResults(false);
+
+        // Get filtered data
+        $builder->orderBy($orderColumn, $orderDir);
+        $data = $builder->limit($length, $start)->get()->getResultArray();
+
+        return $this->response->setJSON([
+            'data' => $data,
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total
+        ]);
+    }
+
+    /**
+     * Get single Mata Kuliah data by ID
+     */
+    public function getMatkul($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'error' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        $model = new ImportMatkulModel();
+        $data = $model->find($id);
+
+        if (!$data) {
+            return $this->response->setJSON([
+                'error' => 'Data not found'
+            ])->setStatusCode(404);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
+    /**
+     * Update Mata Kuliah data
+     */
+    public function updateMatkul($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $model = new ImportMatkulModel();
+        $existingData = $model->find($id);
+
+        if (!$existingData) {
+            return redirect()->to('/import-data')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Validate input
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'matakuliah' => 'required',
+            'kode_matkul' => 'required',
+            'kurikulum' => 'required'
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('error', $validation->getErrors());
+        }
+
+        // Prepare update data
+        $updateData = [
+            'matakuliah' => $this->request->getPost('matakuliah'),
+            'kode_matkul' => $this->request->getPost('kode_matkul'),
+            'kelp_matkul' => $this->request->getPost('kelp_matkul'),
+            'smt_matkul' => $this->request->getPost('smt_matkul'),
+            'jenis_matkul' => $this->request->getPost('jenis_matkul'),
+            'teori' => $this->request->getPost('teori'),
+            'praktek' => $this->request->getPost('praktek'),
+            'tipe_matkul' => $this->request->getPost('tipe_matkul'),
+            'kurikulum' => $this->request->getPost('kurikulum'),
+            'prodi' => $this->request->getPost('prodi'),
+            'jenjang' => $this->request->getPost('jenjang'),
+            'fakultas' => $this->request->getPost('fakultas'),
+            'upd_time' => date('Y-m-d H:i:s')
+        ];
+
+        if ($model->update($id, $updateData)) {
+            return redirect()->to('/import-data')->with('success', 'Data Mata Kuliah berhasil diperbarui');
+        } else {
+            return redirect()->back()->with('error', 'Gagal memperbarui data Mata Kuliah');
+        }
+    }
+
+    /**
+     * Delete Mata Kuliah data
+     */
+    public function deleteMatkul($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $model = new ImportMatkulModel();
+        $data = $model->find($id);
+
+        if (!$data) {
+            return redirect()->to('/import-data')->with('error', 'Data tidak ditemukan');
+        }
+
+        if ($model->delete($id)) {
+            return redirect()->to('/import-data')->with('success', 'Data Mata Kuliah berhasil dihapus');
+        } else {
+            return redirect()->to('/import-data')->with('error', 'Gagal menghapus data Mata Kuliah');
+        }
+    }
+
+    // ==================== MATA KULIAH DIAMPU CRUD METHODS ====================
+
+    /**
+     * Get Mata Kuliah Diampu data for DataTable
+     */
+    public function getDataMatkulDiampu()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'error' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        $model = new ImportMatkulDiampuModel();
+        $builder = $model->db->table($model->table);
+
+        // Get search value
+        $search = $this->request->getGet('search');
+        $length = $this->request->getGet('length') ?? 10;
+        $start = $this->request->getGet('start') ?? 0;
+        $orderColumn = $this->request->getGet('order_column') ?? 'id';
+        $orderDir = $this->request->getGet('order_dir') ?? 'DESC';
+
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('matkul', $search)
+                ->orLike('kode_matkul', $search)
+                ->orLike('dosen', $search)
+                ->orLike('npp', $search)
+                ->groupEnd();
+        }
+
+        // Get total count
+        $total = $builder->countAllResults(false);
+
+        // Get filtered data
+        $builder->orderBy($orderColumn, $orderDir);
+        $data = $builder->limit($length, $start)->get()->getResultArray();
+
+        return $this->response->setJSON([
+            'data' => $data,
+            'recordsTotal' => $total,
+            'recordsFiltered' => $total
+        ]);
+    }
+
+    /**
+     * Get single Mata Kuliah Diampu data by ID
+     */
+    public function getMatkulDiampu($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'error' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        $model = new ImportMatkulDiampuModel();
+        $data = $model->find($id);
+
+        if (!$data) {
+            return $this->response->setJSON([
+                'error' => 'Data not found'
+            ])->setStatusCode(404);
+        }
+
+        return $this->response->setJSON($data);
+    }
+
+    /**
+     * Update Mata Kuliah Diampu data
+     */
+    public function updateMatkulDiampu($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $model = new ImportMatkulDiampuModel();
+        $existingData = $model->find($id);
+
+        if (!$existingData) {
+            return redirect()->to('/import-data')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Validate input
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'matkul' => 'required',
+            'kode_matkul' => 'required',
+            'dosen' => 'required',
+            'npp' => 'required'
+        ]);
+
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('error', $validation->getErrors());
+        }
+
+        // Prepare update data
+        $updateData = [
+            'matkul' => $this->request->getPost('matkul'),
+            'kode_matkul' => $this->request->getPost('kode_matkul'),
+            'kelp_matkul' => $this->request->getPost('kelp_matkul'),
+            'dosen' => $this->request->getPost('dosen'),
+            'npp' => $this->request->getPost('npp'),
+            'upd_time' => date('Y-m-d H:i:s')
+        ];
+
+        if ($model->update($id, $updateData)) {
+            return redirect()->to('/import-data')->with('success', 'Data Mata Kuliah Diampu berhasil diperbarui');
+        } else {
+            return redirect()->back()->with('error', 'Gagal memperbarui data Mata Kuliah Diampu');
+        }
+    }
+
+    /**
+     * Delete Mata Kuliah Diampu data
+     */
+    public function deleteMatkulDiampu($id)
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $model = new ImportMatkulDiampuModel();
+        $data = $model->find($id);
+
+        if (!$data) {
+            return redirect()->to('/import-data')->with('error', 'Data tidak ditemukan');
+        }
+
+        if ($model->delete($id)) {
+            return redirect()->to('/import-data')->with('success', 'Data Mata Kuliah Diampu berhasil dihapus');
+        } else {
+            return redirect()->to('/import-data')->with('error', 'Gagal menghapus data Mata Kuliah Diampu');
         }
     }
 

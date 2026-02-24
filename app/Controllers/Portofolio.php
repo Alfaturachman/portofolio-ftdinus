@@ -407,31 +407,66 @@ class Portofolio extends BaseController
             return redirect()->to('/portofolio-form')->with('error', 'Akses tidak sah.');
         }
 
+        // Get kode_matkul from session
+        $infoMatkul = session()->get('info_matkul');
+        $kodeMatkul = $infoMatkul['kode_mk'] ?? '';
+
+        // Get distinct kurikulum values for this course
+        $db = \Config\Database::connect();
+        $kurikulumQuery = $db->table('cpl_pi')
+            ->select('kurikulum')
+            ->where('kode_matkul', $kodeMatkul)
+            ->groupBy('kurikulum')
+            ->orderBy('kurikulum', 'ASC')
+            ->get();
+        
+        $kurikulumList = [];
+        foreach ($kurikulumQuery->getResultArray() as $row) {
+            if (!empty($row['kurikulum'])) {
+                $kurikulumList[] = $row['kurikulum'];
+            }
+        }
+
+        // Get selected kurikulum from query parameter or use the latest one
+        $selectedKurikulum = $this->request->getGet('kurikulum');
+        if (empty($selectedKurikulum) && !empty($kurikulumList)) {
+            $selectedKurikulum = $kurikulumList[0];
+        }
+
         // Get CPL-PI data from session (already loaded during edit)
         $cplPiData = session()->get('cpl_pi_data') ?? [];
 
-        // If session data is empty, it means we need to load from the database again
+        // If session data is empty, load from database based on kurikulum
         if (empty($cplPiData)) {
-            // We would need to fetch from database here if necessary
-            $portofolioModel = new PortofolioModel();
-            $portofolioData = $portofolioModel->getPortofolioById($idPorto);
-
-            if ($portofolioData && isset($portofolioData['cpl'])) {
-                foreach ($portofolioData['cpl'] as $cpl) {
-                    $cplNo = $cpl['no_cpl'] ?? $cpl['noCpl'] ?? null;
-                    if ($cplNo !== null) {
-                        $pi_list = [];
-                        foreach ($cpl['pi_list'] as $pi) {
-                            $pi_list[] = $pi['isi_ikcp'];
-                        }
-                        $cplPiData[$cplNo] = [
-                            'cpl_indo' => $cpl['isi_cpl'],
-                            'pi_list' => $pi_list
-                        ];
-                    }
-                }
-                session()->set('cpl_pi_data', $cplPiData);
+            // Query to get CPL and PI data based on kurikulum
+            $cplPiQuery = $db->table('cpl_pi')
+                ->where('kode_matkul', $kodeMatkul);
+            
+            if (!empty($selectedKurikulum)) {
+                $cplPiQuery->where('kurikulum', $selectedKurikulum);
             }
+            
+            $query = $cplPiQuery
+                ->orderBy('no_cpl', 'ASC')
+                ->orderBy('no_pi', 'ASC')
+                ->get();
+
+            // Process the results into a structured array
+            foreach ($query->getResultArray() as $row) {
+                $cplNo = $row['no_cpl'];
+                if (!isset($cplPiData[$cplNo])) {
+                    $cplPiData[$cplNo] = [
+                        'cpl_indo' => $row['cpl_indo'],
+                        'pi_list' => []
+                    ];
+                }
+                if (!empty($row['isi_pi'])) {
+                    $cplPiData[$cplNo]['pi_list'][] = $row['isi_pi'];
+                }
+            }
+            
+            session()->set('cpl_pi_data', $cplPiData);
+            session()->set('selected_kurikulum', $selectedKurikulum);
         }
 
         // Update waktu aktifitas terakhir sebelum menampilkan view
@@ -443,7 +478,10 @@ class Portofolio extends BaseController
         return view('backend/portofolio-form/cpl-pi', [
             'pdfUrl' => $pdfUrl,
             'cplPiData' => $cplPiData,
-            'idPorto' => $idPorto // Tambahkan ID portofolio untuk edit
+            'idPorto' => $idPorto,
+            'kurikulumList' => $kurikulumList,
+            'selectedKurikulum' => $selectedKurikulum,
+            'kodeMatkul' => $kodeMatkul
         ]);
     }
 
@@ -468,6 +506,71 @@ class Portofolio extends BaseController
         }
 
         return $this->response->setJSON($sessionData);
+    }
+
+    /**
+     * AJAX endpoint to get CPL-PI data based on kurikulum
+     * 
+     * @return \CodeIgniter\HTTP\JSONResponse
+     */
+    public function apiGetCplPi()
+    {
+        if (!session()->get('UserSession.logged_in')) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ]);
+        }
+
+        $kodeMatkul = $this->request->getGet('kode_matkul');
+        $kurikulum = $this->request->getGet('kurikulum');
+
+        if (empty($kodeMatkul)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Kode mata kuliah diperlukan'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        // Query to get CPL and PI data based on kurikulum
+        $cplPiQuery = $db->table('cpl_pi')
+            ->where('kode_matkul', $kodeMatkul);
+        
+        if (!empty($kurikulum)) {
+            $cplPiQuery->where('kurikulum', $kurikulum);
+        }
+        
+        $query = $cplPiQuery
+            ->orderBy('no_cpl', 'ASC')
+            ->orderBy('no_pi', 'ASC')
+            ->get();
+
+        // Process the results into a structured array
+        $cplPiData = [];
+        foreach ($query->getResultArray() as $row) {
+            $cplNo = $row['no_cpl'];
+            if (!isset($cplPiData[$cplNo])) {
+                $cplPiData[$cplNo] = [
+                    'cpl_indo' => $row['cpl_indo'],
+                    'pi_list' => []
+                ];
+            }
+            if (!empty($row['isi_pi'])) {
+                $cplPiData[$cplNo]['pi_list'][] = $row['isi_pi'];
+            }
+        }
+
+        // Update session with new data
+        session()->set('cpl_pi_data', $cplPiData);
+        session()->set('selected_kurikulum', $kurikulum);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'cplPiData' => $cplPiData,
+            'kurikulum' => $kurikulum
+        ]);
     }
 
     public function cpmk_subcpmk()

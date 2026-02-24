@@ -52,6 +52,9 @@ $routes->group('portofolio-form', function ($routes) {
     $routes->post('saveCPMKToSession', 'Portofolio::saveCPMKToSession');
     $routes->get('getCPMKFromSession', 'Portofolio::getCPMKFromSession');
 
+    // AJAX endpoint for CPL-PI data
+    $routes->get('api/get-cpl-pi', 'Portofolio::apiGetCplPi');
+
     $routes->post('saveMappingToSession', 'Portofolio::saveMappingToSession');
     $routes->post('saveAssessmentToSession', 'Portofolio::saveAssessmentToSession');
     $routes->post('saveAssessmentWithFiles', 'Portofolio::saveAssessmentWithFiles');
@@ -106,6 +109,26 @@ $routes->group('import-data', function ($routes) {
     $routes->post('saveImportMatkul', 'ImportData::saveImportMatkul');
     $routes->post('saveImportMatkulDiampu', 'ImportData::saveImportMatkulDiampu');
     $routes->post('saveMahasiswaKelas', 'ImportData::saveMahasiswaKelas');
+
+    // AJAX Data routes
+    $routes->get('getDataCplPi', 'ImportData::getDataCplPi');
+    $routes->get('getDataMatkul', 'ImportData::getDataMatkul');
+    $routes->get('getDataMatkulDiampu', 'ImportData::getDataMatkulDiampu');
+
+    // CPL PI CRUD
+    $routes->get('getCplPi/(:num)', 'ImportData::getCplPi/$1');
+    $routes->post('updateCplPi/(:num)', 'ImportData::updateCplPi/$1');
+    $routes->get('deleteCplPi/(:num)', 'ImportData::deleteCplPi/$1');
+
+    // Matkul CRUD
+    $routes->get('getMatkul/(:num)', 'ImportData::getMatkul/$1');
+    $routes->post('updateMatkul/(:num)', 'ImportData::updateMatkul/$1');
+    $routes->get('deleteMatkul/(:num)', 'ImportData::deleteMatkul/$1');
+
+    // Matkul Diampu CRUD
+    $routes->get('getMatkulDiampu/(:num)', 'ImportData::getMatkulDiampu/$1');
+    $routes->post('updateMatkulDiampu/(:num)', 'ImportData::updateMatkulDiampu/$1');
+    $routes->get('deleteMatkulDiampu/(:num)', 'ImportData::deleteMatkulDiampu/$1');
 });
 
 $routes->get('downloads/template_cpl_pi.xlsx', 'ImportData::downloadTemplateCplPi');
