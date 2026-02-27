@@ -19,6 +19,7 @@ $routes->get('admin/portofolio/form/(:num)', 'Portofolio::form/$1');
 // ── Per-step AJAX savers ─────────────────────────────
 // Step 1 — Upload RPS (multipart)
 $routes->post('admin/portofolio/step/rps',             'Portofolio::saveRPS');
+$routes->get('admin/portofolio/rps/(:any)', 'Portofolio::serveRPS/$1');
 
 // Step 2 — Info Mata Kuliah (JSON or form-encoded)
 $routes->post('admin/portofolio/step/info-mk',          'Portofolio::saveInfoMK');

@@ -483,47 +483,116 @@
             </div>
         </div>
         <div class="form-card-body">
-            <div class="alert alert-primary d-flex align-items-center gap-2 mb-4" role="alert">
-                <i class="fas fa-info-circle"></i>
-                Silahkan upload file RPS sebelum melanjutkan ke tahap berikutnya.
-            </div>
 
-            <div class="row g-4">
-                <div class="col-lg-12">
-                    <div class="section-header">
-                        <div class="section-dot"></div>
-                        <div class="section-title">File RPS</div>
-                    </div>
-                    <div class="upload-zone" id="rpsZone" onclick="document.getElementById('rps_file').click()">
-                        <input type="file" id="rps_file" accept="application/pdf,.doc,.docx" onchange="handleFileSelect(this, 'rpsZone', 'rpsPreview')">
-                        <i class="fas fa-cloud-upload-alt" id="rpsIcon"></i>
-                        <p class="fw-semibold" style="color:var(--text-sub);font-size:13.5px;margin-bottom:4px;">Klik untuk memilih file</p>
-                        <p>Format: PDF / DOC / DOCX • Maksimal 10MB</p>
-                        <div id="rpsPreview" style="display:none;" class="file-name mt-2"></div>
-                    </div>
-                    <div id="rpsStatus" style="display:none;" class="file-status mt-2">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="rpsFileName">file.pdf</span>
-                        <span class="ms-auto" id="rpsFileSize" style="color:var(--text-muted);"></span>
-                    </div>
+            <?php if (!empty($rps['file_rps'])): ?>
+                <!-- ── RPS sudah ada ── -->
+                <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+                    <i class="fas fa-check-circle"></i>
+                    RPS sudah diupload sebelumnya. Anda dapat langsung melanjutkan atau mengganti file jika diperlukan.
                 </div>
-                <div class="col-lg-12">
-                    <div class="section-header">
-                        <div class="section-dot"></div>
-                        <div class="section-title">Pratinjau RPS</div>
+
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div class="section-header">
+                            <div class="section-dot"></div>
+                            <div class="section-title">File RPS Tersimpan</div>
+                        </div>
+
+                        <!-- Info file existing -->
+                        <div class="file-status mb-3" style="display:flex;">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="rpsFileName"><?= esc($rps['file_rps']) ?></span>
+                            <span class="ms-auto" style="color:var(--text-muted);font-size:11.5px;">
+                                Diupload: <?= date('d M Y H:i', strtotime($rps['created_at'])) ?>
+                            </span>
+                        </div>
+
+                        <!-- Tombol ganti file (toggle) -->
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary mb-3"
+                            onclick="toggleReplaceRPS()">
+                            <i class="fas fa-exchange-alt me-1"></i> Ganti File RPS
+                        </button>
+
+                        <!-- Area upload pengganti (hidden by default) -->
+                        <div id="replaceRPSArea" class="d-none">
+                            <div class="upload-zone" id="rpsZone" onclick="document.getElementById('rps_file').click()">
+                                <input type="file" id="rps_file"
+                                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    onchange="handleFileSelect(this, 'rpsZone', 'rpsPreview')">
+                                <i class="fas fa-cloud-upload-alt" id="rpsIcon"></i>
+                                <p class="fw-semibold" style="color:var(--text-sub);font-size:13.5px;margin-bottom:4px;">Klik untuk memilih file pengganti</p>
+                                <p>Format: PDF / DOC / DOCX • Maksimal 10MB</p>
+                                <div id="rpsPreview" style="display:none;" class="file-name mt-2"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="rpsPdfViewer" style="height:320px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
-                        <div class="text-center text-muted">
-                            <i class="fas fa-file-pdf" style="font-size:48px;margin-bottom:10px;opacity:.3;"></i>
-                            <p style="font-size:13px;">Pratinjau file RPS akan muncul di sini</p>
+
+                    <!-- Pratinjau PDF existing dari server -->
+                    <div class="col-lg-12">
+                        <div class="section-header">
+                            <div class="section-dot"></div>
+                            <div class="section-title">Pratinjau RPS</div>
+                        </div>
+                        <div id="rpsPdfViewer" style="height:420px;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+                            <iframe src="<?= base_url('admin/portofolio/rps/' . esc($rps['file_rps'])) ?>"
+                                width="100%"
+                                height="100%"
+                                style="border:none;">
+                            </iframe>
                         </div>
                     </div>
                 </div>
-            </div>
+
+            <?php else: ?>
+                <!-- ── Belum ada RPS ── -->
+                <div class="alert alert-primary d-flex align-items-center gap-2 mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    Silahkan upload file RPS sebelum melanjutkan ke tahap berikutnya.
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div class="section-header">
+                            <div class="section-dot"></div>
+                            <div class="section-title">File RPS</div>
+                        </div>
+                        <div class="upload-zone" id="rpsZone" onclick="document.getElementById('rps_file').click()">
+                            <input type="file" id="rps_file"
+                                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                onchange="handleFileSelect(this, 'rpsZone', 'rpsPreview')">
+                            <i class="fas fa-cloud-upload-alt" id="rpsIcon"></i>
+                            <p class="fw-semibold" style="color:var(--text-sub);font-size:13.5px;margin-bottom:4px;">Klik untuk memilih file</p>
+                            <p>Format: PDF / DOC / DOCX • Maksimal 10MB</p>
+                            <div id="rpsPreview" style="display:none;" class="file-name mt-2"></div>
+                        </div>
+                        <div id="rpsStatus" style="display:none;" class="file-status mt-2">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="rpsFileNameNew">file.pdf</span>
+                            <span class="ms-auto" id="rpsFileSize" style="color:var(--text-muted);"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="section-header">
+                            <div class="section-dot"></div>
+                            <div class="section-title">Pratinjau RPS</div>
+                        </div>
+                        <div id="rpsPdfViewer" style="height:320px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-file-pdf" style="font-size:48px;margin-bottom:10px;opacity:.3;"></i>
+                                <p style="font-size:13px;">Pratinjau file RPS akan muncul di sini</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="step-nav">
                 <span class="progress-info">Tahap 1 dari 10</span>
-                <button class="btn btn-primary px-4" onclick="saveStep1AndNext(this)">Selanjutnya <i class="bi bi-arrow-right ms-1"></i></button>
+                <button class="btn btn-primary px-4" onclick="saveStep1AndNext(this)">
+                    Selanjutnya <i class="bi bi-arrow-right ms-1"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -536,67 +605,53 @@
             <div class="form-card-icon"><i class="fas fa-book"></i></div>
             <div>
                 <div class="form-card-title">Informasi Mata Kuliah</div>
-                <div class="form-card-subtitle">Pilih mata kuliah dan isi informasi detail perkuliahan</div>
+                <div class="form-card-subtitle">Informasi mata kuliah diambil otomatis dari data perkuliahan Anda</div>
             </div>
         </div>
         <div class="form-card-body">
             <div class="alert alert-primary d-flex align-items-center gap-2 mb-4">
                 <i class="fas fa-info-circle"></i>
-                Pilih mata kuliah dari dropdown untuk mengisi data secara otomatis.
+                Data mata kuliah ditampilkan berdasarkan perkuliahan yang dipilih saat membuat portofolio.
             </div>
 
-            <!-- Dropdown MK -->
             <div class="row g-3">
-                <div class="col-12">
-                    <label class="form-label fw-semibold">Nama Mata Kuliah <span class="text-danger">*</span></label>
-                    <div class="position-relative">
-                        <input type="text" class="form-control" id="mkSearch" placeholder="Cari mata kuliah..." autocomplete="off" oninput="filterMK(this.value)" onfocus="showDropdown()" style="padding-right:36px;">
-                        <i class="fas fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;"></i>
-                    </div>
-                    <div id="mkDropdown" style="display:none;position:absolute;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:220px;overflow-y:auto;width:calc(100% - 48px);">
-                        <div id="mkList"></div>
-                    </div>
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold">Nama Mata Kuliah</label>
+                    <input type="text" class="form-control bg-light" value="<?= esc($porto['nama_mk']) ?>" readonly>
                 </div>
-
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="form-label fw-semibold">Kode MK</label>
-                    <input type="text" class="form-control bg-light" id="kode_mk" readonly placeholder="Otomatis terisi">
+                    <input type="text" class="form-control bg-light" value="<?= esc($porto['kode_mk']) ?>" readonly>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Kelompok MK</label>
-                    <input type="text" class="form-control bg-light" id="kelompok_mk" readonly placeholder="Otomatis terisi">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Fakultas</label>
-                    <input type="text" class="form-control bg-light" id="fakultas" readonly placeholder="Otomatis terisi">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Program Studi</label>
-                    <input type="text" class="form-control bg-light" id="progdi" readonly placeholder="Otomatis terisi">
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label fw-semibold">SKS Teori</label>
-                    <input type="number" class="form-control bg-light" id="sks_teori" readonly placeholder="-">
+                    <input type="number" class="form-control bg-light" value="<?= esc($porto['teori']) ?>" readonly>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label fw-semibold">SKS Praktik</label>
-                    <input type="number" class="form-control bg-light" id="sks_praktik" readonly placeholder="-">
+                    <input type="number" class="form-control bg-light" value="<?= esc($porto['praktek']) ?>" readonly>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label fw-semibold">Kurikulum</label>
-                    <input type="text" class="form-control bg-light" id="kurikulum" readonly placeholder="-">
+                    <input type="text" class="form-control bg-light" value="<?= esc($porto['nama_kurikulum']) ?>" readonly>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label fw-semibold">Semester MK</label>
-                    <input type="text" class="form-control bg-light" id="smt_matkul" readonly placeholder="-">
+                    <input type="text" class="form-control bg-light" value="Semester <?= esc($porto['semester']) ?>" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Tahun Akademik</label>
+                    <input type="text" class="form-control bg-light" value="<?= esc($porto['tahun_akademik']) ?>" readonly>
                 </div>
                 <div class="col-12">
                     <label class="form-label fw-semibold">Mata Kuliah Prasyarat</label>
-                    <textarea class="form-control" id="mk_prasyarat" rows="2" placeholder="Isi jika ada prasyarat, kosongkan jika tidak ada"></textarea>
+                    <textarea class="form-control" id="mk_prasyarat" rows="2"
+                        placeholder="Isi jika ada prasyarat, kosongkan jika tidak ada"><?= esc($info_mk['mk_prasyarat'] ?? '') ?></textarea>
                 </div>
                 <div class="col-12">
                     <label class="form-label fw-semibold">Topik Perkuliahan <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="topik_mk" rows="3" placeholder="Deskripsikan topik-topik yang akan dibahas dalam perkuliahan ini"></textarea>
+                    <textarea class="form-control" id="topik_mk" rows="3"
+                        placeholder="Deskripsikan topik-topik yang akan dibahas dalam perkuliahan ini"><?= esc($info_mk['topik_perkuliahan'] ?? '') ?></textarea>
                 </div>
             </div>
 
@@ -978,6 +1033,29 @@
         </div>
     </div>
 </div>
+
+<!-- GLOBAL ALERT MODAL -->
+<div class="modal fade" id="globalAlertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title" id="globalAlertTitle">
+                    <i class="fas fa-exclamation-circle me-2"></i> Informasi
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="globalAlertMessage" style="font-size:14px;">
+                Pesan
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -1116,6 +1194,40 @@
     let chartInstance = null;
 
     // ══════════════════════════════════════════
+    // Show Modal Alert
+    // ══════════════════════════════════════════
+    function showModalAlert(message, type = 'warning') {
+
+        const modalEl = document.getElementById('globalAlertModal');
+        const titleEl = document.getElementById('globalAlertTitle');
+        const messageEl = document.getElementById('globalAlertMessage');
+        const header = modalEl.querySelector('.modal-header');
+
+        // Reset warna header
+        header.classList.remove('bg-primary', 'bg-danger', 'bg-warning', 'bg-success');
+
+        // Set warna sesuai tipe
+        if (type === 'danger') {
+            header.classList.add('bg-danger');
+            titleEl.innerHTML = '<i class="fas fa-times-circle me-2"></i> Kesalahan';
+        } else if (type === 'success') {
+            header.classList.add('bg-success');
+            titleEl.innerHTML = '<i class="fas fa-check-circle me-2"></i> Berhasil';
+        } else if (type === 'warning') {
+            header.classList.add('bg-warning');
+            titleEl.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Perhatian';
+        } else {
+            header.classList.add('bg-primary');
+            titleEl.innerHTML = '<i class="fas fa-info-circle me-2"></i> Informasi';
+        }
+
+        messageEl.innerHTML = message;
+
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    // ══════════════════════════════════════════
     //  NAVIGATION
     // ══════════════════════════════════════════
     function goToStep(n) {
@@ -1166,59 +1278,6 @@
     // ══════════════════════════════════════════
     //  STEP 2 — MK
     // ══════════════════════════════════════════
-    function renderMKDropdown() {
-        const list = document.getElementById('mkList');
-        list.innerHTML = mkDatabase.map((mk, i) =>
-            `<div class="p-2 px-3" style="cursor:pointer;font-size:13px;border-bottom:1px solid #f1f5f9;" 
-            onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''"
-            onclick="selectMK(${i})">
-            <strong>${mk.nama_mk}</strong> — ${mk.kode_mk} — ${mk.kelompok_mk} — ${mk.kurikulum}<br>
-            <span style="color:var(--text-muted);font-size:11.5px;">${mk.tahun} · ${mk.semester} · Smt ${mk.smt_matkul}</span>
-        </div>`
-        ).join('');
-    }
-
-    function filterMK(val) {
-        const filtered = mkDatabase.filter(mk =>
-            mk.nama_mk.toLowerCase().includes(val.toLowerCase()) ||
-            mk.kode_mk.toLowerCase().includes(val.toLowerCase())
-        );
-        const list = document.getElementById('mkList');
-        list.innerHTML = filtered.map((mk, i) => {
-            const idx = mkDatabase.indexOf(mk);
-            return `<div class="p-2 px-3" style="cursor:pointer;font-size:13px;border-bottom:1px solid #f1f5f9;" 
-            onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''"
-            onclick="selectMK(${idx})">
-            <strong>${mk.nama_mk}</strong> — ${mk.kode_mk}<br>
-            <span style="color:var(--text-muted);font-size:11.5px;">${mk.tahun} · ${mk.semester} · Smt ${mk.smt_matkul}</span>
-        </div>`;
-        }).join('');
-        showDropdown();
-    }
-
-    function showDropdown() {
-        document.getElementById('mkDropdown').style.display = 'block';
-    }
-
-    function hideDropdown() {
-        setTimeout(() => document.getElementById('mkDropdown').style.display = 'none', 200);
-    }
-
-    function selectMK(idx) {
-        const mk = mkDatabase[idx];
-        state.mk = mk;
-        document.getElementById('mkSearch').value = `${mk.nama_mk} — ${mk.kode_mk}`;
-        document.getElementById('kode_mk').value = mk.kode_mk;
-        document.getElementById('kelompok_mk').value = mk.kelompok_mk;
-        document.getElementById('fakultas').value = mk.fakultas;
-        document.getElementById('progdi').value = mk.progdi;
-        document.getElementById('sks_teori').value = mk.sks_teori;
-        document.getElementById('sks_praktik').value = mk.sks_praktik;
-        document.getElementById('kurikulum').value = mk.kurikulum;
-        document.getElementById('smt_matkul').value = `Semester ${mk.smt_matkul}`;
-        hideDropdown();
-    }
-
     function saveMK() {
         state.mk.mk_prasyarat = document.getElementById('mk_prasyarat').value;
         state.mk.topik_mk = document.getElementById('topik_mk').value;
@@ -1851,11 +1910,11 @@
 </script>
 <script>
     // Inject PHP constants - handle case where $porto may not exist
-    const BASE_URL  = '<?= base_url() ?>';
-    const PORTO_ID  = <?= isset($porto['id']) && $porto['id'] ? (int)$porto['id'] : 0 ?>;
+    const BASE_URL = '<?= base_url() ?>';
+    const PORTO_ID = <?= isset($porto['id']) && $porto['id'] ? (int)$porto['id'] : 0 ?>;
     const LAST_STEP = <?= isset($last_step) ? (int)$last_step : 1 ?>;
-    const CSRF_NAME = '<?= csrf_token() ?>';
-    const CSRF_HASH = '<?= csrf_hash() ?>';
+    const CSRF_TOKEN = '<?= csrf_token() ?>'; // Nama field, misal 'csrf_test_name'
+    const CSRF_HASH = '<?= csrf_hash() ?>'; // Value token
     /**
      * ══════════════════════════════════════════════════════════════
      *  PORTOFOLIO FORM — AJAX Integration Snippet
@@ -1905,7 +1964,7 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                [CSRF_NAME]: CSRF_HASH,
+                [CSRF_TOKEN]: CSRF_HASH,
             },
             body: JSON.stringify({
                 ...payload,
@@ -1918,7 +1977,7 @@
     // ── Helper: POST FormData (for file uploads) ──────────────────
     async function postForm(url, formData) {
         formData.append('id_portofolio', PORTO_ID);
-        formData.append(CSRF_NAME, CSRF_HASH);
+        formData.append(CSRF_TOKEN, CSRF_HASH);
         const res = await fetch(url, {
             method: 'POST',
             headers: {
@@ -1945,16 +2004,39 @@
     // ══════════════════════════════════════════════════════════════
     //  STEP 1 — Upload RPS
     // ══════════════════════════════════════════════════════════════
+    // Toggle area ganti RPS
+    function toggleReplaceRPS() {
+        const area = document.getElementById('replaceRPSArea');
+        area.classList.toggle('d-none');
+    }
+
+    // Override saveStep1AndNext agar skip upload jika RPS sudah ada dan tidak diganti
+    const HAS_RPS = <?= !empty($rps['file_rps']) ? 'true' : 'false' ?>;
+
+    /**
+     * Serve file RPS untuk ditampilkan di iframe (hanya pemilik)
+     */
+
     async function saveStep1AndNext(btn) {
-        const file = document.getElementById('rps_file').files[0];
-        if (!file) {
-            alert('Pilih file RPS terlebih dahulu.');
+        const fileInput = document.getElementById('rps_file');
+        const hasNewFile = fileInput && fileInput.files.length > 0;
+
+        // Jika sudah ada RPS dan tidak ada file baru → langsung next
+        if (HAS_RPS && !hasNewFile) {
+            nextStep();
             return;
         }
 
+        // Jika belum ada RPS dan tidak ada file dipilih → wajib upload
+        if (!HAS_RPS && !hasNewFile) {
+            showModalAlert('Pilih file RPS terlebih dahulu.');
+            return;
+        }
+
+        // Ada file baru → upload
         setBtnLoading(btn, true);
         const fd = new FormData();
-        fd.append('file_rps', file);
+        fd.append('file_rps', fileInput.files[0]);
         const res = await postForm(API.rps, fd);
         setBtnLoading(btn, false);
 
@@ -1969,27 +2051,33 @@
     // ══════════════════════════════════════════════════════════════
     //  STEP 2 — Info Mata Kuliah
     // ══════════════════════════════════════════════════════════════
+    // Inject PHP — tambahkan ID perkuliahan
+    const PERKULIAHAN_ID = <?= (int)$porto['id_perkuliahan'] ?>;
+    const PORTOFOLIO_ID = <?= (int)$porto['id'] ?>;
+
     async function saveStep2AndNext(btn) {
-        if (!state.mk.id_mapping) {
-            alert('Pilih mata kuliah terlebih dahulu.');
+        const topik = document.getElementById('topik_mk').value.trim();
+
+        if (!topik) {
+            showModalAlert('Topik perkuliahan wajib diisi.');
             return;
         }
 
-        saveMK(); // sync state
         setBtnLoading(btn, true);
 
         const res = await postJSON(API.infoMK, {
-            id_mapping: state.mk.id_mapping, // id dari mk_cpl_pi
-            mk_prasyarat: state.mk.mk_prasyarat,
-            topik_perkuliahan: state.mk.topik_mk,
+            id_portofolio: PORTOFOLIO_ID,
+            mk_prasyarat: document.getElementById('mk_prasyarat').value,
+            topik_perkuliahan: topik
         });
+
         setBtnLoading(btn, false);
 
         if (res.status === 'success') {
             showToast(res.message);
             nextStep();
         } else {
-            showToast(res.message, 'danger');
+            showModalAlert(res.message, 'danger');
         }
     }
 
@@ -2010,7 +2098,7 @@
         saveCPMK(); // sync state.cpmkList
 
         if (!state.cpmkList.length) {
-            alert('Tambahkan minimal satu CPMK.');
+            showModalAlert('Tambahkan minimal satu CPMK.');
             return;
         }
 
@@ -2097,7 +2185,7 @@
         });
 
         if (!asesmenData.length) {
-            alert('Pilih minimal satu jenis asesmen.');
+            showModalAlert('Pilih minimal satu jenis asesmen.');
             return;
         }
 
@@ -2250,7 +2338,7 @@
         }));
 
         if (!evalList.length) {
-            alert('Data CPMK tidak ditemukan.');
+            showModalAlert('Data CPMK tidak ditemukan.');
             return;
         }
 

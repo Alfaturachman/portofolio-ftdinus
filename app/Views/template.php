@@ -29,6 +29,7 @@
             --text-sub: #64748b;
             --text-muted: #94a3b8;
             --bg: #f8fafc;
+            --secondary: #6b7280;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;

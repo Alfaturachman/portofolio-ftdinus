@@ -36,9 +36,9 @@
         color: #15803d;
     }
 
-    .status-revisi {
-        background: #fce7f3;
-        color: #be185d;
+    .status-belum {
+        background: #f3f4f6;
+        color: #6b7280;
     }
 
     /* Progress bar mini */
@@ -268,22 +268,28 @@
 
 <!-- Stat Mini Cards -->
 <div class="row g-3 mb-4" id="statCards">
-    <div class="col-12 col-lg-4 fade-in" style="animation-delay:.05s">
+    <div class="col-6 col-lg-3 fade-in" style="animation-delay:.05s">
         <div class="stat-mini">
             <div class="stat-mini-val" id="statTotal">—</div>
             <div class="stat-mini-label">Total Portofolio</div>
         </div>
     </div>
-    <div class="col-12 col-lg-4 fade-in" style="animation-delay:.1s">
+    <div class="col-6 col-lg-3 fade-in" style="animation-delay:.1s">
         <div class="stat-mini">
             <div class="stat-mini-val" style="color:var(--success);" id="statSelesai">—</div>
             <div class="stat-mini-label">Selesai</div>
         </div>
     </div>
-    <div class="col-12 col-lg-4 fade-in" style="animation-delay:.15s">
+    <div class="col-6 col-lg-3 fade-in" style="animation-delay:.15s">
         <div class="stat-mini">
             <div class="stat-mini-val" style="color:var(--warning);" id="statProses">—</div>
-            <div class="stat-mini-label">Sedang Proses</div>
+            <div class="stat-mini-label">Proses</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3 fade-in" style="animation-delay:.15s">
+        <div class="stat-mini">
+            <div class="stat-mini-val" style="color:var(--secondary);" id="statBelum">—</div>
+            <div class="stat-mini-label">Belum</div>
         </div>
     </div>
 </div>
@@ -324,7 +330,6 @@
                 <div class="d-flex gap-2 p-3 border-bottom flex-wrap" id="detailTabs">
                     <button class="detail-tab active" onclick="switchDetailTab('tahap',this)">Progres Tahap</button>
                     <button class="detail-tab" onclick="switchDetailTab('info',this)">Info MK</button>
-                    <button class="detail-tab" onclick="switchDetailTab('cpl',this)">CPL & CPMK</button>
                 </div>
 
                 <!-- Tab: Tahap -->
@@ -337,15 +342,10 @@
                 <div id="tab-info" class="p-3 d-none">
                     <div class="row g-3" id="detailInfoGrid"></div>
                 </div>
-
-                <!-- Tab: CPL CPMK -->
-                <div id="tab-cpl" class="p-3 d-none">
-                    <div id="detailCPL"></div>
-                </div>
             </div>
             <div class="modal-footer border-top-0 pt-0 gap-2">
                 <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                <button class="btn btn-warning btn-sm px-3" id="btnRevisi" onclick="setStatus('revisi')"><i class="bi bi-arrow-counterclockwise me-1"></i>Minta Revisi</button>
+                <button class="btn btn-success btn-sm px-4" id="btnDetailBikin" onclick="mulaiPortofolio()"><i class="bi bi-play-circle me-1"></i>Mulai</button>
                 <button class="btn btn-primary btn-sm px-4" id="btnLanjut" onclick="lanjutkanPortofolio()"><i class="bi bi-pencil me-1"></i>Lanjutkan</button>
             </div>
         </div>
@@ -410,10 +410,8 @@
                         <label class="form-label fw-semibold" style="font-size:12.5px;">Status</label>
                         <select class="form-select form-select-sm" id="filterStatus">
                             <option value="">Semua Status</option>
-                            <option>Draft</option>
                             <option>Proses</option>
                             <option>Selesai</option>
-                            <option>Revisi</option>
                         </select>
                     </div>
                 </div>
@@ -437,167 +435,34 @@
     // ══════════════════════════════════
     const STEPS = ['Upload RPS', 'Info MK', 'CPL & PI', 'CPMK', 'Pemetaan', 'Asesmen', 'Rancangan Soal', 'Pelaksanaan', 'Hasil Asesmen', 'Evaluasi'];
 
-    const portofolioData = [{
-            id: 1,
-            nama_mk: 'Pemrograman Web',
-            kode_mk: 'IF204',
-            kelompok_mk: 'Wajib',
-            dosen: 'Dr. Sari Dewi, M.Kom',
-            prodi: 'Informatika',
-            tahun: '2025/2026',
-            semester: 'Ganjil',
-            smt: 3,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 10,
-            status: 'selesai',
-            mk_prasyarat: 'Pemrograman Dasar',
-            topik_mk: 'HTML, CSS, JavaScript, PHP, MySQL, Framework Laravel',
-            cpmk: [{
-                    no: 1,
-                    narasi: 'Mampu membuat antarmuka web yang responsif',
-                    cpl: 'CPL 1',
-                    subs: ['Sub 1.1 Desain layout', 'Sub 1.2 Responsif mobile']
-                },
-                {
-                    no: 2,
-                    narasi: 'Mampu mengintegrasikan front-end dan back-end',
-                    cpl: 'CPL 2',
-                    subs: ['Sub 2.1 REST API', 'Sub 2.2 CRUD database']
-                },
-            ],
-            sks: '3 SKS Teori + 1 SKS Praktik',
-        },
-        {
-            id: 2,
-            nama_mk: 'Basis Data',
-            kode_mk: 'IF205',
-            kelompok_mk: 'Wajib',
-            dosen: 'Prof. Ahmad Fauzi, Ph.D',
-            prodi: 'Informatika',
-            tahun: '2025/2026',
-            semester: 'Ganjil',
-            smt: 3,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 6,
-            status: 'proses',
-            mk_prasyarat: '-',
-            topik_mk: 'ERD, Normalisasi, SQL, Stored Procedure, Trigger',
-            cpmk: [{
-                no: 1,
-                narasi: 'Mampu merancang skema basis data relasional',
-                cpl: 'CPL 1',
-                subs: ['Sub 1.1 ERD', 'Sub 1.2 Normalisasi 3NF']
-            }, ],
-            sks: '2 SKS Teori + 1 SKS Praktik',
-        },
-        {
-            id: 3,
-            nama_mk: 'Algoritma & Pemrograman',
-            kode_mk: 'IF101',
-            kelompok_mk: 'Wajib',
-            dosen: 'Ir. Budi Santoso, M.T',
-            prodi: 'Informatika',
-            tahun: '2025/2026',
-            semester: 'Ganjil',
-            smt: 1,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 3,
-            status: 'proses',
-            mk_prasyarat: '-',
-            topik_mk: 'Flowchart, Pseudocode, Array, Fungsi, Rekursi',
-            cpmk: [],
-            sks: '3 SKS Teori + 1 SKS Praktik',
-        },
-        {
-            id: 4,
-            nama_mk: 'Rekayasa Perangkat Lunak',
-            kode_mk: 'IF301',
-            kelompok_mk: 'Wajib',
-            dosen: 'Dr. Rina Handayani, M.Cs',
-            prodi: 'Informatika',
-            tahun: '2025/2026',
-            semester: 'Ganjil',
-            smt: 5,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 1,
-            status: 'draft',
-            mk_prasyarat: 'Pemrograman Web',
-            topik_mk: 'SDLC, UML, Agile, Testing',
-            cpmk: [],
-            sks: '3 SKS Teori',
-        },
-        {
-            id: 5,
-            nama_mk: 'Jaringan Komputer',
-            kode_mk: 'IF302',
-            kelompok_mk: 'Pilihan',
-            dosen: 'Dr. Surya Wirawan, M.Kom',
-            prodi: 'Informatika',
-            tahun: '2024/2025',
-            semester: 'Genap',
-            smt: 4,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 10,
-            status: 'selesai',
-            mk_prasyarat: '-',
-            topik_mk: 'OSI Layer, TCP/IP, Subnetting, Routing, Switching',
-            cpmk: [{
-                    no: 1,
-                    narasi: 'Mampu mengkonfigurasi jaringan dasar',
-                    cpl: 'CPL 1',
-                    subs: ['Sub 1.1 IP Address', 'Sub 1.2 Routing Statis']
-                },
-                {
-                    no: 2,
-                    narasi: 'Mampu menganalisis topologi jaringan',
-                    cpl: 'CPL 2',
-                    subs: ['Sub 2.1 LAN design', 'Sub 2.2 Troubleshooting']
-                },
-            ],
-            sks: '2 SKS Teori + 1 SKS Praktik',
-        },
-        {
-            id: 6,
-            nama_mk: 'Kecerdasan Buatan',
-            kode_mk: 'IF401',
-            kelompok_mk: 'Pilihan',
-            dosen: 'Dr. Maya Puspa, M.T',
-            prodi: 'Informatika',
-            tahun: '2025/2026',
-            semester: 'Ganjil',
-            smt: 6,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 0,
-            status: 'draft',
-            mk_prasyarat: 'Matematika Diskrit',
-            topik_mk: 'Search Algorithm, Machine Learning, Neural Network',
-            cpmk: [],
-            sks: '3 SKS Teori + 1 SKS Praktik',
-        },
-        {
-            id: 7,
-            nama_mk: 'Sistem Operasi',
-            kode_mk: 'IF206',
-            kelompok_mk: 'Wajib',
-            dosen: 'Ir. Hendra Wijaya, M.T',
-            prodi: 'Informatika',
-            tahun: '2024/2025',
-            semester: 'Genap',
-            smt: 2,
-            kurikulum: 'Kurikulum 2022',
-            step_done: 8,
-            status: 'revisi',
-            mk_prasyarat: '-',
-            topik_mk: 'Process Management, Memory Management, File System, Shell',
-            cpmk: [{
-                no: 1,
-                narasi: 'Mampu menjelaskan konsep sistem operasi',
-                cpl: 'CPL 1',
-                subs: ['Sub 1.1 Process', 'Sub 1.2 Thread']
-            }, ],
-            sks: '3 SKS Teori',
-        },
-    ];
+    // Data dari controller (dinamis)
+    const portofolioData = <?= json_encode(array_map(function ($d) {
+                                return [
+                                    'id'            => (int)$d['id_portofolio'],
+                                    'id_perkuliahan' => (int)$d['id_perkuliahan'],
+                                    'nama_mk'       => $d['nama_mk'],
+                                    'kode_mk'       => $d['kode_mk'],
+                                    'dosen'         => $d['nama_lengkap'],
+                                    'tahun'         => $d['tahun_akademik'],
+                                    'semester'      => $d['semester'],
+                                    'kurikulum'     => $d['nama_kurikulum'],
+                                    'step_done'     => (int)($d['last_step'] ?? 0),
+                                    'status'        => match (true) {
+                                        (int)($d['last_step'] ?? 0) >= 10 => 'selesai',
+                                        (int)($d['last_step'] ?? 0) > 1   => 'proses',
+                                        (int)($d['last_step'] ?? 0) <= 1  => 'belum',
+                                        default                           => 'belum',
+                                    },
+                                    // field opsional (isi default jika belum ada di query)
+                                    'prodi'         => $d['prodi']        ?? '-',
+                                    'smt'           => $d['smt']          ?? '-',
+                                    'kelompok_mk'   => $d['kelompok_mk']  ?? '-',
+                                    'kurikulum'     => $d['nama_kurikulum'],
+                                    'mk_prasyarat'  => $d['mk_prasyarat'] ?? '-',
+                                    'topik_mk'      => $d['topik_mk']     ?? '-',
+                                    'sks'           => $d['sks']          ?? '-',
+                                ];
+                            }, $portofolios)) ?>;
 
     let currentDetailId = null;
     const modalDetail = new bootstrap.Modal('#modalDetail');
@@ -610,12 +475,11 @@
     // ══════════════════════════════════
     function getStatusBadge(s) {
         const map = {
-            draft: ['status-draft', 'Draft'],
-            proses: ['status-proses', 'Sedang Proses'],
+            belum: ['status-belum', 'Belum'],
+            proses: ['status-proses', 'Proses'],
             selesai: ['status-selesai', 'Selesai'],
-            revisi: ['status-revisi', 'Perlu Revisi'],
         };
-        const [cls, label] = map[s] || ['status-draft', 'Unknown'];
+        const [cls, label] = map[s] || ['Unknown'];
         return `<span class="status-badge ${cls}">${label}</span>`;
     }
 
@@ -678,7 +542,7 @@
         document.getElementById('statTotal').textContent = data.length;
         document.getElementById('statSelesai').textContent = data.filter(d => d.status === 'selesai').length;
         document.getElementById('statProses').textContent = data.filter(d => d.status === 'proses').length;
-        document.getElementById('statDraft').textContent = data.filter(d => d.status === 'draft' || d.status === 'revisi').length;
+        document.getElementById('statBelum').textContent = data.filter(d => d.status === 'belum').length;
     }
 
     // ══════════════════════════════════
@@ -733,30 +597,8 @@
         <div class="col-12"><div style="font-size:11.5px;color:var(--text-muted);">Topik Perkuliahan</div><div style="font-size:13px;">${d.topik_mk || '-'}</div></div>
     `;
 
-        // CPL/CPMK tab
-        const cplDiv = document.getElementById('detailCPL');
-        if (!d.cpmk.length) {
-            cplDiv.innerHTML = `<div class="text-muted text-center py-4" style="font-size:13px;"><i class="fas fa-info-circle me-2"></i>Data CPMK belum diisi.</div>`;
-        } else {
-            cplDiv.innerHTML = d.cpmk.map(c => `
-            <div class="mb-3 p-3" style="border:1px solid var(--border);border-radius:8px;background:#fafbfc;">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span style="background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;">CPMK ${c.no}</span>
-                    <span style="background:#f0fdf4;color:#15803d;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;">${c.cpl}</span>
-                </div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${c.narasi}</div>
-                <div style="font-size:11.5px;color:var(--text-muted);">Sub CPMK:</div>
-                <ul style="margin:4px 0 0 16px;font-size:12.5px;color:var(--text-sub);">
-                    ${c.subs.map(s => `<li>${s}</li>`).join('')}
-                </ul>
-            </div>`).join('');
-        }
-
         // Switch back to first tab
         switchDetailTab('tahap', document.querySelector('.detail-tab'));
-
-        // Show/hide revisi button
-        document.getElementById('btnRevisi').style.display = d.status === 'selesai' ? 'inline-flex' : 'none';
 
         modalDetail.show();
     }
@@ -764,14 +606,36 @@
     function switchDetailTab(tab, el) {
         document.querySelectorAll('.detail-tab').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
-        ['tahap', 'info', 'cpl'].forEach(t => {
+        ['tahap', 'info'].forEach(t => {
             document.getElementById(`tab-${t}`).classList.toggle('d-none', t !== tab);
         });
     }
 
+    function mulaiPortofolio() {
+        modalDetail.hide();
+        window.location.href = '<?= base_url('admin/portofolio/start/') ?>' + currentDetailId;
+    }
+
     function lanjutkanPortofolio() {
         modalDetail.hide();
-        window.location.href = 'portofolio-form.html';
+        window.location.href = '<?= base_url('admin/portofolio/form/') ?>' + currentDetailId;
+    }
+
+    // show Detail Button hanya jika belum ada portofolio
+    function showDetail(id_perkuliahan, id) {
+        currentDetailId = id_perkuliahan;
+
+        if (id) {
+            // Sudah ada portofolio
+            document.getElementById('btnDetailBikin').classList.add('d-none');
+            document.getElementById('btnLanjut').classList.remove('d-none');
+        } else {
+            // Belum ada
+            document.getElementById('btnDetailBikin').classList.remove('d-none');
+            document.getElementById('btnLanjut').classList.add('d-none');
+        }
+
+        modalDetail.show();
     }
 
     function setStatus(s) {

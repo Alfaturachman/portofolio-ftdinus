@@ -10,25 +10,60 @@ class Portofolio extends BaseController
     // ══════════════════════════════════════════════════════
     //  VIEWS
     // ══════════════════════════════════════════════════════
-
     public function index()
     {
-        $db   = \Config\Database::connect();
-        $npp  = session()->get('npp'); // logged-in dosen
+        $db  = \Config\Database::connect();
+        $npp = session()->get('npp');
 
-        $data['portofolios'] = $db->table('portofolio p')
-            ->select('p.id, p.last_step,
-                      mk.nama_mk, mk.kode_mk,
-                      per.tahun_akademik, per.semester, per.kode_kelas,
-                      u.nama_lengkap')
-            ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
-            ->join('mk', 'mk.id = per.id_mk')
-            ->join('users u', 'u.npp = per.id_users')
-            ->where('per.id_users', $npp)
-            ->orderBy('p.id', 'DESC')
-            ->get()->getResultArray();
+        log_message('debug', 'NPP SESSION: ' . $npp);
+
+        $query = $db->table('perkuliahan per')
+            ->select('
+            per.id as id_perkuliahan,
+            p.id as id_portofolio,
+            p.last_step,
+            mk.nama_mk, 
+            mk.kode_mk,
+            k.nama_kurikulum,
+            per.tahun_akademik, 
+            per.semester, 
+            per.kode_kelas,
+            u.nama_lengkap
+        ')
+            ->join('portofolio p',   'p.id_perkuliahan = per.id', 'left')
+            ->join('mk',             'mk.id = per.id_mk')
+            ->join('users u',        'u.npp = per.id_users')
+            ->join('kurikulum k',    'k.id = per.id_kurikulum')
+            ->where('per.id_users',  $npp)
+            ->orderBy('per.id', 'DESC')
+            ->get();
+
+        $data['portofolios'] = $query->getResultArray();
+
+        log_message('debug', 'TOTAL DATA: ' . count($data['portofolios']));
 
         return view('admin/portofolio/index', $data);
+    }
+
+    public function start($id_perkuliahan)
+    {
+        $portofolioModel = new \App\Models\Portofolio();
+
+        // Cek apakah sudah ada
+        $existing = $portofolioModel
+            ->where('id_perkuliahan', $id_perkuliahan)
+            ->first();
+
+        if (!$existing) {
+            // Jika belum ada → insert baru
+            $portofolioModel->insert([
+                'id_perkuliahan' => $id_perkuliahan,
+                'last_step' => 1
+            ]);
+        }
+
+        // Setelah insert atau jika sudah ada → langsung ke form
+        return redirect()->to(base_url('admin/portofolio/form/' . $id_perkuliahan));
     }
 
     /**
@@ -55,10 +90,9 @@ class Portofolio extends BaseController
                 ->with('error', 'Anda belum memiliki data perkuliahan. Silahkan tambahkan perkuliahan terlebih dahulu.');
         }
 
-        // Create portofolio skeleton (id_mapping will be filled at step 2)
+        // Create portofolio skeleton
         $db->table('portofolio')->insert([
             'id_perkuliahan' => $perkuliahan['id'],
-            'id_mapping'     => null,
             'last_step'      => 1,
         ]);
         $portofolio_id = $db->insertID();
@@ -209,10 +243,40 @@ class Portofolio extends BaseController
         return $this->_json(['status' => 'success', 'message' => 'RPS berhasil disimpan.', 'file' => $newName]);
     }
 
+    // Server-side file serving for RPS (to ensure only owner can access)
+    public function serveRPS(string $filename)
+    {
+        $db  = \Config\Database::connect();
+        $npp = session()->get('npp');
+
+        $path = WRITEPATH . 'uploads/rps/' . $filename;
+
+        // Pastikan file milik user yang login
+        $row = $db->table('rps r')
+            ->select('r.file_rps')
+            ->join('portofolio p', 'p.id = r.id_portofolio')
+            ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
+            ->where('r.file_rps', $filename)
+            ->where('per.id_users', $npp)
+            ->get()
+            ->getRowArray();
+
+        if (!$row || !is_file($path)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setBody('File tidak ditemukan.');
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', mime_content_type($path))
+            ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+            ->setBody(file_get_contents($path));
+    }
+
     /**
      * Step 2 – Informasi Mata Kuliah
      * POST /admin/portofolio/step/info-mk
-     * Body: id_portofolio, id_mapping, mk_prasyarat, topik_perkuliahan
+     * Body: id_portofolio, mk_prasyarat, topik_perkuliahan
      */
     public function saveInfoMK()
     {
@@ -223,16 +287,8 @@ class Portofolio extends BaseController
             return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
         }
 
-        $id_mapping        = (int) $this->request->getPost('id_mapping');
         $mk_prasyarat      = $this->request->getPost('mk_prasyarat');
         $topik_perkuliahan = $this->request->getPost('topik_perkuliahan');
-
-        if (! $id_mapping) {
-            return $this->_json(['status' => 'error', 'message' => 'Mata kuliah harus dipilih.']);
-        }
-
-        // Update portofolio.id_mapping
-        $db->table('portofolio')->where('id', $id)->update(['id_mapping' => $id_mapping]);
 
         // Upsert informasi_mk
         $existing = $db->table('informasi_mk')->where('id_portofolio', $id)->get()->getRowArray();
@@ -664,13 +720,20 @@ class Portofolio extends BaseController
     private function _ownsPortofolio(int $id): bool
     {
         $db  = \Config\Database::connect();
+        $log = \Config\Services::logger();
+
         $npp = session()->get('npp');
+
         $row = $db->table('portofolio p')
             ->select('p.id')
             ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
             ->where('p.id', $id)
             ->where('per.id_users', $npp)
-            ->get()->getRowArray();
+            ->get()
+            ->getRowArray();
+
+        $log->debug('_ownsPortofolio check: ID=' . $id . ' NPP=' . $npp);
+        $log->debug('Query result: ' . json_encode($row));
 
         return (bool) $row;
     }
