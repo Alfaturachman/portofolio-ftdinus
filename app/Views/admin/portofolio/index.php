@@ -27,8 +27,8 @@
     }
 
     .status-proses {
-        background: #dbeafe;
-        color: #1d4ed8;
+        background: #fef3c7;
+        color: var(--warning);
     }
 
     .status-selesai {
@@ -245,8 +245,7 @@
     .fade-in {
         animation: fadeInUp .3s ease forwards;
     }
-</style>
-<style>
+
     .mk-compact {
         display: flex;
         align-items: center;

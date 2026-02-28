@@ -165,8 +165,8 @@ class Portofolio extends BaseController
         }
         $data['cpmks'] = $cpmks;
 
-        // Mapping CPL-CPMK-SubCPMK
-        $data['mapping'] = $db->table('mapping_cpl_cpmk_scpmk')
+        // Pemetaan CPL-CPMK-SubCPMK
+        $data['mapping'] = $db->table('pemetaan')
             ->where('id_portofolio', $id)->get()->getResultArray();
 
         // Rancangan Asesmen
@@ -433,11 +433,51 @@ class Portofolio extends BaseController
      */
     public function saveMapping()
     {
+        $db   = \Config\Database::connect();
+        $json = $this->request->getJSON(true);
+        
+        // Debug: log received data
+        log_message('debug', 'saveMapping received: ' . json_encode($json));
+        
+        $id   = (string) ($json['id_portofolio'] ?? '');
 
+        if (empty($id)) {
+            return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
+        }
+
+        $mappings = $json['mappings'] ?? [];
+        if (empty($mappings)) {
+            return $this->_json(['status' => 'error', 'message' => 'Minimal satu pemetaan harus dipilih.']);
+        }
+
+        // ── 1. Hapus data pemetaan lama ──────────────────────────────────────
+        $db->table('pemetaan')->where('id_portofolio', $id)->delete();
+
+        // ── 2. Insert pemetaan baru ──────────────────────────────────────────
+        $now = date('Y-m-d H:i:s');
+        $inserted = 0;
+        foreach ($mappings as $map) {
+            $result = $db->table('pemetaan')->insert([
+                'id_portofolio' => $id,
+                'id_cpl'        => (int) $map['id_cpl'],
+                'id_cpmk'       => (int) $map['id_cpmk'],
+                'id_sub_cpmk'   => (int) $map['id_sub_cpmk'],
+                'is_active'     => 1,
+                'created_at'    => $now,
+                'updated_at'    => $now,
+            ]);
+            if ($result) {
+                $inserted++;
+            }
+        }
 
         $this->_updateLastStep($id, 5);
 
-        return $this->_json(['status' => 'success', 'message' => 'Pemetaan berhasil disimpan.']);
+        return $this->_json([
+            'status' => 'success', 
+            'message' => "Pemetaan berhasil disimpan. ({$inserted} data)",
+            'inserted' => $inserted
+        ]);
     }
 
     /**

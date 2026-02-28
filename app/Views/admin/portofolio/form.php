@@ -1048,26 +1048,6 @@
     </div>
 </div>
 
-<!-- Toast Modal -->
-<div class="modal fade" id="toastModal" tabindex="-1" aria-labelledby="toastModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header" id="toastModalHeader">
-                <h5 class="modal-title" id="toastModalLabel">
-                    <i class="fas fa-check-circle me-2"></i> Berhasil
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="toastModalBody">
-                Pesan akan ditampilkan di sini
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -1562,9 +1542,8 @@
 
                 // Sub CPMK cells — SEMUA kolom (1..maxSub) untuk setiap CPMK
                 subColumns.forEach(subNo => {
-                    const cplKey = cplId;
-                    const cpmkKey = String(cpmk.no);
-                    const isChecked = state.mapping?.[cplKey]?.[cpmkKey]?.includes(subNo) || false;
+                    // Cek apakah checkbox ini sudah dicentang dari DB
+                    const isChecked = state.mapping?.[cplId]?.[String(cpmk.no)]?.includes(subNo) || false;
 
                     html += `<td class="text-center align-middle">
         <input type="checkbox"
@@ -1581,6 +1560,48 @@
                 tbody.appendChild(tr);
             });
         });
+    }
+
+    /**
+     * Kumpulkan data mapping dari checkbox yang dicentang
+     */
+    function saveMapping() {
+        const mappings = [];
+        document.querySelectorAll('.mapping-checkbox:checked').forEach((cb) => {
+            const cplId = parseInt(cb.dataset.cpl);
+            const cpmkNo = parseInt(cb.dataset.cpmk);
+            const subNo = parseInt(cb.dataset.sub);
+
+            // Cari id_cpmk dan id_sub_cpmk dari state
+            let id_cpmk = state.cpmkIdMap[cpmkNo];
+            let id_sub_cpmk = state.subIdMap[`${cpmkNo}_${subNo}`];
+
+            // Fallback: jika tidak ada di state, cari dari DB_CPMKS langsung
+            if (!id_cpmk && typeof DB_CPMKS !== 'undefined') {
+                const cpmkData = DB_CPMKS.find(c => c.no === cpmkNo);
+                if (cpmkData) {
+                    id_cpmk = cpmkData.id;
+                }
+            }
+            if (!id_sub_cpmk && typeof DB_CPMKS !== 'undefined') {
+                const cpmkData = DB_CPMKS.find(c => c.no === cpmkNo);
+                if (cpmkData && cpmkData.subs) {
+                    const subData = cpmkData.subs.find(s => s.no === subNo);
+                    if (subData) {
+                        id_sub_cpmk = subData.id;
+                    }
+                }
+            }
+
+            if (id_cpmk && id_sub_cpmk) {
+                mappings.push({
+                    id_cpl: cplId,
+                    id_cpmk: id_cpmk,
+                    id_sub_cpmk: id_sub_cpmk
+                });
+            }
+        });
+        state.mappingData = mappings;
     }
 
     // ══════════════════════════════════════════
@@ -2070,6 +2091,7 @@
                                 ];
                             }, $cpmks ?? [])
                         ) ?>;
+    const DB_MAPPINGS = <?= json_encode($mapping ?? []) ?>;
 
     document.addEventListener('DOMContentLoaded', () => {
         // Inisialisasi state.cpl dari CPL_DATA (untuk Step 4+)
@@ -2116,6 +2138,33 @@
                     })),
                 };
             });
+        }
+
+        // Proses mapping dari DB untuk Step 5
+        if (typeof DB_MAPPINGS !== 'undefined' && DB_MAPPINGS.length > 0) {
+            // Format: { id_cpl: { id_cpmk: [id_sub_cpmk, ...], ... }, ... }
+            const mappingMap = {};
+            DB_MAPPINGS.forEach(map => {
+                const { id_cpl, id_cpmk, id_sub_cpmk } = map;
+                
+                // Cari no_cpmk dan no_sub dari state
+                const cpmkNo = Object.keys(state.cpmkIdMap).find(key => state.cpmkIdMap[key] == id_cpmk);
+                if (!cpmkNo) return;
+                
+                // Cari no_sub dari subIdMap
+                const subKey = Object.keys(state.subIdMap).find(key => state.subIdMap[key] == id_sub_cpmk);
+                const subNo = subKey ? parseInt(subKey.split('_')[1]) : null;
+                if (!subNo) return;
+                
+                if (!mappingMap[id_cpl]) {
+                    mappingMap[id_cpl] = {};
+                }
+                if (!mappingMap[id_cpl][cpmkNo]) {
+                    mappingMap[id_cpl][cpmkNo] = [];
+                }
+                mappingMap[id_cpl][cpmkNo].push(subNo);
+            });
+            state.mapping = mappingMap;
         }
 
         // Auto-resume ke last_step
@@ -2171,14 +2220,20 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                [CSRF_TOKEN]: CSRF_HASH,
             },
             body: JSON.stringify({
                 ...payload,
-                id_portofolio: PORTO_ID
+                id_portofolio: PORTO_ID,
+                [CSRF_TOKEN]: CSRF_HASH
             }),
         });
-        return res.json();
+        const result = await res.json();
+        // Update CSRF hash dari response header untuk request berikutnya
+        const newHash = res.headers.get('x-csrf-hash');
+        if (newHash) {
+            window.CSRF_HASH = newHash;
+        }
+        return result;
     }
 
     // ── Helper: POST FormData (for file uploads) ──────────────────
@@ -2384,7 +2439,28 @@
     //  STEP 5 — Pemetaan CPL-CPMK-SubCPMK
     // ══════════════════════════════════════════════════════════════
     async function saveStep5AndNext(btn) {
+        saveMapping(); // Kumpulkan mapping dari checkbox
 
+        if (!state.mappingData || state.mappingData.length === 0) {
+            showModalAlert('Minimal satu pemetaan CPL-CPMK-Sub CPMK harus dipilih.');
+            return;
+        }
+
+        setBtnLoading(btn, true);
+        
+        // Kirim data mapping ke server menggunakan postJSON
+        const res = await postJSON(API.mapping, {
+            mappings: state.mappingData
+        });
+        
+        setBtnLoading(btn, false);
+
+        if (res.status === 'success') {
+            showToast(res.message);
+            nextStep();
+        } else {
+            showModalAlert(res.message || 'Gagal menyimpan pemetaan.', 'danger');
+        }
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -2591,40 +2667,38 @@
     });
 
     function showToast(message, type = 'success') {
-        const modalEl = document.getElementById('toastModal');
-        const modalHeader = document.getElementById('toastModalHeader');
-        const modalTitle = document.getElementById('toastModalLabel');
-        const modalBody = document.getElementById('toastModalBody');
+        // Buat elemen toast
+        const toastId = 'toast_' + Date.now();
+        const toastHtml = `
+    <div id="${toastId}" class="position-fixed start-50 translate-middle-x" style="top: 20px; z-index: 9999; min-width: 300px; max-width: 500px;">
+        <div class="toast show align-items-center text-white bg-${type} border-0 shadow-lg mx-auto" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="document.getElementById('${toastId}').remove()"></button>
+            </div>
+        </div>
+    </div>`;
 
-        // Reset classes
-        modalHeader.className = 'modal-header';
+        // Hapus toast sebelumnya jika ada (opsional)
+        const existingToasts = document.querySelectorAll('[id^="toast_"]');
+        existingToasts.forEach(toast => toast.remove());
 
-        // Set style berdasarkan type
-        if (type === 'danger') {
-            modalHeader.classList.add('bg-danger', 'text-white');
-            modalTitle.innerHTML = '<i class="fas fa-times-circle me-2"></i> Gagal';
-        } else if (type === 'warning') {
-            modalHeader.classList.add('bg-warning', 'text-dark');
-            modalTitle.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Peringatan';
-        } else if (type === 'info') {
-            modalHeader.classList.add('bg-info', 'text-white');
-            modalTitle.innerHTML = '<i class="fas fa-info-circle me-2"></i> Informasi';
-        } else {
-            modalHeader.classList.add('bg-success', 'text-white');
-            modalTitle.innerHTML = '<i class="fas fa-check-circle me-2"></i> Berhasil';
-        }
+        // Tambahkan toast baru ke body
+        document.body.insertAdjacentHTML('beforeend', toastHtml);
 
-        // Set message
-        modalBody.innerHTML = message;
-
-        // Show modal
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-
-        // Auto close after 3 seconds
+        // Auto hilangkan setelah 5 detik
         setTimeout(() => {
-            modal.hide();
-        }, 3000);
+            const toastEl = document.getElementById(toastId);
+            if (toastEl) {
+                // Animasi fade out
+                toastEl.style.transition = 'opacity 0.3s ease';
+                toastEl.style.opacity = '0';
+                setTimeout(() => toastEl.remove(), 300);
+            }
+        }, 5000);
     }
 </script>
 <?= $this->endSection() ?>
