@@ -1470,29 +1470,47 @@
     //  STEP 5 — Mapping Table
     // ══════════════════════════════════════════
     function renderMappingTable() {
+        console.log('=== RENDER MAPPING TABLE START ===');
+        console.log('Current state.cpmkList:', state.cpmkList);
+        console.log('Current state.mapping:', state.mapping);
+        console.log('Current state.cpmkIdMap:', state.cpmkIdMap);
+        console.log('Current state.subIdMap:', state.subIdMap);
+        console.log('DB_MAPPINGS:', typeof DB_MAPPINGS !== 'undefined' ? DB_MAPPINGS : 'undefined');
+
         saveCPMK(); // sync state.cpmkList
-        if (!state.cpmkList.length) return;
+        if (!state.cpmkList.length) {
+            console.log('⚠️ state.cpmkList kosong!');
+            return;
+        }
 
         // Buat map id_cpl → no_cpl untuk label
         const cplLabelMap = {};
         (state.cpl || []).map(c => {
             cplLabelMap[c.id] = c.no_cpl;
         });
+        console.log('cplLabelMap:', cplLabelMap);
 
         // ── Kumpulkan SEMUA nomor sub yang ada di SEMUA CPMK (global unique set) ──
         const allSubNos = new Set();
         state.cpmkList.forEach(c => {
+            console.log(`CPMK ${c.no} memiliki subs:`, c.subs);
             c.subs.forEach(s => allSubNos.add(parseInt(s.no)));
         });
-        // Urutan terbesar dari sub yang ada → pakai range 1..maxSub
+        console.log('allSubNos:', Array.from(allSubNos));
+
         const maxSub = allSubNos.size > 0 ? Math.max(...allSubNos) : 0;
-        // Kolom sub = 1, 2, 3, ..., maxSub (konsisten untuk semua CPMK)
         const subColumns = Array.from({
             length: maxSub
         }, (_, i) => i + 1);
+        console.log('subColumns (yang akan ditampilkan):', subColumns);
 
         // ── Build header ──
         const headerRow = document.getElementById('mappingHeaderRow');
+        if (!headerRow) {
+            console.error('❌ mappingHeaderRow tidak ditemukan!');
+            return;
+        }
+
         headerRow.innerHTML = `
         <th rowspan="2" class="align-middle" style="background:var(--accent);color:#fff;min-width:160px;">CPL</th>
         <th rowspan="2" class="align-middle" style="background:var(--accent);color:#fff;min-width:180px;">CPMK</th>
@@ -1516,12 +1534,18 @@
             if (!byCpl[key]) byCpl[key] = [];
             byCpl[key].push(c);
         });
+        console.log('CPMKs grouped by CPL:', byCpl);
 
         const tbody = document.getElementById('mappingBody');
+        if (!tbody) {
+            console.error('❌ mappingBody tidak ditemukan!');
+            return;
+        }
         tbody.innerHTML = '';
 
         Object.entries(byCpl).forEach(([cplId, cpmks]) => {
             const cplLabel = cplLabelMap[cplId] || 'CPL ' + cplId;
+            console.log(`Processing CPL ${cplLabel} (ID: ${cplId}) dengan ${cpmks.length} CPMK`);
 
             cpmks.forEach((cpmk, i) => {
                 const tr = document.createElement('tr');
@@ -1543,24 +1567,173 @@
                 // Sub CPMK cells — SEMUA kolom (1..maxSub) untuk setiap CPMK
                 subColumns.forEach(subNo => {
                     // Cek apakah checkbox ini sudah dicentang dari DB
-                    const isChecked = state.mapping?.[cplId]?.[String(cpmk.no)]?.includes(subNo) || false;
+                    const mappingExists = state.mapping &&
+                        state.mapping[String(cplId)] &&
+                        state.mapping[String(cplId)][String(cpmk.no)] &&
+                        state.mapping[String(cplId)][String(cpmk.no)].includes(subNo);
+
+                    // Debug untuk mapping tertentu
+                    if (mappingExists) {
+                        console.log(`✅ Mapping ditemukan: CPL ${cplId} - CPMK ${cpmk.no} - Sub ${subNo}`);
+                    }
+
+                    const isChecked = mappingExists || false;
+
+                    // Cari ID untuk data attribute
+                    const idCpmk = state.cpmkIdMap[cpmk.no] || '';
+                    const idSub = state.subIdMap[`${cpmk.no}_${subNo}`] || '';
 
                     html += `<td class="text-center align-middle">
-        <input type="checkbox"
-            class="mapping-checkbox form-check-input"
-            style="width:20px;height:20px;cursor:pointer;accent-color:var(--primary);"
-            data-cpl="${cplId}"
-            data-cpmk="${cpmk.no}"
-            data-sub="${subNo}"
-            ${isChecked ? 'checked' : ''}>
-    </td>`;
+                    <input type="checkbox"
+                        class="mapping-checkbox form-check-input"
+                        style="width:20px;height:20px;cursor:pointer;accent-color:var(--primary);"
+                        data-cpl="${cplId}"
+                        data-cpmk="${cpmk.no}"
+                        data-sub="${subNo}"
+                        data-id-cpmk="${idCpmk}"
+                        data-id-sub="${idSub}"
+                        ${isChecked ? 'checked' : ''}>
+                </td>`;
                 });
 
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
         });
+
+        console.log('✅ renderMappingTable selesai. Total checkbox:', document.querySelectorAll('.mapping-checkbox').length);
+        console.log('=== RENDER MAPPING TABLE END ===\n');
     }
+
+    // Di bagian inisialisasi DOMContentLoaded, tambahkan console.log untuk melihat data dari database:
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('=== DOM LOADED - INITIAL DATA ===');
+        console.log('CPL_DATA:', CPL_DATA);
+        console.log('PORTO_ID:', PORTO_ID);
+        console.log('PERKULIAHAN_ID:', PERKULIAHAN_ID);
+        console.log('DB_CPMKS:', DB_CPMKS);
+        console.log('DB_MAPPINGS:', DB_MAPPINGS);
+        console.log('LAST_STEP:', LAST_STEP);
+
+        // ── 1. Inisialisasi state.cpl dari CPL_DATA ────────────────────────────
+        if (typeof CPL_DATA !== 'undefined' && CPL_DATA.length > 0) {
+            const grouped = {};
+            CPL_DATA.forEach(row => {
+                if (!grouped[row.id]) {
+                    grouped[row.id] = {
+                        id: row.id,
+                        no_cpl: row.no_cpl,
+                        narasi: row.cpl_indo,
+                        pis: []
+                    };
+                }
+                if (row.id_pi) {
+                    grouped[row.id].pis.push({
+                        id: row.id_pi,
+                        no_pi: row.no_pi,
+                        isi: row.isi_pi
+                    });
+                }
+            });
+            state.cpl = Object.values(grouped);
+            console.log('state.cpl setelah grouping:', state.cpl);
+        }
+
+        // ── 2. Isi state.cpmkList & ID map dari DB_CPMKS ──────────────────────
+        if (typeof DB_CPMKS !== 'undefined' && DB_CPMKS.length > 0) {
+            console.log('Mengolah DB_CPMKS:', DB_CPMKS);
+
+            state.cpmkIdMap = {};
+            state.subIdMap = {};
+
+            state.cpmkList = DB_CPMKS.map((c, i) => {
+                const no = i + 1; // nomor urut (1-based)
+                console.log(`Mapping CPMK ${no}:`, c);
+                state.cpmkIdMap[no] = c.id; // no → db_id
+
+                (c.subs || []).forEach((s) => {
+                    // key: "cpmkNo_subNo" → db sub id
+                    state.subIdMap[`${no}_${s.no}`] = s.id;
+                    console.log(`  Sub mapping: ${no}_${s.no} -> ${s.id}`);
+                });
+
+                return {
+                    no,
+                    cpl: String(c.id_cpl),
+                    narasi: c.narasi,
+                    subs: (c.subs || []).map(s => ({
+                        no: s.no,
+                        narasi: s.narasi,
+                    })),
+                };
+            });
+
+            console.log('state.cpmkIdMap setelah inisialisasi:', state.cpmkIdMap);
+            console.log('state.subIdMap setelah inisialisasi:', state.subIdMap);
+            console.log('state.cpmkList setelah inisialisasi:', state.cpmkList);
+        }
+
+        // ── 3. Bangun state.mapping dari DB_MAPPINGS ──────────────────────────
+        if (typeof DB_MAPPINGS !== 'undefined' && DB_MAPPINGS.length > 0) {
+            console.log('Mengolah DB_MAPPINGS:', DB_MAPPINGS);
+
+            const mappingMap = {};
+
+            DB_MAPPINGS.forEach(map => {
+                const {
+                    id_cpl,
+                    id_cpmk,
+                    id_sub_cpmk
+                } = map;
+
+                console.log(`Processing mapping: CPL ${id_cpl} - CPMK ${id_cpmk} - Sub ${id_sub_cpmk}`);
+
+                // Cari cpmkNo (1,2,3,...) dari state.cpmkIdMap
+                const cpmkNo = Object.keys(state.cpmkIdMap).find(
+                    key => Number(state.cpmkIdMap[key]) === Number(id_cpmk)
+                );
+                if (!cpmkNo) {
+                    console.warn('⚠️ DB_MAPPINGS: id_cpmk tidak ditemukan di cpmkIdMap:', id_cpmk, state.cpmkIdMap);
+                    return;
+                }
+                console.log(`  → ditemukan cpmkNo: ${cpmkNo}`);
+
+                // Cari subNo dari state.subIdMap
+                const subKey = Object.keys(state.subIdMap).find(
+                    key => Number(state.subIdMap[key]) === Number(id_sub_cpmk)
+                );
+                if (!subKey) {
+                    console.warn('⚠️ DB_MAPPINGS: id_sub_cpmk tidak ditemukan di subIdMap:', id_sub_cpmk, state.subIdMap);
+                    return;
+                }
+                const subNo = parseInt(subKey.split('_')[1]);
+                console.log(`  → ditemukan subNo: ${subNo}`);
+
+                const cplKey = String(id_cpl);
+
+                if (!mappingMap[cplKey]) mappingMap[cplKey] = {};
+                if (!mappingMap[cplKey][String(cpmkNo)]) mappingMap[cplKey][String(cpmkNo)] = [];
+                mappingMap[cplKey][String(cpmkNo)].push(subNo);
+                console.log(`  ✅ Mapping ditambahkan: mappingMap[${cplKey}][${cpmkNo}] =`, mappingMap[cplKey][String(cpmkNo)]);
+            });
+
+            state.mapping = mappingMap;
+            console.log('state.mapping setelah inisialisasi:', state.mapping);
+        } else {
+            console.log('DB_MAPPINGS tidak ada atau kosong');
+        }
+
+        // ── 4. Auto-resume ke last_step ────────────────────────────────────────
+        if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
+            console.log('Auto-resume ke step:', LAST_STEP);
+            goToStep(LAST_STEP);
+        }
+
+        console.log('=== DOM LOADED - FINAL STATE ===');
+        console.log('Final state:', state);
+    });
+
 
     /**
      * Kumpulkan data mapping dari checkbox yang dicentang
@@ -2065,7 +2238,7 @@
     });
 </script>
 <script>
-    // Inject PHP constants - handle case where $porto may not exist
+    // Inject PHP
     const BASE_URL = '<?= base_url() ?>';
     const PORTO_ID = <?= json_encode($porto['id'] ?? '') ?>;
     const LAST_STEP = <?= (int)($last_step ?? 1) ?>;
@@ -2094,7 +2267,7 @@
     const DB_MAPPINGS = <?= json_encode($mapping ?? []) ?>;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi state.cpl dari CPL_DATA (untuk Step 4+)
+        // ── 1. Inisialisasi state.cpl dari CPL_DATA ────────────────────────────
         if (typeof CPL_DATA !== 'undefined' && CPL_DATA.length > 0) {
             const grouped = {};
             CPL_DATA.forEach(row => {
@@ -2117,22 +2290,25 @@
             state.cpl = Object.values(grouped);
         }
 
-        // Isi state.cpmkList & ID map dari DB
+        // ── 2. Isi state.cpmkList & ID map dari DB_CPMKS ──────────────────────
         if (typeof DB_CPMKS !== 'undefined' && DB_CPMKS.length > 0) {
             state.cpmkIdMap = {};
             state.subIdMap = {};
 
             state.cpmkList = DB_CPMKS.map((c, i) => {
-                const no = i + 1;
-                state.cpmkIdMap[no] = c.id;
+                const no = i + 1; // nomor urut (1-based)
+                state.cpmkIdMap[no] = c.id; // no → db_id
+
                 (c.subs || []).forEach((s) => {
+                    // key: "cpmkNo_subNo" → db sub id
                     state.subIdMap[`${no}_${s.no}`] = s.id;
                 });
+
                 return {
                     no,
                     cpl: String(c.id_cpl),
                     narasi: c.narasi,
-                    subs: (c.subs || []).map((s) => ({
+                    subs: (c.subs || []).map(s => ({
                         no: s.no,
                         narasi: s.narasi,
                     })),
@@ -2140,39 +2316,56 @@
             });
         }
 
-        // Proses mapping dari DB untuk Step 5
+        // ── 3. Bangun state.mapping dari DB_MAPPINGS ──────────────────────────
+        // HARUS dijalankan SETELAH state.cpmkIdMap & state.subIdMap terisi (step 2)
         if (typeof DB_MAPPINGS !== 'undefined' && DB_MAPPINGS.length > 0) {
-            // Format: { id_cpl: { id_cpmk: [id_sub_cpmk, ...], ... }, ... }
             const mappingMap = {};
+
             DB_MAPPINGS.forEach(map => {
-                const { id_cpl, id_cpmk, id_sub_cpmk } = map;
-                
-                // Cari no_cpmk dan no_sub dari state
-                const cpmkNo = Object.keys(state.cpmkIdMap).find(key => state.cpmkIdMap[key] == id_cpmk);
-                if (!cpmkNo) return;
-                
-                // Cari no_sub dari subIdMap
-                const subKey = Object.keys(state.subIdMap).find(key => state.subIdMap[key] == id_sub_cpmk);
-                const subNo = subKey ? parseInt(subKey.split('_')[1]) : null;
-                if (!subNo) return;
-                
-                if (!mappingMap[id_cpl]) {
-                    mappingMap[id_cpl] = {};
+                const {
+                    id_cpl,
+                    id_cpmk,
+                    id_sub_cpmk
+                } = map;
+
+                // Cari cpmkNo (1,2,3,...) dari state.cpmkIdMap
+                // state.cpmkIdMap = { 1: dbId, 2: dbId, ... }
+                const cpmkNo = Object.keys(state.cpmkIdMap).find(
+                    key => Number(state.cpmkIdMap[key]) === Number(id_cpmk)
+                );
+                if (!cpmkNo) {
+                    console.warn('DB_MAPPINGS: id_cpmk tidak ditemukan di cpmkIdMap:', id_cpmk, state.cpmkIdMap);
+                    return;
                 }
-                if (!mappingMap[id_cpl][cpmkNo]) {
-                    mappingMap[id_cpl][cpmkNo] = [];
+
+                // Cari subNo dari state.subIdMap
+                // state.subIdMap = { "1_1": dbSubId, "1_2": dbSubId, ... }
+                const subKey = Object.keys(state.subIdMap).find(
+                    key => Number(state.subIdMap[key]) === Number(id_sub_cpmk)
+                );
+                if (!subKey) {
+                    console.warn('DB_MAPPINGS: id_sub_cpmk tidak ditemukan di subIdMap:', id_sub_cpmk, state.subIdMap);
+                    return;
                 }
-                mappingMap[id_cpl][cpmkNo].push(subNo);
+                const subNo = parseInt(subKey.split('_')[1]);
+
+                // Key di mappingMap harus String(id_cpl) agar cocok dengan renderMappingTable
+                const cplKey = String(id_cpl);
+
+                if (!mappingMap[cplKey]) mappingMap[cplKey] = {};
+                // cpmkNo sebagai String (key object selalu string di JS)
+                if (!mappingMap[cplKey][String(cpmkNo)]) mappingMap[cplKey][String(cpmkNo)] = [];
+                mappingMap[cplKey][String(cpmkNo)].push(subNo);
             });
+
             state.mapping = mappingMap;
         }
 
-        // Auto-resume ke last_step
+        // ── 4. Auto-resume ke last_step ────────────────────────────────────────
         if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
             goToStep(LAST_STEP);
         }
     });
-
 
     // ══════════════════════════════════════════
     //  STATE
@@ -2447,20 +2640,56 @@
         }
 
         setBtnLoading(btn, true);
-        
+
         // Kirim data mapping ke server menggunakan postJSON
         const res = await postJSON(API.mapping, {
             mappings: state.mappingData
         });
-        
+
         setBtnLoading(btn, false);
 
         if (res.status === 'success') {
+            // Update state.mapping agar data tetap ada saat refresh atau kembali ke step 5
+            updateStateMappingFromSaved(state.mappingData);
             showToast(res.message);
             nextStep();
         } else {
             showModalAlert(res.message || 'Gagal menyimpan pemetaan.', 'danger');
         }
+    }
+
+    /**
+     * Update state.mapping dari data yang baru disimpan
+     * agar checkbox tetap tercentang saat refresh/kembali ke step 5
+     */
+    function updateStateMappingFromSaved(mappings) {
+        const mappingMap = {};
+        mappings.forEach(map => {
+            const {
+                id_cpl,
+                id_cpmk,
+                id_sub_cpmk
+            } = map;
+
+            // Cari no_cpmk dari state.cpmkIdMap
+            const cpmkNo = Object.keys(state.cpmkIdMap).find(key => state.cpmkIdMap[key] == id_cpmk);
+            if (!cpmkNo) return;
+
+            // Cari no_sub dari state.subIdMap
+            const subKey = Object.keys(state.subIdMap).find(key => state.subIdMap[key] == id_sub_cpmk);
+            const subNo = subKey ? parseInt(subKey.split('_')[1]) : null;
+            if (!subNo) return;
+
+            const cplKey = String(id_cpl);
+            if (!mappingMap[cplKey]) {
+                mappingMap[cplKey] = {};
+            }
+            if (!mappingMap[cplKey][String(cpmkNo)]) {
+                mappingMap[cplKey][String(cpmkNo)] = [];
+            }
+            mappingMap[cplKey][String(cpmkNo)].push(subNo);
+        });
+        state.mapping = mappingMap;
     }
 
     // ══════════════════════════════════════════════════════════════

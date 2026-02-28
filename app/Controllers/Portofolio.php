@@ -167,7 +167,11 @@ class Portofolio extends BaseController
 
         // Pemetaan CPL-CPMK-SubCPMK
         $data['mapping'] = $db->table('pemetaan')
-            ->where('id_portofolio', $id)->get()->getResultArray();
+            ->select('id, id_portofolio, id_cpl, id_cpmk, id_sub_cpmk, is_active')
+            ->where('id_portofolio', $id)
+            ->get()->getResultArray();
+        
+        log_message('debug', 'Step 5: Loaded ' . count($data['mapping']) . ' mappings for id_portofolio=' . $id);
 
         // Rancangan Asesmen
         $data['asesmen'] = $db->table('rancangan_asesmen')
@@ -435,48 +439,94 @@ class Portofolio extends BaseController
     {
         $db   = \Config\Database::connect();
         $json = $this->request->getJSON(true);
-        
-        // Debug: log received data
+
         log_message('debug', 'saveMapping received: ' . json_encode($json));
-        
-        $id   = (string) ($json['id_portofolio'] ?? '');
+
+        $id = (string) ($json['id_portofolio'] ?? '');
 
         if (empty($id)) {
+            log_message('error', 'saveMapping: ID Portofolio kosong');
             return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
         }
 
         $mappings = $json['mappings'] ?? [];
         if (empty($mappings)) {
+            log_message('error', 'saveMapping: Mappings kosong untuk id_portofolio=' . $id);
             return $this->_json(['status' => 'error', 'message' => 'Minimal satu pemetaan harus dipilih.']);
         }
 
-        // ── 1. Hapus data pemetaan lama ──────────────────────────────────────
+        // ── 1. Validasi portofolio milik user yang login ──────────────────────
+        $npp = session()->get('npp');
+        $portoExists = $db->table('portofolio p')
+            ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
+            ->where('p.id', $id)
+            ->where('per.id_users', $npp)
+            ->countAllResults();
+
+        if (!$portoExists) {
+            return $this->_json(['status' => 'error', 'message' => 'Portofolio tidak ditemukan atau Anda tidak memiliki akses.']);
+        }
+
+        // ── 2. Hapus data pemetaan lama ───────────────────────────────────────
         $db->table('pemetaan')->where('id_portofolio', $id)->delete();
 
-        // ── 2. Insert pemetaan baru ──────────────────────────────────────────
-        $now = date('Y-m-d H:i:s');
+        // ── 3. Insert pemetaan baru ───────────────────────────────────────────
+        $now      = date('Y-m-d H:i:s');
         $inserted = 0;
-        foreach ($mappings as $map) {
-            $result = $db->table('pemetaan')->insert([
+        $errors   = [];
+
+        foreach ($mappings as $idx => $map) {
+            // Validasi field wajib
+            if (
+                !isset($map['id_cpl'])      || empty($map['id_cpl']) ||
+                !isset($map['id_cpmk'])     || empty($map['id_cpmk']) ||
+                !isset($map['id_sub_cpmk']) || empty($map['id_sub_cpmk'])
+            ) {
+                $errors[] = "Mapping ke-{$idx} tidak lengkap";
+                log_message('warning', "saveMapping: mapping ke-{$idx} tidak lengkap");
+                continue;
+            }
+
+            $rowData = [
                 'id_portofolio' => $id,
                 'id_cpl'        => (int) $map['id_cpl'],
                 'id_cpmk'       => (int) $map['id_cpmk'],
                 'id_sub_cpmk'   => (int) $map['id_sub_cpmk'],
                 'is_active'     => 1,
                 'created_at'    => $now,
-                'updated_at'    => $now,
-            ]);
-            if ($result) {
+            ];
+
+            $result = $db->table('pemetaan')->insert($rowData);
+
+            if ($result === false) {
+                $dbError = $db->error();
+                $errMsg = "Gagal insert mapping ke-{$idx}: " . json_encode($dbError);
+                $errors[] = $errMsg;
+                log_message('error', 'saveMapping: ' . $errMsg);
+            } else {
                 $inserted++;
             }
+        }
+
+        // ── 4. Tentukan response berdasarkan hasil insert ─────────────────────
+        if ($inserted === 0) {
+            log_message('error', 'saveMapping: tidak ada data berhasil diinsert. Errors: ' . implode('; ', $errors));
+            return $this->_json([
+                'status'  => 'error',
+                'message' => 'Pemetaan gagal disimpan. ' . ($errors ? implode(', ', $errors) : 'Cek log untuk detail.'),
+            ]);
+        }
+
+        if (!empty($errors)) {
+            log_message('warning', 'saveMapping partial errors: ' . implode('; ', $errors));
         }
 
         $this->_updateLastStep($id, 5);
 
         return $this->_json([
-            'status' => 'success', 
-            'message' => "Pemetaan berhasil disimpan. ({$inserted} data)",
-            'inserted' => $inserted
+            'status'   => 'success',
+            'message'  => "Pemetaan berhasil disimpan. ({$inserted} data)",
+            'inserted' => $inserted,
         ]);
     }
 
