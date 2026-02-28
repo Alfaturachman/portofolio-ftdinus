@@ -289,15 +289,27 @@ class Portofolio extends BaseController
      */
     public function saveInfoMK()
     {
-        $db = \Config\Database::connect();
-        $id = (int) $this->request->getPost('id_portofolio');
+        $db   = \Config\Database::connect();
+        $json = $this->request->getJSON(true);
+        $id   = (string) ($json['id_portofolio'] ?? '');
 
-        $mk_prasyarat      = $this->request->getPost('mk_prasyarat');
-        $topik_perkuliahan = $this->request->getPost('topik_perkuliahan');
+        if (empty($id)) {
+            return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
+        }
 
-        // Upsert informasi_mk
+        $mk_prasyarat      = $json['mk_prasyarat'] ?? '';
+        $topik_perkuliahan = $json['topik_perkuliahan'] ?? '';
+
+        if (empty(trim($topik_perkuliahan))) {
+            return $this->_json(['status' => 'error', 'message' => 'Topik perkuliahan wajib diisi.']);
+        }
+
         $existing = $db->table('informasi_mk')->where('id_portofolio', $id)->get()->getRowArray();
-        $payload  = ['mk_prasyarat' => $mk_prasyarat, 'topik_perkuliahan' => $topik_perkuliahan];
+        $payload  = [
+            'mk_prasyarat'      => $mk_prasyarat,
+            'topik_perkuliahan' => $topik_perkuliahan,
+        ];
+
         if ($existing) {
             $db->table('informasi_mk')->where('id_portofolio', $id)->update($payload);
         } else {
@@ -331,7 +343,7 @@ class Portofolio extends BaseController
     {
         $db   = \Config\Database::connect();
         $json = $this->request->getJSON(true);
-        $id   = (int) ($json['id_portofolio'] ?? 0);
+        $id   = (string) ($json['id_portofolio'] ?? '');
 
         $cpmkList = $json['cpmk_list'] ?? [];
         if (empty($cpmkList)) {

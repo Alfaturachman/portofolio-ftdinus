@@ -1072,114 +1072,8 @@
 
 <?= $this->section('scripts') ?>
 <script>
-    // ── Demo Data ──
-    const mkDatabase = [{
-            nama_mk: 'Pemrograman Web',
-            kode_mk: 'IF204',
-            kelompok_mk: 'Wajib',
-            fakultas: 'Fakultas Teknik',
-            progdi: 'Informatika',
-            sks_teori: 3,
-            sks_praktik: 1,
-            kurikulum: 'Kurikulum 2022',
-            tahun: '2025',
-            semester: 'Ganjil',
-            smt_matkul: 3
-        },
-        {
-            nama_mk: 'Basis Data',
-            kode_mk: 'IF205',
-            kelompok_mk: 'Wajib',
-            fakultas: 'Fakultas Teknik',
-            progdi: 'Informatika',
-            sks_teori: 2,
-            sks_praktik: 1,
-            kurikulum: 'Kurikulum 2022',
-            tahun: '2025',
-            semester: 'Ganjil',
-            smt_matkul: 3
-        },
-        {
-            nama_mk: 'Algoritma & Pemrograman',
-            kode_mk: 'IF101',
-            kelompok_mk: 'Wajib',
-            fakultas: 'Fakultas Teknik',
-            progdi: 'Informatika',
-            sks_teori: 3,
-            sks_praktik: 1,
-            kurikulum: 'Kurikulum 2022',
-            tahun: '2025',
-            semester: 'Genap',
-            smt_matkul: 2
-        },
-        {
-            nama_mk: 'Rekayasa Perangkat Lunak',
-            kode_mk: 'IF301',
-            kelompok_mk: 'Wajib',
-            fakultas: 'Fakultas Teknik',
-            progdi: 'Informatika',
-            sks_teori: 3,
-            sks_praktik: 0,
-            kurikulum: 'Kurikulum 2022',
-            tahun: '2025',
-            semester: 'Ganjil',
-            smt_matkul: 5
-        },
-        {
-            nama_mk: 'Jaringan Komputer',
-            kode_mk: 'IF302',
-            kelompok_mk: 'Pilihan',
-            fakultas: 'Fakultas Teknik',
-            progdi: 'Informatika',
-            sks_teori: 2,
-            sks_praktik: 1,
-            kurikulum: 'Kurikulum 2022',
-            tahun: '2025',
-            semester: 'Ganjil',
-            smt_matkul: 5
-        },
-    ];
-
-    const cplDatabase = {
-        'IF204': [{
-                no: '1',
-                narasi: 'Mampu menerapkan pengetahuan matematika, ilmu pengetahuan, dan rekayasa',
-                pi: ['PI 1.1: Mengidentifikasi konsep dasar pemrograman web', 'PI 1.2: Menerapkan logika algoritma dalam kode']
-            },
-            {
-                no: '2',
-                narasi: 'Mampu merancang dan mengimplementasikan sistem perangkat lunak berbasis web',
-                pi: ['PI 2.1: Membuat antarmuka pengguna yang responsif', 'PI 2.2: Mengintegrasikan front-end dan back-end', 'PI 2.3: Menerapkan keamanan dasar aplikasi web']
-            },
-            {
-                no: '3',
-                narasi: 'Mampu bekerja secara mandiri maupun tim dalam proyek perangkat lunak',
-                pi: ['PI 3.1: Berkolaborasi dalam pengembangan proyek', 'PI 3.2: Mendokumentasikan kode dengan baik']
-            },
-        ],
-        'IF205': [{
-                no: '1',
-                narasi: 'Mampu merancang dan mengimplementasikan skema basis data relasional',
-                pi: ['PI 1.1: Membuat ERD', 'PI 1.2: Normalisasi tabel hingga 3NF']
-            },
-            {
-                no: '2',
-                narasi: 'Mampu menulis query SQL yang efisien untuk manipulasi data',
-                pi: ['PI 2.1: Menulis query SELECT kompleks', 'PI 2.2: Mengoptimasi performa query']
-            },
-        ],
-        'DEFAULT': [{
-                no: '1',
-                narasi: 'Menguasai konsep dasar keilmuan',
-                pi: ['PI 1.1: Memahami teori dasar', 'PI 1.2: Menerapkan konsep dalam praktik']
-            },
-            {
-                no: '2',
-                narasi: 'Mampu mengaplikasikan ilmu dalam pemecahan masalah',
-                pi: ['PI 2.1: Analisis masalah', 'PI 2.2: Sintesis solusi']
-            },
-        ]
-    };
+    // Data CPL dari server, di-encode sebagai JSON
+    const CPL_DATA = <?= json_encode($cpls ?? []) ?>;
 
     let cpmkCounter = 0;
     let chartInstance = null;
@@ -1278,24 +1172,69 @@
     //  STEP 3 — CPL Table
     // ══════════════════════════════════════════
     function renderCPLTable() {
-        const kode = state.mk.kode_mk || 'DEFAULT';
-        const data = cplDatabase[kode] || cplDatabase['DEFAULT'];
-        state.cpl = data;
-        document.getElementById('cplMKName').textContent = state.mk.nama_mk ? `${state.mk.nama_mk} (${kode})` : '—';
+        // Kelompokkan CPL_DATA (flat rows) menjadi struktur { cpl_id: { ...cpl, pis: [...] } }
+        const grouped = {};
+        CPL_DATA.forEach(row => {
+            if (!grouped[row.id]) {
+                grouped[row.id] = {
+                    id: row.id,
+                    no_cpl: row.no_cpl,
+                    narasi: row.cpl_indo,
+                    pis: []
+                };
+            }
+            if (row.id_pi) {
+                grouped[row.id].pis.push({
+                    id: row.id_pi,
+                    no_pi: row.no_pi,
+                    isi: row.isi_pi
+                });
+            }
+        });
+
+        const data = Object.values(grouped);
+        state.cpl = data; // simpan ke state untuk dipakai step 4+
+
+        document.getElementById('cplMKName').textContent =
+            '<?= esc($porto['nama_mk']) ?> (<?= esc($porto['kode_mk']) ?>)';
 
         const tbody = document.getElementById('cplTableBody');
         tbody.innerHTML = '';
+
+        if (!data.length) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Tidak ada data CPL untuk mata kuliah ini.
+        </td></tr>`;
+            return;
+        }
+
         data.forEach(cpl => {
-            const rowspan = cpl.pi.length;
-            cpl.pi.forEach((pi, i) => {
+            const rowspan = cpl.pis.length || 1;
+
+            if (!cpl.pis.length) {
+                // CPL tanpa PI
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td class="text-center align-middle"><span class="cpl-tag">${cpl.no_cpl}</span></td>
+                <td class="align-middle" style="font-size:13px;">${cpl.narasi}</td>
+                <td class="text-muted" style="font-size:12px;">—</td>`;
+                tbody.appendChild(tr);
+                return;
+            }
+
+            cpl.pis.forEach((pi, i) => {
                 const tr = document.createElement('tr');
                 if (i === 0) {
                     tr.innerHTML = `
-                    <td rowspan="${rowspan}" class="text-center align-middle"><span class="cpl-tag">CPL ${cpl.no}</span></td>
+                    <td rowspan="${rowspan}" class="text-center align-middle">
+                        <span class="cpl-tag">${cpl.no_cpl}</span>
+                    </td>
                     <td rowspan="${rowspan}" class="align-middle" style="font-size:13px;">${cpl.narasi}</td>
-                    <td style="font-size:13px;">${pi}</td>`;
+                    <td style="font-size:13px;"><strong>${pi.no_pi}</strong> — ${pi.isi}</td>`;
                 } else {
-                    tr.innerHTML = `<td style="font-size:13px;">${pi}</td>`;
+                    tr.innerHTML = `
+                    <td style="font-size:13px;"><strong>${pi.no_pi}</strong> — ${pi.isi}</td>`;
                 }
                 tbody.appendChild(tr);
             });
@@ -1315,36 +1254,47 @@
         cpmkCounter++;
         const container = document.getElementById('cpmkContainer');
         const id = `cpmk_${cpmkCounter}`;
-        const cplOptions = (state.cpl || []).map(c => `<option value="${c.no}">CPL ${c.no}</option>`).join('');
+
+        // Gunakan id asli dari DB sebagai value, no_cpl sebagai label
+        const cplOptions = (state.cpl || []).map(c =>
+            `<option value="${c.id}">${c.no_cpl}</option>`
+        ).join('');
 
         const div = document.createElement('div');
         div.className = 'cpmk-block';
         div.id = id;
         div.innerHTML = `
-                <div class="cpmk-block-header">
-                    <span class="cpmk-num">CPMK ${cpmkCounter}</span>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeCPMK('${id}')"><i class="fas fa-trash-alt"></i></button>
+            <div class="cpmk-block-header">
+                <span class="cpmk-num">CPMK ${cpmkCounter}</span>
+                <button class="btn btn-sm btn-outline-danger" onclick="removeCPMK('${id}')">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="font-size:12.5px;">Terkait CPL</label>
+                    <select class="form-select form-select-sm" id="${id}_cpl">${cplOptions}</select>
                 </div>
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold" style="font-size:12.5px;">Terkait CPL</label>
-                        <select class="form-select form-select-sm" id="${id}_cpl">${cplOptions}</select>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label fw-semibold" style="font-size:12.5px;">Narasi CPMK</label>
-                        <input type="text" class="form-control form-control-sm" id="${id}_narasi" placeholder="Deskripsikan capaian pembelajaran mata kuliah ini...">
-                    </div>
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold" style="font-size:12.5px;">Narasi CPMK</label>
+                    <input type="text" class="form-control form-control-sm" id="${id}_narasi"
+                        placeholder="Deskripsikan capaian pembelajaran mata kuliah ini...">
                 </div>
-                <div class="sub-cpmk-list">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="fw-bold text-muted" style="font-size:12px;">Sub CPMK</small>
-                        <button class="btn btn-sm btn-outline-primary" style="font-size:11px;" onclick="addSubCPMK('${id}')"><i class="fas fa-plus me-1"></i>Tambah Sub</button>
-                    </div>
-                    <div id="${id}_subs"></div>
-                </div>`;
+            </div>
+            <div class="sub-cpmk-list">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <small class="fw-bold text-muted" style="font-size:12px;">Sub CPMK</small>
+                    <button class="btn btn-sm btn-outline-primary" style="font-size:11px;"
+                        onclick="addSubCPMK('${id}')">
+                        <i class="fas fa-plus me-1"></i>Tambah Sub
+                    </button>
+                </div>
+                <div id="${id}_subs"></div>
+            </div>`;
         container.appendChild(div);
         addSubCPMK(id);
     }
+
 
     function addSubCPMK(cpmkId) {
         const subsDiv = document.getElementById(`${cpmkId}_subs`);
@@ -1394,40 +1344,54 @@
         saveCPMK();
         if (!state.cpmkList.length) return;
 
-        // Collect all sub CPMK numbers
+        // Buat map id_cpl → no_cpl untuk label
+        const cplLabelMap = {};
+        (state.cpl || []).forEach(c => {
+            cplLabelMap[c.id] = c.no_cpl;
+        });
+
         const allSubs = [];
         state.cpmkList.forEach(c => c.subs.forEach(s => {
             if (!allSubs.includes(s.no)) allSubs.push(s.no);
         }));
         allSubs.sort((a, b) => a - b);
 
-        // Header
         const headerRow = document.getElementById('mappingHeaderRow');
-        headerRow.innerHTML = `<th class="cpl-col" style="background:var(--accent);color:#fff;">CPL</th>
+        headerRow.innerHTML = `
+        <th class="cpl-col" style="background:var(--accent);color:#fff;">CPL</th>
         <th class="cpmk-col" style="background:var(--accent);color:#fff;">CPMK</th>` +
             allSubs.map(s => `<th style="background:var(--accent);color:#fff;">Sub ${s}</th>`).join('');
 
-        // Group by CPL
         const byCpl = {};
         state.cpmkList.forEach(c => {
-            if (!byCpl[c.cpl]) byCpl[c.cpl] = [];
-            byCpl[c.cpl].push(c);
+            const key = c.cpl; // ini sekarang adalah id CPL dari DB
+            if (!byCpl[key]) byCpl[key] = [];
+            byCpl[key].push(c);
         });
 
         const tbody = document.getElementById('mappingBody');
         tbody.innerHTML = '';
-        Object.entries(byCpl).forEach(([cplNo, cpmks]) => {
+        Object.entries(byCpl).forEach(([cplId, cpmks]) => {
+            const cplLabel = cplLabelMap[cplId] || 'CPL ' + cplId;
             cpmks.forEach((cpmk, i) => {
                 const tr = document.createElement('tr');
                 let html = '';
                 if (i === 0) {
-                    html += `<td rowspan="${cpmks.length}" class="align-middle cpl-col"><span class="cpl-tag">CPL ${cplNo}</span></td>`;
+                    html += `<td rowspan="${cpmks.length}" class="align-middle cpl-col">
+                    <span class="cpl-tag">${cplLabel}</span>
+                </td>`;
                 }
-                html += `<td class="cpmk-col align-middle"><strong>CPMK ${cpmk.no}</strong><br><small style="color:var(--text-muted);font-size:11.5px;">${cpmk.narasi || ''}</small></td>`;
+                html += `<td class="cpmk-col align-middle">
+                <strong>CPMK ${cpmk.no}</strong><br>
+                <small style="color:var(--text-muted);font-size:11.5px;">${cpmk.narasi || ''}</small>
+            </td>`;
                 allSubs.forEach(subNo => {
                     const hasSub = cpmk.subs.some(s => s.no === subNo);
                     html += `<td class="text-center align-middle">
-                    ${hasSub ? `<input type="checkbox" class="mapping-checkbox" data-cpl="${cplNo}" data-cpmk="${cpmk.no}" data-sub="${subNo}">` : '<span style="color:#cbd5e1;">—</span>'}
+                    ${hasSub
+                        ? `<input type="checkbox" class="mapping-checkbox"
+                              data-cpl="${cplId}" data-cpmk="${cpmk.no}" data-sub="${subNo}">`
+                        : '<span style="color:#cbd5e1;">—</span>'}
                 </td>`;
                 });
                 tr.innerHTML = html;
