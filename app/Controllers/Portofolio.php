@@ -345,21 +345,32 @@ class Portofolio extends BaseController
         $json = $this->request->getJSON(true);
         $id   = (string) ($json['id_portofolio'] ?? '');
 
+        if (empty($id)) {
+            return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
+        }
+
         $cpmkList = $json['cpmk_list'] ?? [];
         if (empty($cpmkList)) {
             return $this->_json(['status' => 'error', 'message' => 'Minimal satu CPMK harus diisi.']);
         }
 
-        // Delete existing CPMK (cascade sub_cpmk must be handled manually if no FK cascade)
-        $existingCpmkIds = $db->table('cpmk')->select('id')->where('id_portofolio', $id)->get()->getResultArray();
-        foreach ($existingCpmkIds as $row) {
+        // ── 1. Hapus data lama ────────────────────────────────────────────
+        $existingCpmks = $db->table('cpmk')
+            ->select('id')
+            ->where('id_portofolio', $id)
+            ->get()->getResultArray();
+
+        foreach ($existingCpmks as $row) {
             $db->table('sub_cpmk')->where('id_cpmk', $row['id'])->delete();
         }
+        $db->table('mapping_cpl_cpmk_scpmk')->where('id_portofolio', $id)->delete();
         $db->table('cpmk')->where('id_portofolio', $id)->delete();
 
-        $savedCpmks = []; // Return new IDs to frontend
+        // ── 2. Insert CPMK + Sub CPMK + Mapping sekaligus ────────────────
+        $savedCpmks = [];
 
         foreach ($cpmkList as $c) {
+            // Insert CPMK
             $db->table('cpmk')->insert([
                 'id_portofolio' => $id,
                 'no_cpmk'       => 'CPMK-' . str_pad($c['no'], 2, '0', STR_PAD_LEFT),
@@ -368,28 +379,49 @@ class Portofolio extends BaseController
                 'created_at'    => date('Y-m-d H:i:s'),
                 'updated_at'    => date('Y-m-d H:i:s'),
             ]);
-            $cpmk_id = $db->insertID();
+            $cpmk_id = (int) $db->insertID();
 
+            // Insert Sub CPMK
             $subs = [];
             foreach (($c['subs'] ?? []) as $s) {
                 $db->table('sub_cpmk')->insert([
-                    'id_cpmk'        => $cpmk_id,
-                    'no_sub_cpmk'    => 'Sub-' . str_pad($s['no'], 2, '0', STR_PAD_LEFT),
+                    'id_cpmk'         => $cpmk_id,
+                    'no_sub_cpmk'     => 'Sub-' . str_pad($s['no'], 2, '0', STR_PAD_LEFT),
                     'narasi_sub_cpmk' => trim($s['narasi']),
-                    'created_at'     => date('Y-m-d H:i:s'),
-                    'updated_at'     => date('Y-m-d H:i:s'),
+                    'created_at'      => date('Y-m-d H:i:s'),
+                    'updated_at'      => date('Y-m-d H:i:s'),
                 ]);
-                $subs[] = ['id' => $db->insertID(), 'no' => $s['no'], 'narasi' => $s['narasi']];
+                $sub_id = (int) $db->insertID();
+
+                // Insert Mapping CPL → CPMK → Sub CPMK langsung di sini
+                $db->table('mapping_cpl_cpmk_scpmk')->insert([
+                    'id_portofolio' => $id,
+                    'id_cpl'        => (int) $c['id_cpl'],
+                    'id_cpmk'       => $cpmk_id,
+                    'id_sub_cpmk'   => $sub_id,
+                ]);
+
+                $subs[] = [
+                    'id'     => $sub_id,
+                    'no'     => (int) $s['no'],
+                    'narasi' => trim($s['narasi']),
+                ];
             }
 
-            $savedCpmks[] = ['id' => $cpmk_id, 'no' => $c['no'], 'narasi' => $c['narasi'], 'subs' => $subs];
+            $savedCpmks[] = [
+                'id'     => $cpmk_id,
+                'no'     => (int) $c['no'],
+                'narasi' => trim($c['narasi']),
+                'subs'   => $subs,
+            ];
         }
 
+        // ── 3. Advance last_step ─────────────────────────────────────────
         $this->_updateLastStep($id, 4);
 
         return $this->_json([
             'status'  => 'success',
-            'message' => 'CPMK berhasil disimpan.',
+            'message' => 'CPMK, Sub CPMK, dan Pemetaan berhasil disimpan.',
             'cpmks'   => $savedCpmks,
         ]);
     }
@@ -401,21 +433,7 @@ class Portofolio extends BaseController
      */
     public function saveMapping()
     {
-        $db   = \Config\Database::connect();
-        $json = $this->request->getJSON(true);
-        $id   = (int) ($json['id_portofolio'] ?? 0);
 
-        $db->table('mapping_cpl_cpmk_scpmk')->where('id_portofolio', $id)->delete();
-
-        $mappings = $json['mappings'] ?? [];
-        foreach ($mappings as $m) {
-            $db->table('mapping_cpl_cpmk_scpmk')->insert([
-                'id_portofolio' => $id,
-                'id_cpl'        => (int) $m['id_cpl'],
-                'id_cpmk'       => (int) $m['id_cpmk'],
-                'id_sub_cpmk'   => (int) $m['id_sub_cpmk'],
-            ]);
-        }
 
         $this->_updateLastStep($id, 5);
 

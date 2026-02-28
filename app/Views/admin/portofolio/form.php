@@ -1245,87 +1245,256 @@
     //  STEP 4 — CPMK Builder
     // ══════════════════════════════════════════
     function renderCPMKBuilder() {
-        if (document.getElementById('cpmkContainer').children.length === 0 && state.cpmkList.length === 0) {
+        const container = document.getElementById('cpmkContainer');
+
+        // Sudah ada isi di DOM (misal balik dari step 5) → jangan render ulang
+        if (container.children.length > 0) return;
+
+        if (DB_CPMKS.length > 0) {
+            // ── Ada data dari DB → render dari DB ──
+            DB_CPMKS.forEach((cpmk) => {
+                addCPMKFromData(cpmk);
+            });
+        } else if (state.cpmkList.length > 0) {
+            // ── Ada data di state (pindah step bolak-balik) → render dari state ──
+            state.cpmkList.forEach((cpmk) => {
+                addCPMKFromData(cpmk);
+            });
+        } else {
+            // ── Belum ada data sama sekali → tambah 1 block kosong ──
             addCPMK();
         }
     }
 
-    function addCPMK() {
-        cpmkCounter++;
+    function addCPMKFromData(cpmk) {
         const container = document.getElementById('cpmkContainer');
-        const id = `cpmk_${cpmkCounter}`;
 
-        // Gunakan id asli dari DB sebagai value, no_cpl sebagai label
-        const cplOptions = (state.cpl || []).map(c =>
-            `<option value="${c.id}">${c.no_cpl}</option>`
+        const cplOptions = (state.cpl || []).map((c) =>
+            `<option value="${c.id}" ${String(c.id) === String(cpmk.id_cpl) ? 'selected' : ''}>${c.no_cpl}</option>`
         ).join('');
 
+        const blockId = `cpmk_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         const div = document.createElement('div');
         div.className = 'cpmk-block';
-        div.id = id;
+        div.id = blockId;
         div.innerHTML = `
-            <div class="cpmk-block-header">
-                <span class="cpmk-num">CPMK ${cpmkCounter}</span>
-                <button class="btn btn-sm btn-outline-danger" onclick="removeCPMK('${id}')">
-                    <i class="fas fa-trash-alt"></i>
+        <div class="cpmk-block-header">
+            <span class="cpmk-num cpmk-label">CPMK ?</span>
+            <button class="btn btn-sm btn-outline-danger" onclick="removeCPMK('${blockId}')">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold" style="font-size:12.5px;">Terkait CPL</label>
+                <select class="form-select form-select-sm" id="${blockId}_cpl">${cplOptions}</select>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label fw-semibold" style="font-size:12.5px;">Narasi CPMK</label>
+                <input type="text" class="form-control form-control-sm" id="${blockId}_narasi"
+                    placeholder="Deskripsikan capaian pembelajaran mata kuliah ini..."
+                    value="${escHtml(cpmk.narasi || '')}">
+            </div>
+        </div>
+        <div class="sub-cpmk-list">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <small class="fw-bold text-muted" style="font-size:12px;">Sub CPMK</small>
+                <button class="btn btn-sm btn-outline-primary" style="font-size:11px;"
+                    onclick="addSubCPMK('${blockId}')">
+                    <i class="fas fa-plus me-1"></i>Tambah Sub
                 </button>
             </div>
-            <div class="row g-3 mb-3">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold" style="font-size:12.5px;">Terkait CPL</label>
-                    <select class="form-select form-select-sm" id="${id}_cpl">${cplOptions}</select>
-                </div>
-                <div class="col-md-8">
-                    <label class="form-label fw-semibold" style="font-size:12.5px;">Narasi CPMK</label>
-                    <input type="text" class="form-control form-control-sm" id="${id}_narasi"
-                        placeholder="Deskripsikan capaian pembelajaran mata kuliah ini...">
-                </div>
-            </div>
-            <div class="sub-cpmk-list">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <small class="fw-bold text-muted" style="font-size:12px;">Sub CPMK</small>
-                    <button class="btn btn-sm btn-outline-primary" style="font-size:11px;"
-                        onclick="addSubCPMK('${id}')">
-                        <i class="fas fa-plus me-1"></i>Tambah Sub
-                    </button>
-                </div>
-                <div id="${id}_subs"></div>
-            </div>`;
+            <div id="${blockId}_subs"></div>
+        </div>`;
         container.appendChild(div);
-        addSubCPMK(id);
+        renumberCPMK();
+
+        // Render sub CPMK
+        if (cpmk.subs && cpmk.subs.length > 0) {
+            cpmk.subs.forEach((sub) => addSubCPMKFromData(blockId, sub));
+        } else {
+            addSubCPMK(blockId); // default 1 sub kosong
+        }
+
+        // Simpan mapping DB id ke state
+        if (cpmk.id) {
+            const no = document.querySelectorAll('.cpmk-block').length; // nomor urut setelah append
+            state.cpmkIdMap[no] = cpmk.id;
+            (cpmk.subs || []).forEach((s) => {
+                state.subIdMap[`${no}_${s.no}`] = s.id;
+            });
+        }
     }
 
+    /**
+     * Render satu Sub CPMK dengan nilai yang sudah terisi
+     */
+    function addSubCPMKFromData(cpmkBlockId, sub) {
+        const subsDiv = document.getElementById(`${cpmkBlockId}_subs`);
+        if (!subsDiv) return;
 
-    function addSubCPMK(cpmkId) {
-        const subsDiv = document.getElementById(`${cpmkId}_subs`);
-        const subCount = subsDiv.children.length + 1;
-        const subId = `${cpmkId}_sub_${subCount}`;
+        const subId = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
         const div = document.createElement('div');
         div.className = 'sub-cpmk-item';
         div.id = subId;
         div.innerHTML = `
-        <span class="sub-num">Sub ${subCount}</span>
-        <input type="text" class="form-control form-control-sm" placeholder="Narasi Sub CPMK ${subCount}...">
-        <button class="btn btn-sm btn-outline-secondary" style="flex-shrink:0;" onclick="this.closest('.sub-cpmk-item').remove()"><i class="fas fa-times"></i></button>`;
+        <div style="display:flex;align-items:center;gap:10px;width:100%;">
+            <span class="sub-num" style="white-space:nowrap;font-size:12px;font-weight:700;color:var(--text-muted);">Sub</span>
+            <input type="number"
+                class="form-control form-control-sm sub-no-input"
+                style="width:70px;flex-shrink:0;"
+                value="${sub.no}"
+                min="1"
+                title="Nomor Sub CPMK">
+            <input type="text"
+                class="form-control form-control-sm sub-narasi-input"
+                placeholder="Narasi Sub CPMK..."
+                value="${escHtml(sub.narasi || '')}">
+            <button class="btn btn-sm btn-outline-secondary"
+                style="flex-shrink:0;"
+                onclick="removeSubCPMK('${subId}', '${cpmkBlockId}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
         subsDiv.appendChild(div);
+    }
+
+    /** Escape HTML untuk value attribute agar tidak XSS / break HTML */
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+
+
+    function addCPMK() {
+        const container = document.getElementById('cpmkContainer');
+
+        const cplOptions = (state.cpl || []).map(c =>
+            `<option value="${c.id}">${c.no_cpl}</option>`
+        ).join('');
+
+        const blockId = `cpmk_${Date.now()}`; // unique ID, bukan counter
+        const div = document.createElement('div');
+        div.className = 'cpmk-block';
+        div.id = blockId;
+        div.innerHTML = `
+        <div class="cpmk-block-header">
+            <span class="cpmk-num cpmk-label">CPMK ?</span>
+            <button class="btn btn-sm btn-outline-danger" onclick="removeCPMK('${blockId}')">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold" style="font-size:12.5px;">Terkait CPL</label>
+                <select class="form-select form-select-sm" id="${blockId}_cpl">${cplOptions}</select>
+            </div>
+            <div class="col-md-8">
+                <label class="form-label fw-semibold" style="font-size:12.5px;">Narasi CPMK</label>
+                <input type="text" class="form-control form-control-sm" id="${blockId}_narasi"
+                    placeholder="Deskripsikan capaian pembelajaran mata kuliah ini...">
+            </div>
+        </div>
+        <div class="sub-cpmk-list">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <small class="fw-bold text-muted" style="font-size:12px;">Sub CPMK</small>
+                <button class="btn btn-sm btn-outline-primary" style="font-size:11px;"
+                    onclick="addSubCPMK('${blockId}')">
+                    <i class="fas fa-plus me-1"></i>Tambah Sub
+                </button>
+            </div>
+            <div id="${blockId}_subs"></div>
+        </div>`;
+        container.appendChild(div);
+
+        renumberCPMK(); // assign nomor setelah append
+        addSubCPMK(blockId); // langsung tambah 1 sub default
     }
 
     function removeCPMK(id) {
         document.getElementById(id)?.remove();
+        renumberCPMK();
+    }
+
+    /** Update label "CPMK N" di setiap block sesuai urutan DOM */
+    function renumberCPMK() {
+        document.querySelectorAll('.cpmk-block').forEach((block, i) => {
+            const no = i + 1;
+            const label = block.querySelector('.cpmk-label');
+            if (label) label.textContent = `CPMK ${no}`;
+        });
+    }
+
+    /** Tambah Sub CPMK ke dalam block tertentu, dengan input nomor yang bisa diubah */
+    function addSubCPMK(cpmkBlockId) {
+        const subsDiv = document.getElementById(`${cpmkBlockId}_subs`);
+        if (!subsDiv) return;
+
+        const subCount = subsDiv.children.length + 1;
+        const subId = `sub_${Date.now()}_${subCount}`;
+
+        const div = document.createElement('div');
+        div.className = 'sub-cpmk-item';
+        div.id = subId;
+        div.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;width:100%;">
+            <span class="sub-num" style="white-space:nowrap;font-size:12px;font-weight:700;color:var(--text-muted);">Sub</span>
+            <input type="number"
+                class="form-control form-control-sm sub-no-input"
+                style="width:70px;flex-shrink:0;"
+                value="${subCount}"
+                min="1"
+                title="Nomor Sub CPMK (bisa diubah)">
+            <input type="text"
+                class="form-control form-control-sm sub-narasi-input"
+                placeholder="Narasi Sub CPMK ${subCount}...">
+            <button class="btn btn-sm btn-outline-secondary"
+                style="flex-shrink:0;"
+                onclick="removeSubCPMK('${subId}', '${cpmkBlockId}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
+        subsDiv.appendChild(div);
+    }
+
+    /** Hapus sub, lalu renumber otomatis semua sub dalam block yang sama */
+    function removeSubCPMK(subId, cpmkBlockId) {
+        document.getElementById(subId)?.remove();
+        renumberSubCPMK(cpmkBlockId);
+    }
+
+    /** Update value input nomor Sub CPMK sesuai urutan DOM dalam satu block */
+    function renumberSubCPMK(cpmkBlockId) {
+        const subsDiv = document.getElementById(`${cpmkBlockId}_subs`);
+        if (!subsDiv) return;
+        subsDiv.querySelectorAll('.sub-cpmk-item').forEach((item, i) => {
+            const noInput = item.querySelector('.sub-no-input');
+            const narasiInput = item.querySelector('.sub-narasi-input');
+            if (noInput) noInput.value = i + 1;
+            if (narasiInput && !narasiInput.value) {
+                narasiInput.placeholder = `Narasi Sub CPMK ${i + 1}...`;
+            }
+        });
     }
 
     function saveCPMK() {
         state.cpmkList = [];
         document.querySelectorAll('.cpmk-block').forEach((block, i) => {
             const id = block.id;
-            const no = i + 1;
+            const no = i + 1; // nomor urutan DOM, bukan dari input
             const cpl = document.getElementById(`${id}_cpl`)?.value;
             const narasi = document.getElementById(`${id}_narasi`)?.value;
             const subs = [];
-            block.querySelectorAll('.sub-cpmk-item input[type=text]').forEach((inp, j) => {
+            block.querySelectorAll('.sub-cpmk-item').forEach((subItem) => {
+                const noInput = subItem.querySelector('.sub-no-input');
+                const narasiInput = subItem.querySelector('.sub-narasi-input');
                 subs.push({
-                    no: j + 1,
-                    narasi: inp.value
+                    no: noInput ? parseInt(noInput.value) || (subs.length + 1) : subs.length + 1,
+                    narasi: narasiInput ? narasiInput.value : ''
                 });
             });
             state.cpmkList.push({
@@ -1341,76 +1510,96 @@
     //  STEP 5 — Mapping Table
     // ══════════════════════════════════════════
     function renderMappingTable() {
-        saveCPMK();
+        saveCPMK(); // sync state.cpmkList
         if (!state.cpmkList.length) return;
 
         // Buat map id_cpl → no_cpl untuk label
         const cplLabelMap = {};
-        (state.cpl || []).forEach(c => {
+        (state.cpl || []).map(c => {
             cplLabelMap[c.id] = c.no_cpl;
         });
 
-        const allSubs = [];
-        state.cpmkList.forEach(c => c.subs.forEach(s => {
-            if (!allSubs.includes(s.no)) allSubs.push(s.no);
-        }));
-        allSubs.sort((a, b) => a - b);
+        // ── Kumpulkan SEMUA nomor sub yang ada di SEMUA CPMK (global unique set) ──
+        const allSubNos = new Set();
+        state.cpmkList.forEach(c => {
+            c.subs.forEach(s => allSubNos.add(parseInt(s.no)));
+        });
+        // Urutan terbesar dari sub yang ada → pakai range 1..maxSub
+        const maxSub = allSubNos.size > 0 ? Math.max(...allSubNos) : 0;
+        // Kolom sub = 1, 2, 3, ..., maxSub (konsisten untuk semua CPMK)
+        const subColumns = Array.from({
+            length: maxSub
+        }, (_, i) => i + 1);
 
+        // ── Build header ──
         const headerRow = document.getElementById('mappingHeaderRow');
         headerRow.innerHTML = `
-        <th class="cpl-col" style="background:var(--accent);color:#fff;">CPL</th>
-        <th class="cpmk-col" style="background:var(--accent);color:#fff;">CPMK</th>` +
-            allSubs.map(s => `<th style="background:var(--accent);color:#fff;">Sub ${s}</th>`).join('');
+        <th rowspan="2" class="align-middle" style="background:var(--accent);color:#fff;min-width:160px;">CPL</th>
+        <th rowspan="2" class="align-middle" style="background:var(--accent);color:#fff;min-width:180px;">CPMK</th>
+        <th colspan="${subColumns.length}" class="text-center" style="background:var(--accent);color:#fff;">Sub CPMK</th>`;
 
+        // Sub-header row (nomor sub)
+        let subHeaderRow = document.getElementById('mappingSubHeaderRow');
+        if (!subHeaderRow) {
+            subHeaderRow = document.createElement('tr');
+            subHeaderRow.id = 'mappingSubHeaderRow';
+            headerRow.parentNode.insertBefore(subHeaderRow, headerRow.nextSibling);
+        }
+        subHeaderRow.innerHTML = subColumns.map(n =>
+            `<th class="text-center" style="background:var(--accent);color:#fff;min-width:60px;">${n}</th>`
+        ).join('');
+
+        // ── Group CPMK by CPL ──
         const byCpl = {};
         state.cpmkList.forEach(c => {
-            const key = c.cpl; // ini sekarang adalah id CPL dari DB
+            const key = c.cpl;
             if (!byCpl[key]) byCpl[key] = [];
             byCpl[key].push(c);
         });
 
         const tbody = document.getElementById('mappingBody');
         tbody.innerHTML = '';
+
         Object.entries(byCpl).forEach(([cplId, cpmks]) => {
             const cplLabel = cplLabelMap[cplId] || 'CPL ' + cplId;
+
             cpmks.forEach((cpmk, i) => {
                 const tr = document.createElement('tr');
                 let html = '';
+
+                // CPL cell dengan rowspan
                 if (i === 0) {
-                    html += `<td rowspan="${cpmks.length}" class="align-middle cpl-col">
+                    html += `<td rowspan="${cpmks.length}" class="align-middle" style="font-size:13px;">
                     <span class="cpl-tag">${cplLabel}</span>
                 </td>`;
                 }
-                html += `<td class="cpmk-col align-middle">
+
+                // CPMK cell
+                html += `<td class="align-middle" style="font-size:13px;">
                 <strong>CPMK ${cpmk.no}</strong><br>
                 <small style="color:var(--text-muted);font-size:11.5px;">${cpmk.narasi || ''}</small>
             </td>`;
-                allSubs.forEach(subNo => {
-                    const hasSub = cpmk.subs.some(s => s.no === subNo);
+
+                // Sub CPMK cells — SEMUA kolom (1..maxSub) untuk setiap CPMK
+                subColumns.forEach(subNo => {
+                    const cplKey = cplId;
+                    const cpmkKey = String(cpmk.no);
+                    const isChecked = state.mapping?.[cplKey]?.[cpmkKey]?.includes(subNo) || false;
+
                     html += `<td class="text-center align-middle">
-                    ${hasSub
-                        ? `<input type="checkbox" class="mapping-checkbox"
-                              data-cpl="${cplId}" data-cpmk="${cpmk.no}" data-sub="${subNo}">`
-                        : '<span style="color:#cbd5e1;">—</span>'}
-                </td>`;
+        <input type="checkbox"
+            class="mapping-checkbox form-check-input"
+            style="width:20px;height:20px;cursor:pointer;accent-color:var(--primary);"
+            data-cpl="${cplId}"
+            data-cpmk="${cpmk.no}"
+            data-sub="${subNo}"
+            ${isChecked ? 'checked' : ''}>
+    </td>`;
                 });
+
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
-        });
-    }
-
-    function saveMapping() {
-        state.mapping = {};
-        document.querySelectorAll('.mapping-checkbox:checked').forEach(cb => {
-            const {
-                cpl,
-                cpmk,
-                sub
-            } = cb.dataset;
-            if (!state.mapping[cpl]) state.mapping[cpl] = {};
-            if (!state.mapping[cpl][cpmk]) state.mapping[cpl][cpmk] = [];
-            state.mapping[cpl][cpmk].push(parseInt(sub));
         });
     }
 
@@ -1882,6 +2071,56 @@
     const CSRF_TOKEN = '<?= csrf_token() ?>';
     const CSRF_HASH = '<?= csrf_hash() ?>';
     const PERKULIAHAN_ID = <?= (int)($porto['id_perkuliahan'] ?? 0) ?>;
+    const DB_CPMKS = <?= json_encode(
+                            array_map(function ($cpmk) {
+                                return [
+                                    'id'     => (int) $cpmk['id'],
+                                    // Ambil angka dari "CPMK-01" → 1
+                                    'no'     => (int) ltrim(str_replace('CPMK-', '', $cpmk['no_cpmk']), '0') ?: 1,
+                                    'id_cpl' => (int) $cpmk['id_cpl'],
+                                    'narasi' => $cpmk['narasi_cpmk'],
+                                    'subs'   => array_map(function ($sub) {
+                                        return [
+                                            'id'     => (int) $sub['id'],
+                                            // Ambil angka dari "Sub-01" → 1
+                                            'no'     => (int) ltrim(str_replace('Sub-', '', $sub['no_sub_cpmk']), '0') ?: 1,
+                                            'narasi' => $sub['narasi_sub_cpmk'],
+                                        ];
+                                    }, $cpmk['subs'] ?? []),
+                                ];
+                            }, $cpmks ?? [])
+                        ) ?>;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Isi state.cpmkList & ID map dari DB
+        if (typeof DB_CPMKS !== 'undefined' && DB_CPMKS.length > 0) {
+            state.cpmkIdMap = {};
+            state.subIdMap = {};
+
+            state.cpmkList = DB_CPMKS.map((c, i) => {
+                const no = i + 1;
+                state.cpmkIdMap[no] = c.id;
+                (c.subs || []).forEach((s) => {
+                    state.subIdMap[`${no}_${s.no}`] = s.id;
+                });
+                return {
+                    no,
+                    cpl: String(c.id_cpl),
+                    narasi: c.narasi,
+                    subs: (c.subs || []).map((s) => ({
+                        no: s.no,
+                        narasi: s.narasi,
+                    })),
+                };
+            });
+        }
+
+        // Auto-resume ke last_step
+        if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
+            goToStep(LAST_STEP);
+        }
+    });
+
 
     // ══════════════════════════════════════════
     //  STATE
@@ -2086,21 +2325,31 @@
     //  STEP 4 — CPMK & Sub CPMK
     // ══════════════════════════════════════════════════════════════
     async function saveStep4AndNext(btn) {
-        saveCPMK(); // sync state.cpmkList
+        saveCPMK(); // sync DOM → state.cpmkList
 
         if (!state.cpmkList.length) {
             showModalAlert('Tambahkan minimal satu CPMK.');
             return;
         }
 
+        // Validasi narasi wajib diisi
+        for (const c of state.cpmkList) {
+            if (!c.narasi || !c.narasi.trim()) {
+                showModalAlert(`CPMK ${c.no} belum diisi narasinya.`);
+                return;
+            }
+        }
+
+        // Payload: cpmk_list sudah mengandung id_cpl dan subs[]
+        // Controller akan otomatis insert mapping dari relasi CPL → CPMK → Sub
         const payload = {
             cpmk_list: state.cpmkList.map((c) => ({
                 no: c.no,
-                id_cpl: c.cpl, // no_cpl string used as id_cpl — in production use actual id
-                narasi: c.narasi,
-                subs: c.subs.map((s) => ({
+                id_cpl: c.cpl, // id CPL dari <select>
+                narasi: c.narasi.trim(),
+                subs: (c.subs || []).map((s) => ({
                     no: s.no,
-                    narasi: s.narasi
+                    narasi: s.narasi || '',
                 })),
             })),
         };
@@ -2110,17 +2359,21 @@
         setBtnLoading(btn, false);
 
         if (res.status === 'success') {
-            // Store returned DB IDs for later steps
-            res.cpmks.forEach((c) => {
+            // Simpan ID dari DB ke state supaya step 6+ bisa pakai
+            state.cpmkIdMap = {};
+            state.subIdMap = {};
+
+            (res.cpmks || []).forEach((c) => {
                 state.cpmkIdMap[c.no] = c.id;
-                c.subs.forEach((s) => {
+                (c.subs || []).forEach((s) => {
                     state.subIdMap[`${c.no}_${s.no}`] = s.id;
                 });
             });
+
             showToast(res.message);
             nextStep();
         } else {
-            showToast(res.message, 'danger');
+            showModalAlert(res.message || 'Gagal menyimpan CPMK.', 'danger');
         }
     }
 
@@ -2128,34 +2381,7 @@
     //  STEP 5 — Pemetaan CPL-CPMK-SubCPMK
     // ══════════════════════════════════════════════════════════════
     async function saveStep5AndNext(btn) {
-        saveMapping(); // sync state.mapping
 
-        // Build flat list from state.mapping { cpl: { cpmk: [sub, ...] } }
-        const mappings = [];
-        Object.entries(state.mapping).forEach(([cplNo, cpmkMap]) => {
-            Object.entries(cpmkMap).forEach(([cpmkNo, subs]) => {
-                subs.forEach((subNo) => {
-                    mappings.push({
-                        id_cpl: cplNo,
-                        id_cpmk: state.cpmkIdMap[cpmkNo] || cpmkNo,
-                        id_sub_cpmk: state.subIdMap[`${cpmkNo}_${subNo}`] || subNo,
-                    });
-                });
-            });
-        });
-
-        setBtnLoading(btn, true);
-        const res = await postJSON(API.mapping, {
-            mappings
-        });
-        setBtnLoading(btn, false);
-
-        if (res.status === 'success') {
-            showToast(res.message);
-            nextStep();
-        } else {
-            showToast(res.message, 'danger');
-        }
     }
 
     // ══════════════════════════════════════════════════════════════
