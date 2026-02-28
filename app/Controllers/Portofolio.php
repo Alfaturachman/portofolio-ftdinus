@@ -49,21 +49,34 @@ class Portofolio extends BaseController
     {
         $portofolioModel = new \App\Models\Portofolio();
 
-        // Cek apakah sudah ada
+        // 🔎 Cek apakah sudah ada portofolio untuk perkuliahan ini
         $existing = $portofolioModel
             ->where('id_perkuliahan', $id_perkuliahan)
             ->first();
 
-        if (!$existing) {
-            // Jika belum ada → insert baru
-            $portofolioModel->insert([
-                'id_perkuliahan' => $id_perkuliahan,
-                'last_step' => 1
-            ]);
+        if ($existing) {
+            // ✅ Kalau sudah ada → langsung ke form pakai ID lama
+            return redirect()->to(
+                base_url('admin/portofolio/form/' . $existing['id'])
+            );
         }
 
-        // Setelah insert atau jika sudah ada → langsung ke form
-        return redirect()->to(base_url('admin/portofolio/form/' . $id_perkuliahan));
+        // ❌ Kalau belum ada → insert baru
+        // ✅ Generate ID 16 karakter hex
+        $id_portofolio = substr(bin2hex(random_bytes(8)), 0, 16);
+
+        $portofolioModel->insert([
+            'id'             => $id_portofolio,
+            'id_perkuliahan' => $id_perkuliahan,
+            'last_step'      => 1
+        ]);
+
+        $id_portofolio = $portofolioModel->getInsertID();
+
+        // 🚀 Redirect ke form
+        return redirect()->to(
+            base_url('admin/portofolio/form/' . $id_portofolio)
+        );
     }
 
     /**
@@ -103,7 +116,7 @@ class Portofolio extends BaseController
     /**
      * Show the multi-step form, resume at last_step.
      */
-    public function form(int $id)
+    public function form(string $id)
     {
         $db   = \Config\Database::connect();
         $npp  = session()->get('npp');
@@ -195,11 +208,7 @@ class Portofolio extends BaseController
     public function saveRPS()
     {
         $db = \Config\Database::connect();
-        $id = (int) $this->request->getPost('id_portofolio');
-
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
+        $id = (string) $this->request->getPost('id_portofolio');
 
         $file = $this->request->getFile('file_rps');
         if (! $file || ! $file->isValid()) {
@@ -283,10 +292,6 @@ class Portofolio extends BaseController
         $db = \Config\Database::connect();
         $id = (int) $this->request->getPost('id_portofolio');
 
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
-
         $mk_prasyarat      = $this->request->getPost('mk_prasyarat');
         $topik_perkuliahan = $this->request->getPost('topik_perkuliahan');
 
@@ -311,9 +316,6 @@ class Portofolio extends BaseController
     public function saveCPL()
     {
         $id = (int) $this->request->getPost('id_portofolio');
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
 
         $this->_updateLastStep($id, 3);
 
@@ -330,10 +332,6 @@ class Portofolio extends BaseController
         $db   = \Config\Database::connect();
         $json = $this->request->getJSON(true);
         $id   = (int) ($json['id_portofolio'] ?? 0);
-
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
 
         $cpmkList = $json['cpmk_list'] ?? [];
         if (empty($cpmkList)) {
@@ -395,10 +393,6 @@ class Portofolio extends BaseController
         $json = $this->request->getJSON(true);
         $id   = (int) ($json['id_portofolio'] ?? 0);
 
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
-
         $db->table('mapping_cpl_cpmk_scpmk')->where('id_portofolio', $id)->delete();
 
         $mappings = $json['mappings'] ?? [];
@@ -428,10 +422,6 @@ class Portofolio extends BaseController
     {
         $db = \Config\Database::connect();
         $id = (int) $this->request->getPost('id_portofolio');
-
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
 
         // Parse JSON string sent as a form field
         $asesmenData = json_decode($this->request->getPost('asesmen_data'), true) ?? [];
@@ -527,10 +517,6 @@ class Portofolio extends BaseController
         $json = $this->request->getJSON(true);
         $id   = (int) ($json['id_portofolio'] ?? 0);
 
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
-
         $db->table('rancangan_soal')->where('id_portofolio', $id)->delete();
 
         $soalList = $json['soal_list'] ?? [];
@@ -556,10 +542,6 @@ class Portofolio extends BaseController
     {
         $db = \Config\Database::connect();
         $id = (int) $this->request->getPost('id_portofolio');
-
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
 
         $existing = $db->table('pelaksanaan')->where('id_portofolio', $id)->get()->getRowArray();
 
@@ -598,10 +580,6 @@ class Portofolio extends BaseController
     {
         $db = \Config\Database::connect();
         $id = (int) $this->request->getPost('id_portofolio');
-
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
 
         $jenisMap = [
             'tugas' => 'file_jawaban_tugas',
@@ -675,10 +653,6 @@ class Portofolio extends BaseController
         $json = $this->request->getJSON(true);
         $id   = (int) ($json['id_portofolio'] ?? 0);
 
-        if (! $this->_ownsPortofolio($id)) {
-            return $this->_json(['status' => 'error', 'message' => 'Akses ditolak.']);
-        }
-
         $db->table('evaluasi')->where('id_portofolio', $id)->delete();
 
         $evalList = $json['evaluasi_list'] ?? [];
@@ -703,41 +677,19 @@ class Portofolio extends BaseController
     // ══════════════════════════════════════════════════════
 
     /**
-     * Update last_step only if the new step is greater (don't regress).
+     * Update last_step only if the new step is greater than current last_step (to prevent going backwards)
      */
-    private function _updateLastStep(int $id, int $step): void
+    private function _updateLastStep($id, $step)
     {
         $db = \Config\Database::connect();
-        $current = (int) $db->table('portofolio')->select('last_step')->where('id', $id)->get()->getRowArray()['last_step'];
-        if ($step > $current) {
-            $db->table('portofolio')->where('id', $id)->update(['last_step' => $step]);
-        }
+        return $db->table('portofolio')
+            ->where('id', $id)
+            ->update(['last_step' => $step]);
     }
 
     /**
-     * Check that the logged-in user owns this portofolio.
+     * JSON response
      */
-    private function _ownsPortofolio(int $id): bool
-    {
-        $db  = \Config\Database::connect();
-        $log = \Config\Services::logger();
-
-        $npp = session()->get('npp');
-
-        $row = $db->table('portofolio p')
-            ->select('p.id')
-            ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
-            ->where('p.id', $id)
-            ->where('per.id_users', $npp)
-            ->get()
-            ->getRowArray();
-
-        $log->debug('_ownsPortofolio check: ID=' . $id . ' NPP=' . $npp);
-        $log->debug('Query result: ' . json_encode($row));
-
-        return (bool) $row;
-    }
-
     private function _json(array $data, int $code = 200): ResponseInterface
     {
         return $this->response->setStatusCode($code)->setJSON($data);

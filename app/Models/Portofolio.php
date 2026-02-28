@@ -14,4 +14,6 @@ class Portofolio extends Model
         'id_perkuliahan',
         'last_step'
     ];
+
+    protected $useAutoIncrement = false;
 }

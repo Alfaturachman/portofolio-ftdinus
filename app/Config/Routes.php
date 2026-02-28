@@ -14,7 +14,8 @@ $routes->get('dashboard', 'Dashboard::index');
 // ── Portofolio index & form ──────────────────────────
 $routes->get('admin/portofolio', 'Portofolio::index');
 $routes->get('admin/portofolio/add', 'Portofolio::add');
-$routes->get('admin/portofolio/form/(:num)', 'Portofolio::form/$1');
+$routes->get('admin/portofolio/form/(:any)', 'Portofolio::form/$1');
+$routes->post('admin/portofolio/start/(:any)', 'Portofolio::start/$1');
 
 // ── Per-step AJAX savers ─────────────────────────────
 // Step 1 — Upload RPS (multipart)

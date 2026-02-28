@@ -246,6 +246,66 @@
         animation: fadeInUp .3s ease forwards;
     }
 </style>
+<style>
+    .mk-compact {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mk-code-pill {
+        background: var(--primary);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    }
+
+    .class-badge {
+        background: #f1f5f9;
+        color: #334155;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        border: 1px solid #e2e8f0;
+    }
+
+    .hover-card {
+        position: relative;
+    }
+
+    .hover-card:hover::after {
+        content: attr(data-info);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .hover-card:hover::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #1e293b;
+        margin-bottom: -4px;
+    }
+</style>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
@@ -345,7 +405,9 @@
             </div>
             <div class="modal-footer border-top-0 pt-0 gap-2">
                 <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                <button class="btn btn-success btn-sm px-4" id="btnDetailBikin" onclick="mulaiPortofolio()"><i class="bi bi-play-circle me-1"></i>Mulai</button>
+                <form id="formStart" method="post">
+                    <button class="btn btn-success btn-sm px-4" id="btnDetailBikin" onclick="mulaiPortofolio()"><i class="bi bi-play-circle me-1"></i>Mulai</button>
+                </form>
                 <button class="btn btn-primary btn-sm px-4" id="btnLanjut" onclick="lanjutkanPortofolio()"><i class="bi bi-pencil me-1"></i>Lanjutkan</button>
             </div>
         </div>
@@ -438,7 +500,9 @@
     // Data dari controller (dinamis)
     const portofolioData = <?= json_encode(array_map(function ($d) {
                                 return [
-                                    'id'            => (int)$d['id_portofolio'],
+                                    'id' => !empty($d['id_portofolio'])
+                                        ? (string) $d['id_portofolio']
+                                        : null,
                                     'id_perkuliahan' => (int)$d['id_perkuliahan'],
                                     'nama_mk'       => $d['nama_mk'],
                                     'kode_mk'       => $d['kode_mk'],
@@ -455,7 +519,7 @@
                                     },
                                     // field opsional (isi default jika belum ada di query)
                                     'prodi'         => $d['prodi']        ?? '-',
-                                    'smt'           => $d['smt']          ?? '-',
+                                    'kode_kelas'    => $d['kode_kelas']          ?? '-',
                                     'kelompok_mk'   => $d['kelompok_mk']  ?? '-',
                                     'kurikulum'     => $d['nama_kurikulum'],
                                     'mk_prasyarat'  => $d['mk_prasyarat'] ?? '-',
@@ -465,6 +529,7 @@
                             }, $portofolios)) ?>;
 
     let currentDetailId = null;
+    let currentIdPerkuliahan = null;
     const modalDetail = new bootstrap.Modal('#modalDetail');
     const modalDelete = new bootstrap.Modal('#modalDelete');
     const modalFilter = new bootstrap.Modal('#modalFilter');
@@ -502,14 +567,19 @@
             tr.style.animationDelay = `${idx * 0.04}s`;
             tr.innerHTML = `
             <td style="font-size:12.5px;color:var(--text-muted);font-weight:600;">${idx + 1}</td>
-            <td>
-                <div class="mk-cell">
-                    <div class="mk-name">${d.nama_mk}</div>
-                    <div class="mk-meta">
-                        <span class="mk-code">${d.kode_mk}</span>${d.kelompok_mk} &middot; ${d.prodi} &middot; Smt ${d.smt}
-                    </div>
+                    <td>
+            <div class="mk-cell">
+                <div class="mk-name">${d.nama_mk}</div>
+                <div class="mk-compact mt-1">
+                    <span class="mk-code-pill hover-card" data-info="Kode MK: ${d.kode_mk}">
+                        ${d.kode_mk}
+                    </span>
+                    <span class="class-badge hover-card" data-info="Kelas: ${d.kode_kelas}">
+                        <i class="bi bi-people me-1"></i>${d.kode_kelas}
+                    </span>
                 </div>
-            </td>
+            </div>
+        </td>
             <td>
                 <div style="font-size:13px;font-weight:600;">${d.dosen.split(',')[0]}</div>
                 <div style="font-size:11.5px;color:var(--text-muted);">${d.dosen.split(',').slice(1).join(',').trim() || ''}</div>
@@ -530,9 +600,9 @@
             <td>${getStatusBadge(d.status)}</td>
             <td>
                 <div class="d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-primary" title="Detail" onclick="openDetail(${d.id})"><i class="bi bi-eye"></i></button>
-                    <a href="<?= base_url('admin/portofolio/form/') ?>${d.id}" class="btn btn-sm btn-outline-success" title="Lanjutkan"><i class="bi bi-pencil"></i></a>
-                    <button class="btn btn-sm btn-outline-danger" title="Hapus" onclick="deletePortofolio(${d.id})"><i class="bi bi-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-primary" title="Detail" onclick="openDetail(${d.id ? `'${d.id}'` : 'null'}, ${d.id_perkuliahan})"><i class="bi bi-eye"></i></button>
+                    ${d.id ? `<a href="<?= base_url('admin/portofolio/form/') ?>${d.id}" class="btn btn-sm btn-outline-success" title="Lanjutkan"><i class="bi bi-pencil"></i></a>` : ''}
+                    ${d.id ? `<button class="btn btn-sm btn-outline-danger" title="Hapus" onclick="deletePortofolio('${d.id}')"><i class="bi bi-trash"></i></button>` : ''}
                 </div>
             </td>`;
             tbody.appendChild(tr);
@@ -548,10 +618,26 @@
     // ══════════════════════════════════
     //  DETAIL MODAL
     // ══════════════════════════════════
-    function openDetail(id) {
-        const d = portofolioData.find(x => x.id === id);
+    function openDetail(id, id_perkuliahan) {
+        console.log("Detail diklik", id, id_perkuliahan);
+        console.log(portofolioData);
+        console.log("id portofolio:", typeof id, id);
+        console.log(typeof portofolioData[0].id_perkuliahan);
+        console.log(typeof id_perkuliahan);
+        let d;
+
+        if (!id) {
+            d = portofolioData.find(x => x.id_perkuliahan === parseInt(id_perkuliahan));
+        } else {
+            d = portofolioData.find(x => x.id === id);
+        }
         if (!d) return;
-        currentDetailId = id;
+
+        // Call showDetail to handle button visibility
+        // Pass id_perkuliahan and id_portofolio (d.id)
+        // Note: d.id is the portofolio ID (could be null/undefined for rows without portfolio)
+        const idPortofolio = d.id || null;
+        showDetail(d.id_perkuliahan, idPortofolio);
 
         document.getElementById('detailMKName').textContent = `${d.nama_mk}`;
         document.getElementById('detailMKMeta').textContent = `${d.kode_mk} — ${d.prodi} — ${d.tahun} ${d.semester}`;
@@ -613,7 +699,9 @@
 
     function mulaiPortofolio() {
         modalDetail.hide();
-        window.location.href = '<?= base_url('admin/portofolio/start/') ?>' + currentDetailId;
+        const form = document.getElementById('formStart');
+        form.action = '<?= base_url('admin/portofolio/start/') ?>' + currentIdPerkuliahan;
+        form.submit();
     }
 
     function lanjutkanPortofolio() {
@@ -623,14 +711,16 @@
 
     // show Detail Button hanya jika belum ada portofolio
     function showDetail(id_perkuliahan, id) {
-        currentDetailId = id_perkuliahan;
+        currentIdPerkuliahan = id_perkuliahan;
 
         if (id) {
-            // Sudah ada portofolio
+            // Sudah ada portofolio - tampilkan tombol Lanjutkan, sembunyikan Mulai
+            currentDetailId = id; // id_portofolio
             document.getElementById('btnDetailBikin').classList.add('d-none');
             document.getElementById('btnLanjut').classList.remove('d-none');
         } else {
-            // Belum ada
+            // Belum ada portofolio - tampilkan tombol Mulai, sembunyikan Lanjutkan
+            currentDetailId = id_perkuliahan;
             document.getElementById('btnDetailBikin').classList.remove('d-none');
             document.getElementById('btnLanjut').classList.add('d-none');
         }
@@ -652,7 +742,7 @@
     }
 
     function confirmDelete() {
-        const id = parseInt(document.getElementById('deleteId').value);
+        const id = document.getElementById('deleteId').value;
         const idx = portofolioData.findIndex(d => d.id === id);
         if (idx !== -1) portofolioData.splice(idx, 1);
         renderTable(portofolioData);

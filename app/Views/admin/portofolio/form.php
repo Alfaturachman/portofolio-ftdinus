@@ -507,16 +507,8 @@
                             </span>
                         </div>
 
-                        <!-- Tombol ganti file (toggle) -->
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-secondary mb-3"
-                            onclick="toggleReplaceRPS()">
-                            <i class="fas fa-exchange-alt me-1"></i> Ganti File RPS
-                        </button>
-
                         <!-- Area upload pengganti (hidden by default) -->
-                        <div id="replaceRPSArea" class="d-none">
+                        <div id="replaceRPSArea">
                             <div class="upload-zone" id="rpsZone" onclick="document.getElementById('rps_file').click()">
                                 <input type="file" id="rps_file"
                                     accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -1056,31 +1048,30 @@
     </div>
 </div>
 
+<!-- Toast Modal -->
+<div class="modal fade" id="toastModal" tabindex="-1" aria-labelledby="toastModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header" id="toastModalHeader">
+                <h5 class="modal-title" id="toastModalLabel">
+                    <i class="fas fa-check-circle me-2"></i> Berhasil
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="toastModalBody">
+                Pesan akan ditampilkan di sini
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
-    // ══════════════════════════════════════════
-    //  STATE
-    // ══════════════════════════════════════════
-    let currentStep = 1;
-    const TOTAL_STEPS = 10;
-
-    const state = {
-        rpsFile: null,
-        mk: {},
-        cpl: [],
-        cpmkList: [],
-        assessment: {
-            tugas: false,
-            uts: false,
-            uas: false
-        },
-        soalData: {},
-        mapping: {},
-        cpmkValues: {},
-    };
-
     // ── Demo Data ──
     const mkDatabase = [{
             nama_mk: 'Pemrograman Web',
@@ -1282,11 +1273,6 @@
         state.mk.mk_prasyarat = document.getElementById('mk_prasyarat').value;
         state.mk.topik_mk = document.getElementById('topik_mk').value;
     }
-
-    // Click outside to close
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#mkSearch') && !e.target.closest('#mkDropdown')) hideDropdown();
-    });
 
     // ══════════════════════════════════════════
     //  STEP 3 — CPL Table
@@ -1814,21 +1800,40 @@
     // ══════════════════════════════════════════
     function handleFileSelect(input, zoneId, previewId) {
         const file = input.files[0];
-        const zone = document.getElementById(zoneId);
-        if (file) {
-            zone.classList.add('has-file');
-            const preview = document.getElementById(previewId);
-            preview.style.display = 'block';
-            preview.innerHTML = `<i class="fas fa-check-circle me-1"></i>${file.name}`;
-            document.getElementById('rpsStatus').style.display = 'flex';
-            document.getElementById('rpsFileName').textContent = file.name;
-            document.getElementById('rpsFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
-            state.rpsFile = file;
+        if (!file) return;
 
-            // Show iframe for PDF
-            if (file.type === 'application/pdf') {
-                const url = URL.createObjectURL(file);
-                document.getElementById('rpsPdfViewer').innerHTML = `<iframe src="${url}" width="100%" height="100%" style="border:none;"></iframe>`;
+        const preview = document.getElementById(previewId);
+        if (preview) {
+            preview.style.display = 'block';
+            preview.innerText = file.name;
+        }
+
+        // PREVIEW PDF
+        if (file.type === "application/pdf") {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const viewer = document.getElementById('rpsPdfViewer');
+                if (viewer) {
+                    viewer.innerHTML = `
+                    <iframe src="${e.target.result}"
+                        width="100%"
+                        height="100%"
+                        style="border:none;">
+                    </iframe>
+                `;
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // For non-PDF files, show a message
+            const viewer = document.getElementById('rpsPdfViewer');
+            if (viewer) {
+                viewer.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-file" style="font-size:48px;margin-bottom:10px;opacity:.3;"></i>
+                        <p style="font-size:13px;">Preview tidak tersedia untuk format ${file.type}</p>
+                    </div>
+                `;
             }
         }
     }
@@ -1904,40 +1909,36 @@
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 992) closeSidebar();
     });
-
-    // Init
-    renderMKDropdown();
 </script>
 <script>
     // Inject PHP constants - handle case where $porto may not exist
     const BASE_URL = '<?= base_url() ?>';
-    const PORTO_ID = <?= isset($porto['id']) && $porto['id'] ? (int)$porto['id'] : 0 ?>;
-    const LAST_STEP = <?= isset($last_step) ? (int)$last_step : 1 ?>;
-    const CSRF_TOKEN = '<?= csrf_token() ?>'; // Nama field, misal 'csrf_test_name'
-    const CSRF_HASH = '<?= csrf_hash() ?>'; // Value token
-    /**
-     * ══════════════════════════════════════════════════════════════
-     *  PORTOFOLIO FORM — AJAX Integration Snippet
-     *  Tambahkan / gabungkan ke dalam section scripts di form.php
-     * ══════════════════════════════════════════════════════════════
-     *
-     *  Asumsi:
-     *   - BASE_URL dan PORTO_ID di-inject dari PHP:
-     *       const BASE_URL  = '<?= base_url() ?>';
-     *       const PORTO_ID  = <?= $porto['id'] ?>;
-     *       const LAST_STEP = <?= $last_step ?>;
-     *       const CSRF_NAME  = '<?= csrf_token() ?>';
-     *       const CSRF_HASH  = '<?= csrf_hash() ?>';
-     *   - state.cpmkIdMap = {} — diisi setelah step 4 berhasil
-     *     (mapping no_cpmk -> id dari DB)
-     *   - state.asesmenIdMap = {} — diisi setelah step 6
-     *     (mapping jenis_asesmen+id_cpmk -> id dari DB)
-     */
+    const PORTO_ID = <?= json_encode($porto['id'] ?? '') ?>;
+    const LAST_STEP = <?= (int)($last_step ?? 1) ?>;
+    const CSRF_TOKEN = '<?= csrf_token() ?>';
+    const CSRF_HASH = '<?= csrf_hash() ?>';
+    const PERKULIAHAN_ID = <?= (int)($porto['id_perkuliahan'] ?? 0) ?>;
 
-    // ── Inject dari PHP (letakkan di atas scripts) ──────────────
-    // const BASE_URL  = '<?= base_url() ?>';
-    // const PORTO_ID  = <?= $porto['id'] ?>;
-    // const LAST_STEP = <?= $last_step ?>;
+    // ══════════════════════════════════════════
+    //  STATE
+    // ══════════════════════════════════════════
+    let currentStep = 1;
+    const TOTAL_STEPS = 10;
+
+    const state = {
+        rpsFile: null,
+        mk: {},
+        cpl: [],
+        cpmkList: [],
+        assessment: {
+            tugas: false,
+            uts: false,
+            uas: false
+        },
+        soalData: {},
+        mapping: {},
+        cpmkValues: {},
+    };
 
     const API = {
         rps: BASE_URL + 'admin/portofolio/step/rps',
@@ -2001,23 +2002,23 @@
         }
     }
 
+
     // ══════════════════════════════════════════════════════════════
     //  STEP 1 — Upload RPS
     // ══════════════════════════════════════════════════════════════
-    // Toggle area ganti RPS
-    function toggleReplaceRPS() {
-        const area = document.getElementById('replaceRPSArea');
-        area.classList.toggle('d-none');
-    }
-
-    // Override saveStep1AndNext agar skip upload jika RPS sudah ada dan tidak diganti
-    const HAS_RPS = <?= !empty($rps['file_rps']) ? 'true' : 'false' ?>;
-
     /**
      * Serve file RPS untuk ditampilkan di iframe (hanya pemilik)
      */
 
     async function saveStep1AndNext(btn) {
+        // Validate PORTO_ID
+        if (!PORTO_ID) {
+            showModalAlert('ID Portofolio tidak valid. Silakan refresh halaman atau mulai ulang.');
+            console.error('PORTO_ID is empty or invalid');
+            return;
+        }
+
+        const HAS_RPS = <?= !empty($rps['file_rps']) ? 'true' : 'false' ?>;
         const fileInput = document.getElementById('rps_file');
         const hasNewFile = fileInput && fileInput.files.length > 0;
 
@@ -2034,27 +2035,53 @@
         }
 
         // Ada file baru → upload
+        const file = fileInput.files[0];
+
+        // Validate file type
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        if (!allowedTypes.includes(file.type)) {
+            showModalAlert('Format file tidak diizinkan. Gunakan PDF/DOC/DOCX.');
+            return;
+        }
+
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            showModalAlert('Ukuran file maksimal 10 MB.');
+            return;
+        }
+
         setBtnLoading(btn, true);
         const fd = new FormData();
-        fd.append('file_rps', fileInput.files[0]);
-        const res = await postForm(API.rps, fd);
-        setBtnLoading(btn, false);
+        fd.append('id_portofolio', PORTO_ID);
+        fd.append('file_rps', file);
 
-        if (res.status === 'success') {
-            showToast(res.message);
-            nextStep();
-        } else {
-            showToast(res.message, 'danger');
+        try {
+            const res = await postForm(API.rps, fd);
+            setBtnLoading(btn, false);
+
+            if (res.status === 'success') {
+                showToast(res.message);
+                // Reload page to show updated RPS preview
+                setTimeout(() => {
+                    nextStep();
+                }, 500);
+            } else {
+                showToast(res.message || 'Gagal menyimpan RPS.', 'danger');
+            }
+        } catch (error) {
+            setBtnLoading(btn, false);
+            console.error('Upload error:', error);
+            showModalAlert('Terjadi kesalahan saat mengupload file. Silakan coba lagi.');
         }
     }
 
     // ══════════════════════════════════════════════════════════════
     //  STEP 2 — Info Mata Kuliah
     // ══════════════════════════════════════════════════════════════
-    // Inject PHP — tambahkan ID perkuliahan
-    const PERKULIAHAN_ID = <?= (int)$porto['id_perkuliahan'] ?>;
-    const PORTOFOLIO_ID = <?= (int)$porto['id'] ?>;
-
     async function saveStep2AndNext(btn) {
         const topik = document.getElementById('topik_mk').value.trim();
 
@@ -2066,7 +2093,7 @@
         setBtnLoading(btn, true);
 
         const res = await postJSON(API.infoMK, {
-            id_portofolio: PORTOFOLIO_ID,
+            id_portofolio: PORTO_ID,
             mk_prasyarat: document.getElementById('mk_prasyarat').value,
             topik_perkuliahan: topik
         });
@@ -2369,5 +2396,42 @@
             goToStep(LAST_STEP);
         }
     });
+
+    function showToast(message, type = 'success') {
+        const modalEl = document.getElementById('toastModal');
+        const modalHeader = document.getElementById('toastModalHeader');
+        const modalTitle = document.getElementById('toastModalLabel');
+        const modalBody = document.getElementById('toastModalBody');
+
+        // Reset classes
+        modalHeader.className = 'modal-header';
+
+        // Set style berdasarkan type
+        if (type === 'danger') {
+            modalHeader.classList.add('bg-danger', 'text-white');
+            modalTitle.innerHTML = '<i class="fas fa-times-circle me-2"></i> Gagal';
+        } else if (type === 'warning') {
+            modalHeader.classList.add('bg-warning', 'text-dark');
+            modalTitle.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Peringatan';
+        } else if (type === 'info') {
+            modalHeader.classList.add('bg-info', 'text-white');
+            modalTitle.innerHTML = '<i class="fas fa-info-circle me-2"></i> Informasi';
+        } else {
+            modalHeader.classList.add('bg-success', 'text-white');
+            modalTitle.innerHTML = '<i class="fas fa-check-circle me-2"></i> Berhasil';
+        }
+
+        // Set message
+        modalBody.innerHTML = message;
+
+        // Show modal
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        // Auto close after 3 seconds
+        setTimeout(() => {
+            modal.hide();
+        }, 3000);
+    }
 </script>
 <?= $this->endSection() ?>
