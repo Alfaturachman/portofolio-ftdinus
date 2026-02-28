@@ -413,24 +413,6 @@
     </div>
 </div>
 
-<!-- ══════════════════════ MODAL HAPUS ══════════════════════ -->
-<div class="modal fade" id="modalDelete" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center py-4">
-                <div class="mb-3" style="font-size:40px;color:#ef4444"><i class="bi bi-trash3"></i></div>
-                <p class="fw-bold mb-1">Hapus Portofolio?</p>
-                <p class="text-muted small">Data yang dihapus tidak dapat dikembalikan.</p>
-                <input type="hidden" id="deleteId">
-            </div>
-            <div class="modal-footer justify-content-center border-0 pt-0 pb-3 gap-2">
-                <button class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">Batal</button>
-                <button class="btn btn-danger btn-sm px-4" onclick="confirmDelete()">Hapus</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- ══════════════════════ MODAL FILTER ══════════════════════ -->
 <div class="modal fade" id="modalFilter" tabindex="-1">
     <div class="modal-dialog">
@@ -530,7 +512,6 @@
     let currentDetailId = null;
     let currentIdPerkuliahan = null;
     const modalDetail = new bootstrap.Modal('#modalDetail');
-    const modalDelete = new bootstrap.Modal('#modalDelete');
     const modalFilter = new bootstrap.Modal('#modalFilter');
     let dt;
 
@@ -601,7 +582,7 @@
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-primary" title="Detail" onclick="openDetail(${d.id ? `'${d.id}'` : 'null'}, ${d.id_perkuliahan})"><i class="bi bi-eye"></i></button>
                     ${d.id ? `<a href="<?= base_url('admin/portofolio/form/') ?>${d.id}" class="btn btn-sm btn-outline-success" title="Lanjutkan"><i class="bi bi-pencil"></i></a>` : ''}
-                    ${d.id ? `<button class="btn btn-sm btn-outline-danger" title="Hapus" onclick="deletePortofolio('${d.id}')"><i class="bi bi-trash"></i></button>` : ''}
+                    ${d.id ? `<a href="<?= base_url('admin/cetak/') ?>${d.id}" class="btn btn-sm btn-outline-info" title="Cetak"><i class="bi bi-printer"></i></a>` : ''}
                 </div>
             </td>`;
             tbody.appendChild(tr);
@@ -699,7 +680,7 @@
     function mulaiPortofolio() {
         modalDetail.hide();
         const form = document.getElementById('formStart');
-        form.action = '<?= base_url('admin/portofolio/start/') ?>' + currentIdPerkuliahan;
+        form.action = '<?= base_url('admin/portofolio/add/') ?>' + currentIdPerkuliahan;
         form.submit();
     }
 
@@ -730,23 +711,6 @@
     function setStatus(s) {
         showToast(`Status diubah menjadi: ${s}`, 'warning');
         modalDetail.hide();
-    }
-
-    // ══════════════════════════════════
-    //  DELETE
-    // ══════════════════════════════════
-    function deletePortofolio(id) {
-        document.getElementById('deleteId').value = id;
-        modalDelete.show();
-    }
-
-    function confirmDelete() {
-        const id = document.getElementById('deleteId').value;
-        const idx = portofolioData.findIndex(d => d.id === id);
-        if (idx !== -1) portofolioData.splice(idx, 1);
-        renderTable(portofolioData);
-        modalDelete.hide();
-        showToast('Portofolio berhasil dihapus.', 'danger');
     }
 
     // ══════════════════════════════════

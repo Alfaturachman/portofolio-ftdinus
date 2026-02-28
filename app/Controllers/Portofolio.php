@@ -4,113 +4,48 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\PortofolioModel;
 
 class Portofolio extends BaseController
 {
-    // ══════════════════════════════════════════════════════
-    //  VIEWS
-    // ══════════════════════════════════════════════════════
     public function index()
     {
-        $db  = \Config\Database::connect();
         $npp = session()->get('npp');
 
         log_message('debug', 'NPP SESSION: ' . $npp);
 
-        $query = $db->table('perkuliahan per')
-            ->select('
-            per.id as id_perkuliahan,
-            p.id as id_portofolio,
-            p.last_step,
-            mk.nama_mk, 
-            mk.kode_mk,
-            k.nama_kurikulum,
-            per.tahun_akademik, 
-            per.semester, 
-            per.kode_kelas,
-            u.nama_lengkap
-        ')
-            ->join('portofolio p',   'p.id_perkuliahan = per.id', 'left')
-            ->join('mk',             'mk.id = per.id_mk')
-            ->join('users u',        'u.npp = per.id_users')
-            ->join('kurikulum k',    'k.id = per.id_kurikulum')
-            ->where('per.id_users',  $npp)
-            ->orderBy('per.id', 'DESC')
-            ->get();
-
-        $data['portofolios'] = $query->getResultArray();
+        $portofolioModel = new PortofolioModel();
+        $data['portofolios'] = $portofolioModel->getPortofolioByNpp($npp);
 
         log_message('debug', 'TOTAL DATA: ' . count($data['portofolios']));
 
         return view('admin/portofolio/index', $data);
     }
 
-    public function start($id_perkuliahan)
-    {
-        $portofolioModel = new \App\Models\Portofolio();
-
-        // 🔎 Cek apakah sudah ada portofolio untuk perkuliahan ini
-        $existing = $portofolioModel
-            ->where('id_perkuliahan', $id_perkuliahan)
-            ->first();
-
-        if ($existing) {
-            // ✅ Kalau sudah ada → langsung ke form pakai ID lama
-            return redirect()->to(
-                base_url('admin/portofolio/form/' . $existing['id'])
-            );
-        }
-
-        // ❌ Kalau belum ada → insert baru
-        // ✅ Generate ID 16 karakter hex
-        $id_portofolio = substr(bin2hex(random_bytes(8)), 0, 16);
-
-        $portofolioModel->insert([
-            'id'             => $id_portofolio,
-            'id_perkuliahan' => $id_perkuliahan,
-            'last_step'      => 1
-        ]);
-
-        $id_portofolio = $portofolioModel->getInsertID();
-
-        // 🚀 Redirect ke form
-        return redirect()->to(
-            base_url('admin/portofolio/form/' . $id_portofolio)
-        );
-    }
 
     /**
      * Form add (new portofolio).
      * Creates a new portofolio record and redirects to form step 1.
      */
-    public function add()
+    public function add($id_perkuliahan)
     {
-        $db = \Config\Database::connect();
-        $npp = session()->get('npp');
+        $portofolioModel = new PortofolioModel();
 
-        // Get first perkuliahan for this user as default
-        // User can change MK later in step 2 (Info MK)
-        $perkuliahan = $db->table('perkuliahan per')
-            ->select('per.id, per.id_mk, per.id_kurikulum')
-            ->join('mk', 'mk.id = per.id_mk')
-            ->where('per.id_users', $npp)
-            ->orderBy('per.id', 'DESC')
-            ->get()->getRowArray();
+        // Cek existing
+        $existing = $portofolioModel->findByPerkuliahan($id_perkuliahan);
 
-        if (! $perkuliahan) {
-            // No perkuliahan available, redirect to perkuliahan page
-            return redirect()->to(base_url('admin/perkuliahan'))
-                ->with('error', 'Anda belum memiliki data perkuliahan. Silahkan tambahkan perkuliahan terlebih dahulu.');
+        if ($existing) {
+            return redirect()->to(
+                base_url('admin/portofolio/form/' . $existing['id'])
+            );
         }
 
-        // Create portofolio skeleton
-        $db->table('portofolio')->insert([
-            'id_perkuliahan' => $perkuliahan['id'],
-            'last_step'      => 1,
-        ]);
-        $portofolio_id = $db->insertID();
+        // Buat baru lewat model
+        $id_portofolio = $portofolioModel->createPortofolio($id_perkuliahan);
 
-        return redirect()->to(base_url("admin/portofolio/form/{$portofolio_id}"));
+        return redirect()->to(
+            base_url('admin/portofolio/form/' . $id_portofolio)
+        );
     }
 
     /**
@@ -118,84 +53,17 @@ class Portofolio extends BaseController
      */
     public function form(string $id)
     {
-        $db   = \Config\Database::connect();
-        $npp  = session()->get('npp');
+        $npp = session()->get('npp');
+        $model = new PortofolioModel();
 
-        $porto = $db->table('portofolio p')
-            ->select('p.*, per.id_mk, per.id_kurikulum, per.id_users,
-                      mk.nama_mk, mk.kode_mk, mk.kelp_mk, mk.teori, mk.praktek,
-                      k.tahun_ajaran, k.nama_kurikulum,
-                      per.semester, per.tahun_akademik, per.kode_kelas')
-            ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
-            ->join('mk', 'mk.id = per.id_mk')
-            ->join('kurikulum k', 'k.id = per.id_kurikulum')
-            ->where('p.id', $id)
-            ->get()->getRowArray();
+        $data = $model->getFormData($id);
 
-        if (! $porto || $porto['id_users'] !== $npp) {
-            return redirect()->to(base_url('admin/portofolio'))->with('error', 'Portofolio tidak ditemukan.');
+        if (!$data || $data['porto']['id_users'] !== $npp) {
+            return redirect()->to(base_url('admin/portofolio'))
+                ->with('error', 'Portofolio tidak ditemukan.');
         }
-
-        // ── Existing step data (to prefill the form via JSON) ──
-        $data['porto']     = $porto;
-        $data['last_step'] = (int) $porto['last_step'];
-
-        // RPS
-        $data['rps'] = $db->table('rps')->where('id_portofolio', $id)->get()->getRowArray();
-
-        // Informasi MK
-        $data['info_mk'] = $db->table('informasi_mk')->where('id_portofolio', $id)->get()->getRowArray();
-
-        // CPL & PI for this MK-kurikulum
-        $data['cpls'] = $db->table('mk_cpl_pi mcp')
-            ->select('cpl.id, cpl.no_cpl, cpl.cpl_indo, cpl.cpl_inggris, pi.id as id_pi, pi.no_pi, pi.isi_pi')
-            ->join('cpl', 'cpl.id = mcp.id_cpl')
-            ->join('pi', 'pi.id = mcp.id_pi')
-            ->where('mcp.id_mk', $porto['id_mk'])
-            ->where('mcp.id_kurikulum', $porto['id_kurikulum'])
-            ->get()->getResultArray();
-
-        // CPMK
-        $cpmks = $db->table('cpmk')->where('id_portofolio', $id)->orderBy('no_cpmk')->get()->getResultArray();
-        foreach ($cpmks as &$cpmk) {
-            $cpmk['subs'] = $db->table('sub_cpmk')
-                ->where('id_cpmk', $cpmk['id'])
-                ->orderBy('no_sub_cpmk')
-                ->get()->getResultArray();
-        }
-        $data['cpmks'] = $cpmks;
-
-        // Pemetaan CPL-CPMK-SubCPMK
-        $data['mapping'] = $db->table('pemetaan')
-            ->select('id, id_portofolio, id_cpl, id_cpmk, id_sub_cpmk, is_active')
-            ->where('id_portofolio', $id)
-            ->get()->getResultArray();
 
         log_message('debug', 'Step 5: Loaded ' . count($data['mapping']) . ' mappings for id_portofolio=' . $id);
-
-        // Rancangan Asesmen
-        $data['asesmen'] = $db->table('rancangan_asesmen')
-            ->where('id_portofolio', $id)->get()->getResultArray();
-
-        // Rancangan Soal
-        $data['soal'] = $db->table('rancangan_soal rs')
-            ->select('rs.*, ra.jenis_asesmen, ra.id_cpmk')
-            ->join('rancangan_asesmen ra', 'ra.id = rs.id_asesmen')
-            ->where('rs.id_portofolio', $id)
-            ->get()->getResultArray();
-
-        // Pelaksanaan
-        $data['pelaksanaan'] = $db->table('pelaksanaan')->where('id_portofolio', $id)->get()->getRowArray();
-
-        // Hasil Asesmen
-        $data['hasil_asesmen'] = $db->table('hasil_asesmen')->where('id_portofolio', $id)->get()->getResultArray();
-
-        // Nilai MK & CPMK
-        $data['nilai_matkul'] = $db->table('nilai_matkul')->where('id_portofolio', $id)->get()->getRowArray();
-        $data['nilai_cpmk']   = $db->table('nilai_cpmk')->where('id_portofolio', $id)->get()->getRowArray();
-
-        // Evaluasi
-        $data['evaluasi'] = $db->table('evaluasi')->where('id_portofolio', $id)->get()->getResultArray();
 
         return view('admin/portofolio/form', $data);
     }

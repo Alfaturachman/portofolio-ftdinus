@@ -1181,6 +1181,7 @@
     }
 
     function onStepEnter(n) {
+        if (n === 1) loadDataRPS();
         if (n === 2) renderMKDropdown();
         if (n === 3) loadDataCPLPI();
         if (n === 4) loadDataMapping();
@@ -1190,6 +1191,48 @@
         if (n === 8) renderPelaksanaan();
         if (n === 9) loadDataHasilAsesmen();
         if (n === 10) loadDataEvaluasi();
+    }
+
+    // ══════════════════════════════════════════
+    //  STEP 1 — RPS
+    // ══════════════════════════════════════════
+    function loadDataRPS() {
+        const DB_RPS = <?= json_encode($rps ?? []) ?>;
+
+        if (!DB_RPS || !DB_RPS.file_rps) return; // Belum ada RPS, tampilan default sudah benar
+
+        // Update file name display
+        const rpsFileNameEl = document.getElementById('rpsFileName');
+        if (rpsFileNameEl) {
+            rpsFileNameEl.textContent = DB_RPS.file_rps;
+        }
+
+        // Update iframe preview jika sudah ada iframe
+        const viewer = document.getElementById('rpsPdfViewer');
+        if (!viewer) return;
+
+        // Cek apakah iframe sudah ada dengan src yang benar
+        const existingIframe = viewer.querySelector('iframe');
+        const correctSrc = BASE_URL + 'admin/portofolio/rps/' + DB_RPS.file_rps;
+
+        if (existingIframe) {
+            // Iframe sudah ada, pastikan src-nya benar
+            if (existingIframe.src !== correctSrc) {
+                existingIframe.src = correctSrc;
+            }
+        } else {
+            // Iframe belum ada (misal user baru pilih file non-PDF sebelumnya)
+            viewer.style.height = '420px';
+            viewer.style.background = '';
+            viewer.style.display = '';
+            viewer.innerHTML = `
+            <iframe src="${correctSrc}"
+                width="100%"
+                height="100%"
+                style="border:none;">
+            </iframe>
+        `;
+        }
     }
 
     // ══════════════════════════════════════════
@@ -1830,7 +1873,12 @@
             const tr = document.createElement('tr');
 
             // Check which assessments are already selected for this CPMK
-            const selectedAssessments = state.assessmentByCpmk[c.no] || [];
+            const globalAssessments = [];
+            if (state.assessment.tugas) globalAssessments.push('tugas');
+            if (state.assessment.uts) globalAssessments.push('uts');
+            if (state.assessment.uas) globalAssessments.push('uas');
+            const selectedAssessments = state.assessmentByCpmk?.[c.no] || globalAssessments;
+
             const tugasChecked = selectedAssessments.includes('tugas') ? 'checked' : '';
             const utsChecked = selectedAssessments.includes('uts') ? 'checked' : '';
             const uasChecked = selectedAssessments.includes('uas') ? 'checked' : '';
@@ -2627,17 +2675,30 @@
             DB_ASSESSMEN.forEach(a => {
                 const jenis = a.jenis_asesmen.toLowerCase();
 
-                // Tandai jenis aktif
                 if (jenis === 'tugas') state.assessment.tugas = true;
                 if (jenis === 'uts') state.assessment.uts = true;
                 if (jenis === 'uas') state.assessment.uas = true;
 
-                // Bangun asesmenIdMap: "tugas_1" -> db_id
                 const cpmkNo = Object.keys(state.cpmkIdMap).find(
                     key => Number(state.cpmkIdMap[key]) === Number(a.id_cpmk)
                 );
                 if (cpmkNo) {
                     state.asesmenIdMap[`${jenis}_${cpmkNo}`] = a.id;
+
+                    if (!state.assessmentByCpmk) state.assessmentByCpmk = {};
+                    if (!state.assessmentByCpmk[cpmkNo]) state.assessmentByCpmk[cpmkNo] = [];
+                    if (!state.assessmentByCpmk[cpmkNo].includes(jenis)) {
+                        state.assessmentByCpmk[cpmkNo].push(jenis);
+                    }
+                }
+
+                // Simpan nama file soal & rubrik untuk masing-masing jenis asesmen
+                const typeCapitalized = jenis.charAt(0).toUpperCase() + jenis.slice(1);
+                if (a.file_soal) {
+                    state.existingFiles[typeCapitalized + 'Soal'] = a.file_soal;
+                }
+                if (a.file_rubrik) {
+                    state.existingFiles[typeCapitalized + 'Rubrik'] = a.file_rubrik;
                 }
             });
 
@@ -2724,7 +2785,7 @@
         soalData: {},
         mapping: {},
         cpmkValues: {},
-        existingFiles: {}, // Store existing file names: { tugasSoal: 'filename.pdf', ... }
+        existingFiles: {},
     };
 
     const API = {
