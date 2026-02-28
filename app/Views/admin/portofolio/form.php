@@ -1951,19 +1951,18 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 7 — Rancangan Asesmen
+    //  STEP 7 — Rancangan Soal
     // ══════════════════════════════════════════
     function loadDataRancanganSoal() {
         const container = document.getElementById('soalContainer');
         container.innerHTML = '';
 
-        // Guard: pastikan state.cpmkList sudah terisi
         if (!state.cpmkList.length) {
             container.innerHTML = `
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                Data CPMK belum tersedia. Kembali ke Tahap 4.
-            </div>`;
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Data CPMK belum tersedia. Kembali ke Tahap 4.
+        </div>`;
             return;
         }
 
@@ -1987,17 +1986,17 @@
 
         if (!orderedTypes.length) {
             container.innerHTML = `
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                Belum ada jenis asesmen yang dipilih. Kembali ke Tahap 6 untuk memilih.
-            </div>`;
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Belum ada jenis asesmen yang dipilih. Kembali ke Tahap 6.
+        </div>`;
             return;
         }
 
         const cpmkNos = state.cpmkList.map(c => c.no);
 
         orderedTypes.forEach(type => {
-            // Inisialisasi soalData jika kosong
+            // Inisialisasi jika kosong — JANGAN reset jika sudah ada datanya
             if (!state.soalData[type.key] || !state.soalData[type.key].length) {
                 state.soalData[type.key] = [{
                     soal_no: 1,
@@ -2007,102 +2006,119 @@
 
             const soalList = state.soalData[type.key];
 
-            // Build header CPMK
             const cpmkHeaders = cpmkNos.map(no =>
                 `<th class="text-center align-middle" style="min-width:80px;font-size:12px;">CPMK ${no}</th>`
             ).join('');
 
-            // Build rows
+            // Gunakan INDEX (i) sebagai data-soal — bukan soal_no
             const rows = soalList.map((soal, i) => {
                 const cells = cpmkNos.map(cno => {
                     const checked = soal.cpmk_mappings && soal.cpmk_mappings[cno] ? 'checked' : '';
                     return `
-                    <td class="text-center align-middle">
-                        <input type="checkbox"
-                            class="soal-cb form-check-input"
-                            style="width:18px;height:18px;cursor:pointer;accent-color:var(--primary);"
-                            data-type="${type.key}"
-                            data-soal="${i}"
-                            data-cpmk="${cno}"
-                            ${checked}>
-                    </td>`;
+                <td class="text-center align-middle">
+                    <input type="checkbox"
+                        class="soal-cb form-check-input"
+                        style="width:18px;height:18px;cursor:pointer;accent-color:var(--primary);"
+                        data-type="${type.key}"
+                        data-soal="${i}"
+                        data-cpmk="${cno}"
+                        ${checked}>
+                </td>`;
                 }).join('');
 
                 const deleteBtn = soalList.length > 1 ?
                     `<button type="button" class="btn btn-sm btn-outline-danger px-2"
-                        onclick="removeSoal('${type.key}', ${i})">
+                        onclick="removeRancanganSoal('${type.key}', ${i})">
                         <i class="fas fa-trash-alt" style="font-size:11px;"></i>
                    </button>` :
                     `<span style="color:var(--text-muted);font-size:11px;">—</span>`;
 
                 return `
-                <tr>
-                    <td class="text-center align-middle fw-bold" style="font-size:13px;">
-                        Soal no ${soal.soal_no}
-                    </td>
-                    ${cells}
-                    <td class="text-center align-middle">${deleteBtn}</td>
-                </tr>`;
+            <tr>
+                <td class="text-center align-middle fw-bold" style="font-size:13px;">
+                    Soal no ${soal.soal_no}
+                </td>
+                ${cells}
+                <td class="text-center align-middle">${deleteBtn}</td>
+            </tr>`;
             }).join('');
 
-            // Build section
             const section = document.createElement('div');
             section.className = 'mb-5';
             section.setAttribute('data-type', type.key);
             section.innerHTML = `
-            <div class="section-header">
-                <div class="section-dot" style="background:${type.color};"></div>
-                <div class="section-title">${type.label}</div>
-            </div>
-            <div class="alert alert-primary d-flex align-items-center gap-2 py-2 mb-3" style="font-size:13px;">
-                <i class="fas fa-info-circle"></i>
-                Centang CPMK yang diukur oleh masing-masing soal.
-            </div>
-            <div class="table-responsive mb-3">
-                <table class="table table-bordered mb-0">
-                    <thead style="background:#0f4c92;" class="text-white">
-                        <tr class="align-middle text-center">
-                            <th style="min-width:110px;font-size:12px;">Soal No</th>
-                            ${cpmkHeaders}
-                            <th style="min-width:70px;font-size:12px;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>
-            <button type="button" class="btn btn-secondary btn-sm"
-                onclick="addSoal('${type.key}')">
-                <i class="fas fa-plus me-1"></i> Tambah Soal
-            </button>`;
+        <div class="section-header">
+            <div class="section-dot" style="background:${type.color};"></div>
+            <div class="section-title">${type.label}</div>
+        </div>
+        <div class="alert alert-primary d-flex align-items-center gap-2 py-2 mb-3" style="font-size:13px;">
+            <i class="fas fa-info-circle"></i>
+            Centang CPMK yang diukur oleh masing-masing soal.
+        </div>
+        <div class="table-responsive mb-3">
+            <table class="table table-bordered mb-0">
+                <thead style="background:#0f4c92;" class="text-white">
+                    <tr class="align-middle text-center">
+                        <th style="min-width:110px;font-size:12px;">Soal No</th>
+                        ${cpmkHeaders}
+                        <th style="min-width:70px;font-size:12px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm"
+            onclick="addRancanganSoal('${type.key}')">
+            <i class="fas fa-plus me-1"></i> Tambah Soal
+        </button>`;
 
             container.appendChild(section);
         });
     }
 
-    function addSoal(type) {
+    function addRancanganSoal(type) {
+        saveRancanganSoalMapping();
+
         if (!state.soalData[type]) state.soalData[type] = [];
-        state.soalData[type].push({
-            soal_no: state.soalData[type].length + 1,
+
+        const existing = state.soalData[type];
+
+        // Cari nomor terbesar yang ada
+        const maxNo = existing.length ?
+            Math.max(...existing.map(s => s.soal_no)) :
+            0;
+
+        existing.push({
+            soal_no: maxNo + 1,
             cpmk_mappings: {}
         });
+
         loadDataRancanganSoal();
     }
 
-    function removeSoal(type, idx) {
+    function removeRancanganSoal(type, idx) {
+        // WAJIB: sync checkbox DOM → state dulu sebelum render ulang
+        saveRancanganSoalMapping();
+
         state.soalData[type].splice(idx, 1);
         state.soalData[type].forEach(function(s, i) {
             s.soal_no = i + 1;
         });
+
         loadDataRancanganSoal();
     }
 
-    function saveSoalMapping() {
+    function saveRancanganSoalMapping() {
         document.querySelectorAll('.soal-cb').forEach(function(cb) {
-            var type = cb.dataset.type,
-                soal = parseInt(cb.dataset.soal),
-                cpmk = cb.dataset.cpmk;
-            if (state.soalData[type] && state.soalData[type][soal]) {
-                state.soalData[type][soal].cpmk_mappings[cpmk] = cb.checked;
+            var type = cb.dataset.type;
+            var soalIdx = parseInt(cb.dataset.soal); // index array (0-based)
+            var cpmk = cb.dataset.cpmk;
+
+            if (state.soalData[type] && state.soalData[type][soalIdx] !== undefined) {
+                if (!state.soalData[type][soalIdx].cpmk_mappings) {
+                    state.soalData[type][soalIdx].cpmk_mappings = {};
+                }
+                state.soalData[type][soalIdx].cpmk_mappings[cpmk] = cb.checked;
             }
         });
     }
@@ -2706,61 +2722,44 @@
             console.log('state.asesmenIdMap:', state.asesmenIdMap);
         }
 
-        // ── Load state.soalData dari DB_SOAL ──────────────────────────
+        // ── Load state.soalData dari DB_SOAL ──────────────────────
         if (typeof DB_SOAL !== 'undefined' && DB_SOAL.length > 0) {
-            console.log('Loading DB_SOAL:', DB_SOAL);
-
             state.soalData = {};
 
             DB_SOAL.forEach(soal => {
-                // Cari jenis asesmen dari asesmenIdMap
-                const asesmenKey = Object.keys(state.asesmenIdMap).find(
+                // Cari SEMUA asesmenKey yang memiliki id_asesmen ini
+                // (satu nomor_soal bisa ada di banyak id_asesmen karena per CPMK)
+                const matchingKeys = Object.keys(state.asesmenIdMap).filter(
                     key => Number(state.asesmenIdMap[key]) === Number(soal.id_asesmen)
                 );
-                if (!asesmenKey) {
-                    console.warn('id_asesmen tidak ditemukan di asesmenIdMap:', soal.id_asesmen);
-                    return;
-                }
 
-                // asesmenKey format: "tugas_1" → ambil jenis = "tugas"
-                const jenis = asesmenKey.split('_')[0];
+                matchingKeys.forEach(asesmenKey => {
+                    const parts = asesmenKey.split('_');
+                    const jenis = parts[0];
+                    const cpmkNo = parseInt(parts[1]);
 
-                if (!state.soalData[jenis]) state.soalData[jenis] = [];
+                    if (!state.soalData[jenis]) state.soalData[jenis] = [];
 
-                // Cek apakah nomor soal sudah ada
-                let existing = state.soalData[jenis].find(s => s.soal_no === soal.nomor_soal);
-                if (!existing) {
-                    existing = {
-                        soal_no: soal.nomor_soal,
-                        cpmk_mappings: {}
-                    };
-                    state.soalData[jenis].push(existing);
-                }
-
-                // Tandai CPMK mapping
-                // Cari cpmkNo dari id_asesmen → asesmenKey → "jenis_cpmkNo"
-                // Semua asesmen untuk jenis ini, cari cpmkNo yg match
-                Object.keys(state.asesmenIdMap).forEach(key => {
-                    if (
-                        Number(state.asesmenIdMap[key]) === Number(soal.id_asesmen) &&
-                        key.startsWith(jenis + '_')
-                    ) {
-                        const cpmkNo = parseInt(key.split('_')[1]);
-                        existing.cpmk_mappings[cpmkNo] = true;
+                    // Cari entry yang sama berdasarkan soal_no — JANGAN buat duplikat
+                    let existing = state.soalData[jenis].find(s => s.soal_no === soal.nomor_soal);
+                    if (!existing) {
+                        existing = {
+                            soal_no: soal.nomor_soal,
+                            cpmk_mappings: {}
+                        };
+                        state.soalData[jenis].push(existing);
                     }
+                    // Merge: tandai CPMK ini sebagai checked
+                    existing.cpmk_mappings[cpmkNo] = true;
                 });
             });
 
-            // Sort soal per jenis berdasarkan nomor
             Object.keys(state.soalData).forEach(jenis => {
                 state.soalData[jenis].sort((a, b) => a.soal_no - b.soal_no);
             });
-
-            console.log('state.soalData setelah load DB_SOAL:', state.soalData);
         }
 
-
-        // ── 5. Auto-resume ke last_step ────────────────────────────────────────
+        // ── Auto-resume ke last_step ────────────────────────────────────────
         if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
             goToStep(LAST_STEP);
         }
@@ -2802,9 +2801,9 @@
     };
 
     // Track DB IDs returned from server
-    state.cpmkIdMap = {}; // { no_cpmk: db_id }
-    state.subIdMap = {}; // { cpmk_no + '_' + sub_no: db_id }
-    state.asesmenIdMap = {}; // { 'tugas_1': db_id, ... }
+    state.cpmkIdMap = {};
+    state.subIdMap = {};
+    state.asesmenIdMap = {};
 
     // ── Helper: POST JSON ─────────────────────────────────────────
     async function postJSON(url, payload) {
@@ -3157,29 +3156,70 @@
     //  STEP 7 — Rancangan Soal
     // ══════════════════════════════════════════════════════════════
     async function saveStep7AndNext(btn) {
+        // 1. Sync checkbox DOM → state dulu
         saveSoalMapping();
+
         var soalList = [];
+        var seen = new Set(); // deduplikasi id_asesmen + nomor_soal
+
         Object.entries(state.soalData).forEach(function([jenis, soals]) {
             soals.forEach(function(soal) {
                 Object.entries(soal.cpmk_mappings || {}).forEach(function([cpmkNo, checked]) {
                     if (!checked) return;
+
                     var id_asesmen = state.asesmenIdMap[jenis + '_' + cpmkNo];
-                    if (id_asesmen) soalList.push({
+                    if (!id_asesmen) {
+                        console.warn('id_asesmen tidak ditemukan untuk:', jenis + '_' + cpmkNo);
+                        return;
+                    }
+
+                    // Deduplikasi: satu id_asesmen + nomor_soal hanya dikirim sekali
+                    var key = id_asesmen + '_' + soal.soal_no;
+                    if (seen.has(key)) return;
+                    seen.add(key);
+
+                    soalList.push({
                         id_asesmen: id_asesmen,
                         nomor_soal: soal.soal_no
                     });
                 });
             });
         });
+
+        console.log('soalList yang akan dikirim:', soalList);
+
+        if (!soalList.length) {
+            showModalAlert('Centang minimal satu CPMK pada soal yang tersedia.');
+            return;
+        }
+
         setBtnLoading(btn, true);
         var res = await postJSON(API.soal, {
             soal_list: soalList
         });
         setBtnLoading(btn, false);
+
         if (res.status === 'success') {
             showToast(res.message);
             nextStep();
-        } else showToast(res.message, 'danger');
+        } else {
+            showToast(res.message || 'Gagal menyimpan soal.', 'danger');
+        }
+    }
+
+    function saveSoalMapping() {
+        document.querySelectorAll('.soal-cb').forEach(function(cb) {
+            var type = cb.dataset.type;
+            var soalIdx = parseInt(cb.dataset.soal); // index array (0-based)
+            var cpmk = cb.dataset.cpmk;
+
+            if (state.soalData[type] && state.soalData[type][soalIdx] !== undefined) {
+                if (!state.soalData[type][soalIdx].cpmk_mappings) {
+                    state.soalData[type][soalIdx].cpmk_mappings = {};
+                }
+                state.soalData[type][soalIdx].cpmk_mappings[cpmk] = cb.checked;
+            }
+        });
     }
 
     // ══════════════════════════════════════════════════════════════
