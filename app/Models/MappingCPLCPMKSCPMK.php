@@ -36,7 +36,7 @@ class MappingCPLCPMKSCPMK extends Model
     public function getCompleteMapping($id_portofolio)
     {
         return $this->select('
-                mapping_cpl_cpmk_scpmk.*,
+                mapping_cpl_cpmk_scpmk.,
                 cpl.kode_cpl,
                 cpl.narasi_cpl,
                 cpmk.no_cpmk,
@@ -51,11 +51,13 @@ class MappingCPLCPMKSCPMK extends Model
             ->findAll();
     }
 
-    /**
-     * Mendapatkan mapping berdasarkan CPL
-     */
-    public function getByCPL($id_cpl)
+    public function getMapping($idPorto)
     {
-        return $this->where('id_cpl', $id_cpl)->findAll();
+        $rows = $this->where('id_portofolio', $idPorto)->findAll();
+        $map  = [];
+        foreach ($rows as $row) {
+            $map[$row['id_cpmk']][$row['id_sub_cpmk']] = true;
+        }
+        return $map;
     }
 }

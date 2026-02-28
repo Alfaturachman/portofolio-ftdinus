@@ -41,26 +41,14 @@ class SubCPMK extends Model
         ]
     ];
 
-    /**
-     * Mendapatkan Sub CPMK berdasarkan ID CPMK
-     */
-    public function getByIdCPMK($id_cpmk)
+    public function getSubCpmkByPorto($idPorto)
     {
-        return $this->where('id_cpmk', $id_cpmk)->findAll();
-    }
-
-    /**
-     * Mendapatkan Sub CPMK dengan data CPMK
-     */
-    public function getWithCPMK($id = null)
-    {
-        $this->select('sub_cpmk.*, cpmk.no_cpmk, cpmk.narasi_cpmk');
-        $this->join('cpmk', 'cpmk.id = sub_cpmk.id_cpmk');
-
-        if ($id !== null) {
-            return $this->find($id);
-        }
-
-        return $this->findAll();
+        return $this->db->table('sub_cpmk sc')
+            ->select('sc.id, sc.no_sub_cpmk AS no_scpmk,
+                      sc.narasi_sub_cpmk AS isi_scmpk, sc.id_cpmk')
+            ->join('cpmk c', 'c.id = sc.id_cpmk')
+            ->where('c.id_portofolio', $idPorto)
+            ->orderBy('sc.no_sub_cpmk')
+            ->get()->getResultArray();
     }
 }

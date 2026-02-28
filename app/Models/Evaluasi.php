@@ -68,4 +68,14 @@ class Evaluasi extends Model
             ->where('id_portofolio', $id_portofolio)
             ->first();
     }
+
+    public function getEvaluasiByPorto($idPorto)
+    {
+        return $this->db->table('evaluasi e')
+            ->select('e.*, c.no_cpmk')
+            ->join('cpmk c', 'c.id = e.id_cpmk')
+            ->where('e.id_portofolio', $idPorto)
+            ->orderBy('c.no_cpmk')
+            ->get()->getResultArray();
+    }
 }

@@ -802,7 +802,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Soal Tugas (PDF)</label>
-                            <div class="upload-zone" onclick="document.getElementById('soal_tugas').click()">
+                            <div id="tugasSoalExisting" style="display:none;" class="mb-2">
+                                <div class="file-status" style="display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="tugasSoalFileName">—</span>
+                                    <!-- <a href="#" class="ms-2" onclick="showPdfPreview('tugasSoal')" title="Lihat PDF"><i class="fas fa-eye"></i></a> -->
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="tugasSoalUploadZone" onclick="document.getElementById('soal_tugas').click()">
                                 <input type="file" id="soal_tugas" accept="application/pdf" onchange="handleFileUpload(this,'soalTugasStatus')">
                                 <i class="fas fa-file-pdf"></i>
                                 <p>Upload Soal</p>
@@ -811,7 +818,14 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Rubrik Penilaian (PDF)</label>
-                            <div class="upload-zone" onclick="document.getElementById('rubrik_tugas').click()">
+                            <div id="tugasRubrikExisting" style="display:none;" class="mb-2">
+                                <div class="file-status" style="display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="tugasRubrikFileName">—</span>
+                                    <!-- <a href="#" class="ms-2" onclick="showPdfPreview('tugasRubrik')" title="Lihat PDF"><i class="fas fa-eye"></i></a> -->
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="tugasRubrikUploadZone" onclick="document.getElementById('rubrik_tugas').click()">
                                 <input type="file" id="rubrik_tugas" accept="application/pdf" onchange="handleFileUpload(this,'rubrikTugasStatus')">
                                 <i class="fas fa-file-pdf"></i>
                                 <p>Upload Rubrik</p>
@@ -830,7 +844,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Soal UTS (PDF)</label>
-                            <div class="upload-zone" onclick="document.getElementById('soal_uts').click()">
+                            <div id="utsSoalExisting" style="display:none;" class="mb-2">
+                                <div class="file-status" style="display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="utsSoalFileName">—</span>
+                                    <!-- <a href="#" class="ms-2" onclick="showPdfPreview('utsSoal')" title="Lihat PDF"><i class="fas fa-eye"></i></a> -->
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="utsSoalUploadZone" onclick="document.getElementById('soal_uts').click()">
                                 <input type="file" id="soal_uts" accept="application/pdf" onchange="handleFileUpload(this,'soalUtsStatus')">
                                 <i class="fas fa-file-pdf"></i>
                                 <p>Upload Soal</p>
@@ -839,7 +860,14 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Rubrik Penilaian (PDF)</label>
-                            <div class="upload-zone" onclick="document.getElementById('rubrik_uts').click()">
+                            <div id="utsRubrikExisting" style="display:none;" class="mb-2">
+                                <div class="file-status" style="display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="utsRubrikFileName">—</span>
+                                    <!-- <a href="#" class="ms-2" onclick="showPdfPreview('utsRubrik')" title="Lihat PDF"><i class="fas fa-eye"></i></a> -->
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="utsRubrikUploadZone" onclick="document.getElementById('rubrik_uts').click()">
                                 <input type="file" id="rubrik_uts" accept="application/pdf" onchange="handleFileUpload(this,'rubrikUtsStatus')">
                                 <i class="fas fa-file-pdf"></i>
                                 <p>Upload Rubrik</p>
@@ -858,7 +886,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Soal UAS (PDF)</label>
-                            <div class="upload-zone" onclick="document.getElementById('soal_uas').click()">
+                            <div id="uasSoalExisting" style="display:none;" class="mb-2">
+                                <div class="file-status" style="display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="uasSoalFileName">—</span>
+                                    <!-- <a href="#" class="ms-2" onclick="showPdfPreview('uasSoal')" title="Lihat PDF"><i class="fas fa-eye"></i></a> -->
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="uasSoalUploadZone" onclick="document.getElementById('soal_uas').click()">
                                 <input type="file" id="soal_uas" accept="application/pdf" onchange="handleFileUpload(this,'soalUasStatus')">
                                 <i class="fas fa-file-pdf"></i>
                                 <p>Upload Soal</p>
@@ -867,7 +902,14 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Rubrik Penilaian (PDF)</label>
-                            <div class="upload-zone" onclick="document.getElementById('rubrik_uas').click()">
+                            <div id="uasRubrikExisting" style="display:none;" class="mb-2">
+                                <div class="file-status" style="display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="uasRubrikFileName">—</span>
+                                    <!-- <a href="#" class="ms-2" onclick="showPdfPreview('uasRubrik')" title="Lihat PDF"><i class="fas fa-eye"></i></a> -->
+                                </div>
+                            </div>
+                            <div class="upload-zone" id="uasRubrikUploadZone" onclick="document.getElementById('rubrik_uas').click()">
                                 <input type="file" id="rubrik_uas" accept="application/pdf" onchange="handleFileUpload(this,'rubrikUasStatus')">
                                 <i class="fas fa-file-pdf"></i>
                                 <p>Upload Rubrik</p>
@@ -923,26 +965,35 @@
         <div class="form-card-body">
             <div class="alert alert-primary d-flex align-items-center gap-2 mb-4">
                 <i class="fas fa-info-circle"></i>
-                Upload dokumentasi pelaksanaan perkuliahan (foto kegiatan, daftar hadir, dll).
+                Upload dokumentasi pelaksanaan perkuliahan (kontrak kuliah, realisasi mengajar, kehadiran).
             </div>
             <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Foto Kegiatan (PDF)</label>
-                    <div class="upload-zone" onclick="document.getElementById('foto_kegiatan').click()">
-                        <input type="file" id="foto_kegiatan" accept="application/pdf" onchange="handleFileUpload(this,'fotoKegiatanStatus')">
-                        <i class="fas fa-camera"></i>
-                        <p>Upload Foto</p>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Kontrak Kuliah (PDF)</label>
+                    <div class="upload-zone" onclick="document.getElementById('file_kontrak_kuliah').click()">
+                        <input type="file" id="file_kontrak_kuliah" accept="application/pdf" onchange="handleFileUpload(this,'kontrakKuliahStatus')">
+                        <i class="fas fa-file-signature"></i>
+                        <p>Upload Kontrak Kuliah</p>
                     </div>
-                    <div id="fotoKegiatanStatus" style="display:none;" class="file-status"></div>
+                    <div id="kontrakKuliahStatus" style="display:none;" class="file-status"></div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Daftar Hadir (PDF)</label>
-                    <div class="upload-zone" onclick="document.getElementById('daftar_hadir').click()">
-                        <input type="file" id="daftar_hadir" accept="application/pdf" onchange="handleFileUpload(this,'daftarHadirStatus')">
-                        <i class="fas fa-clipboard-list"></i>
-                        <p>Upload Daftar Hadir</p>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Realisasi Mengajar (PDF)</label>
+                    <div class="upload-zone" onclick="document.getElementById('file_realisasi_mengajar').click()">
+                        <input type="file" id="file_realisasi_mengajar" accept="application/pdf" onchange="handleFileUpload(this,'realisasiMengajarStatus')">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <p>Upload Realisasi Mengajar</p>
                     </div>
-                    <div id="daftarHadirStatus" style="display:none;" class="file-status"></div>
+                    <div id="realisasiMengajarStatus" style="display:none;" class="file-status"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Kehadiran (PDF)</label>
+                    <div class="upload-zone" onclick="document.getElementById('file_kehadiran').click()">
+                        <input type="file" id="file_kehadiran" accept="application/pdf" onchange="handleFileUpload(this,'kehadiranStatus')">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Upload Kehadiran</p>
+                    </div>
+                    <div id="kehadiranStatus" style="display:none;" class="file-status"></div>
                 </div>
             </div>
             <div class="step-nav">
@@ -1131,13 +1182,14 @@
 
     function onStepEnter(n) {
         if (n === 2) renderMKDropdown();
-        if (n === 3) renderCPLTable();
-        if (n === 4) renderCPMKBuilder();
-        if (n === 5) renderMappingTable();
-        if (n === 6) renderAssessTable();
-        if (n === 7) renderSoalSection();
-        if (n === 9) renderHasilAsesmen();
-        if (n === 10) renderEvaluation();
+        if (n === 3) loadDataCPLPI();
+        if (n === 4) loadDataMapping();
+        if (n === 5) loadDataPemetaan();
+        if (n === 6) loadDataRancanganAsesmen();
+        if (n === 7) loadDataRancanganSoal();
+        if (n === 8) renderPelaksanaan();
+        if (n === 9) loadDataHasilAsesmen();
+        if (n === 10) loadDataEvaluasi();
     }
 
     // ══════════════════════════════════════════
@@ -1149,9 +1201,9 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 3 — CPL Table
+    //  STEP 3 — CPL & PI
     // ══════════════════════════════════════════
-    function renderCPLTable() {
+    function loadDataCPLPI() {
         // Gunakan state.cpl yang sudah diinisialisasi di DOMContentLoaded
         const data = state.cpl || [];
 
@@ -1204,7 +1256,7 @@
     // ══════════════════════════════════════════
     //  STEP 4 — CPMK Builder
     // ══════════════════════════════════════════
-    function renderCPMKBuilder() {
+    function loadDataMapping() {
         const container = document.getElementById('cpmkContainer');
 
         // Sudah ada isi di DOM (misal balik dari step 5) → jangan render ulang
@@ -1327,8 +1379,6 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
     }
-
-
 
     function addCPMK() {
         const container = document.getElementById('cpmkContainer');
@@ -1467,9 +1517,9 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 5 — Mapping Table
+    //  STEP 5 — Pemetaan CPL-CPMK-SubCPMK
     // ══════════════════════════════════════════
-    function renderMappingTable() {
+    function loadDataPemetaan() {
         console.log('=== RENDER MAPPING TABLE START ===');
         console.log('Current state.cpmkList:', state.cpmkList);
         console.log('Current state.mapping:', state.mapping);
@@ -1477,9 +1527,13 @@
         console.log('Current state.subIdMap:', state.subIdMap);
         console.log('DB_MAPPINGS:', typeof DB_MAPPINGS !== 'undefined' ? DB_MAPPINGS : 'undefined');
 
-        saveCPMK(); // sync state.cpmkList
+        const hasDomCPMK = document.querySelectorAll('.cpmk-block').length > 0;
+        if (hasDomCPMK) {
+            saveCPMK();
+        }
+
         if (!state.cpmkList.length) {
-            console.log('⚠️ state.cpmkList kosong!');
+            console.warn('state.cpmkList kosong');
             return;
         }
 
@@ -1566,7 +1620,6 @@
 
                 // Sub CPMK cells — SEMUA kolom (1..maxSub) untuk setiap CPMK
                 subColumns.forEach(subNo => {
-                    // Cek apakah checkbox ini sudah dicentang dari DB
                     const mappingExists = state.mapping &&
                         state.mapping[String(cplId)] &&
                         state.mapping[String(cplId)][String(cpmk.no)] &&
@@ -1601,7 +1654,7 @@
             });
         });
 
-        console.log('✅ renderMappingTable selesai. Total checkbox:', document.querySelectorAll('.mapping-checkbox').length);
+        console.log('✅ loadDataPemetaan selesai. Total checkbox:', document.querySelectorAll('.mapping-checkbox').length);
         console.log('=== RENDER MAPPING TABLE END ===\n');
     }
 
@@ -1736,61 +1789,66 @@
 
 
     /**
-     * Kumpulkan data mapping dari checkbox yang dicentang
+     * Kumpulkan semua checkbox yang dicentang, lalu bangun array mappingData yang akan dikirim ke server
      */
     function saveMapping() {
-        const mappings = [];
-        document.querySelectorAll('.mapping-checkbox:checked').forEach((cb) => {
-            const cplId = parseInt(cb.dataset.cpl);
-            const cpmkNo = parseInt(cb.dataset.cpmk);
-            const subNo = parseInt(cb.dataset.sub);
+        const checkboxes = document.querySelectorAll('.mapping-checkbox:checked');
 
-            // Cari id_cpmk dan id_sub_cpmk dari state
-            let id_cpmk = state.cpmkIdMap[cpmkNo];
-            let id_sub_cpmk = state.subIdMap[`${cpmkNo}_${subNo}`];
+        state.mappingData = [];
 
-            // Fallback: jika tidak ada di state, cari dari DB_CPMKS langsung
-            if (!id_cpmk && typeof DB_CPMKS !== 'undefined') {
-                const cpmkData = DB_CPMKS.find(c => c.no === cpmkNo);
-                if (cpmkData) {
-                    id_cpmk = cpmkData.id;
-                }
-            }
-            if (!id_sub_cpmk && typeof DB_CPMKS !== 'undefined') {
-                const cpmkData = DB_CPMKS.find(c => c.no === cpmkNo);
-                if (cpmkData && cpmkData.subs) {
-                    const subData = cpmkData.subs.find(s => s.no === subNo);
-                    if (subData) {
-                        id_sub_cpmk = subData.id;
-                    }
-                }
-            }
+        checkboxes.forEach(cb => {
 
-            if (id_cpmk && id_sub_cpmk) {
-                mappings.push({
-                    id_cpl: cplId,
-                    id_cpmk: id_cpmk,
-                    id_sub_cpmk: id_sub_cpmk
-                });
-            }
+            const idCpl = cb.dataset.cpl;
+            const idCpmk = cb.dataset.idCpmk;
+            const idSub = cb.dataset.idSub;
+
+            if (!idCpl || !idCpmk || !idSub) return;
+
+            state.mappingData.push({
+                id_cpl: parseInt(idCpl),
+                id_cpmk: parseInt(idCpmk),
+                id_sub_cpmk: parseInt(idSub),
+            });
         });
-        state.mappingData = mappings;
+
+        console.log('Mapping yang akan dikirim:', state.mappingData);
     }
 
     // ══════════════════════════════════════════
-    //  STEP 6 — Assessment
+    //  STEP 6 — Rancangan Asesmen
     // ══════════════════════════════════════════
-    function renderAssessTable() {
+    function loadDataRancanganAsesmen() {
         const tbody = document.getElementById('assessBody');
         tbody.innerHTML = '';
+
+        // Ensure assessmentByCpmk exists in state
+        if (!state.assessmentByCpmk) {
+            state.assessmentByCpmk = {};
+        }
+
         state.cpmkList.forEach(c => {
             const tr = document.createElement('tr');
+
+            // Check which assessments are already selected for this CPMK
+            const selectedAssessments = state.assessmentByCpmk[c.no] || [];
+            const tugasChecked = selectedAssessments.includes('tugas') ? 'checked' : '';
+            const utsChecked = selectedAssessments.includes('uts') ? 'checked' : '';
+            const uasChecked = selectedAssessments.includes('uas') ? 'checked' : '';
+
             tr.innerHTML = `
             <td class="align-middle"><strong>CPMK ${c.no}</strong><br><small style="color:var(--text-muted);font-size:11.5px;">${c.narasi || ''}</small></td>
-            <td class="text-center"><input type="checkbox" class="assess-cb" data-type="tugas" data-cpmk="${c.no}" onchange="updateAssessUpload()"></td>
-            <td class="text-center"><input type="checkbox" class="assess-cb" data-type="uts" data-cpmk="${c.no}" onchange="updateAssessUpload()"></td>
-            <td class="text-center"><input type="checkbox" class="assess-cb" data-type="uas" data-cpmk="${c.no}" onchange="updateAssessUpload()"></td>`;
+            <td class="text-center"><input type="checkbox" class="assess-cb" data-type="tugas" data-cpmk="${c.no}" onchange="updateAssessUpload()" ${tugasChecked}></td>
+            <td class="text-center"><input type="checkbox" class="assess-cb" data-type="uts" data-cpmk="${c.no}" onchange="updateAssessUpload()" ${utsChecked}></td>
+            <td class="text-center"><input type="checkbox" class="assess-cb" data-type="uas" data-cpmk="${c.no}" onchange="updateAssessUpload()" ${uasChecked}></td>`;
             tbody.appendChild(tr);
+        });
+
+        // After rendering, trigger updateAssessUpload
+        updateAssessUpload();
+
+        // Force show existing files for all types
+        ['Tugas', 'Uts', 'Uas'].forEach(function(type) {
+            showExistingFileForType(type);
         });
     }
 
@@ -1798,12 +1856,45 @@
         const tugas = document.querySelector('.assess-cb[data-type="tugas"]:checked');
         const uts = document.querySelector('.assess-cb[data-type="uts"]:checked');
         const uas = document.querySelector('.assess-cb[data-type="uas"]:checked');
-        document.getElementById('tugasUploadArea').style.display = tugas ? 'block' : 'none';
-        document.getElementById('utsUploadArea').style.display = uts ? 'block' : 'none';
-        document.getElementById('uasUploadArea').style.display = uas ? 'block' : 'none';
+
+        const tugasVisible = tugas ? 'block' : 'none';
+        const utsVisible = uts ? 'block' : 'none';
+        const uasVisible = uas ? 'block' : 'none';
+
+        document.getElementById('tugasUploadArea').style.display = tugasVisible;
+        document.getElementById('utsUploadArea').style.display = utsVisible;
+        document.getElementById('uasUploadArea').style.display = uasVisible;
+
         state.assessment.tugas = !!tugas;
         state.assessment.uts = !!uts;
         state.assessment.uas = !!uas;
+
+        // Show existing files when area becomes visible
+        if (tugasVisible === 'block') {
+            showExistingFileForType('Tugas');
+        }
+        if (utsVisible === 'block') {
+            showExistingFileForType('Uts');
+        }
+        if (uasVisible === 'block') {
+            showExistingFileForType('Uas');
+        }
+    }
+
+    /**
+     * Show existing files for a specific assessment type
+     */
+    function showExistingFileForType(type) {
+        const fileTypes = ['Soal', 'Rubrik'];
+
+        fileTypes.forEach(function(ft) {
+            const key = type + ft;
+            const fileName = state.existingFiles[key];
+
+            if (fileName) {
+                showExistingFile(type, ft, fileName);
+            }
+        });
     }
 
     function saveAssessment() {
@@ -1812,67 +1903,53 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 7 — Rancangan Soal (Matrix Table)
+    //  STEP 7 — Rancangan Asesmen
     // ══════════════════════════════════════════
-    function renderSoalSection() {
+    function loadDataRancanganSoal() {
         const container = document.getElementById('soalContainer');
         container.innerHTML = '';
 
-        const types = [];
-        if (state.assessment.tugas) types.push({
-            key: 'tugas',
-            label: '1. Tugas',
-            color: '#f59e0b',
-            num: 1
-        });
-        if (state.assessment.uts) types.push({
-            key: 'uts',
-            label: `${types.length+1}. Ujian Tengah Semester`,
-            color: '#0ea5e9',
-            num: types.length + 1
-        });
-        if (state.assessment.uas) types.push({
-            key: 'uas',
-            label: `${types.length+1}. Ujian Akhir Semester`,
-            color: '#8b5cf6',
-            num: types.length + 1
-        });
-
-        // Recompute labels with correct numbering
-        let idx = 1;
-        const orderedTypes = [];
-        if (state.assessment.tugas) {
-            orderedTypes.push({
-                key: 'tugas',
-                label: `${idx++}. Tugas`,
-                color: '#f59e0b'
-            });
-        }
-        if (state.assessment.uts) {
-            orderedTypes.push({
-                key: 'uts',
-                label: `${idx++}. Ujian Tengah Semester (UTS)`,
-                color: '#0ea5e9'
-            });
-        }
-        if (state.assessment.uas) {
-            orderedTypes.push({
-                key: 'uas',
-                label: `${idx++}. Ujian Akhir Semester (UAS)`,
-                color: '#8b5cf6'
-            });
-        }
-
-        if (!orderedTypes.length) {
-            container.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-circle me-2"></i>Belum ada jenis asesmen yang dipilih. Kembali ke Tahap 6 untuk memilih.</div>`;
+        // Guard: pastikan state.cpmkList sudah terisi
+        if (!state.cpmkList.length) {
+            container.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Data CPMK belum tersedia. Kembali ke Tahap 4.
+            </div>`;
             return;
         }
 
-        // Get unique CPMK numbers from the mapping state
+        const orderedTypes = [];
+        let idx = 1;
+        if (state.assessment.tugas) orderedTypes.push({
+            key: 'tugas',
+            label: idx++ + '. Tugas',
+            color: '#f59e0b'
+        });
+        if (state.assessment.uts) orderedTypes.push({
+            key: 'uts',
+            label: idx++ + '. Ujian Tengah Semester (UTS)',
+            color: '#0ea5e9'
+        });
+        if (state.assessment.uas) orderedTypes.push({
+            key: 'uas',
+            label: idx++ + '. Ujian Akhir Semester (UAS)',
+            color: '#8b5cf6'
+        });
+
+        if (!orderedTypes.length) {
+            container.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Belum ada jenis asesmen yang dipilih. Kembali ke Tahap 6 untuk memilih.
+            </div>`;
+            return;
+        }
+
         const cpmkNos = state.cpmkList.map(c => c.no);
 
         orderedTypes.forEach(type => {
-            // Initialise soal list for this type if needed
+            // Inisialisasi soalData jika kosong
             if (!state.soalData[type.key] || !state.soalData[type.key].length) {
                 state.soalData[type.key] = [{
                     soal_no: 1,
@@ -1882,41 +1959,48 @@
 
             const soalList = state.soalData[type.key];
 
-            // Build CPMK header cells
+            // Build header CPMK
             const cpmkHeaders = cpmkNos.map(no =>
-                `<th class="text-center align-middle" style="min-width:80px;">CPMK ${no}</th>`
+                `<th class="text-center align-middle" style="min-width:80px;font-size:12px;">CPMK ${no}</th>`
             ).join('');
 
             // Build rows
             const rows = soalList.map((soal, i) => {
                 const cells = cpmkNos.map(cno => {
                     const checked = soal.cpmk_mappings && soal.cpmk_mappings[cno] ? 'checked' : '';
-                    return `<td class="text-center align-middle">
-                    <input type="checkbox" class="soal-cb form-check-input"
-                        style="width:18px;height:18px;cursor:pointer;accent-color:var(--primary);"
-                        data-type="${type.key}" data-soal="${i}" data-cpmk="${cno}" ${checked}>
-                </td>`;
+                    return `
+                    <td class="text-center align-middle">
+                        <input type="checkbox"
+                            class="soal-cb form-check-input"
+                            style="width:18px;height:18px;cursor:pointer;accent-color:var(--primary);"
+                            data-type="${type.key}"
+                            data-soal="${i}"
+                            data-cpmk="${cno}"
+                            ${checked}>
+                    </td>`;
                 }).join('');
 
-                return `<tr>
-                <td class="text-center align-middle fw-bold" style="white-space:nowrap;font-size:13px;">
-                    Soal no ${soal.soal_no}
-                </td>
-                ${cells}
-                <td class="text-center align-middle">
-                    ${soalList.length > 1
-                        ? `<button type="button" class="btn btn-sm btn-outline-danger px-2" onclick="removeSoal('${type.key}',${i})" title="Hapus Soal">
-                              <i class="fas fa-trash-alt" style="font-size:11px;"></i>
-                           </button>`
-                        : `<span style="color:var(--text-muted);font-size:11px;">—</span>`
-                    }
-                </td>
-            </tr>`;
+                const deleteBtn = soalList.length > 1 ?
+                    `<button type="button" class="btn btn-sm btn-outline-danger px-2"
+                        onclick="removeSoal('${type.key}', ${i})">
+                        <i class="fas fa-trash-alt" style="font-size:11px;"></i>
+                   </button>` :
+                    `<span style="color:var(--text-muted);font-size:11px;">—</span>`;
+
+                return `
+                <tr>
+                    <td class="text-center align-middle fw-bold" style="font-size:13px;">
+                        Soal no ${soal.soal_no}
+                    </td>
+                    ${cells}
+                    <td class="text-center align-middle">${deleteBtn}</td>
+                </tr>`;
             }).join('');
 
+            // Build section
             const section = document.createElement('div');
             section.className = 'mb-5';
-            section.id = `soalSection_${type.key}`;
+            section.setAttribute('data-type', type.key);
             section.innerHTML = `
             <div class="section-header">
                 <div class="section-dot" style="background:${type.color};"></div>
@@ -1924,66 +2008,161 @@
             </div>
             <div class="alert alert-primary d-flex align-items-center gap-2 py-2 mb-3" style="font-size:13px;">
                 <i class="fas fa-info-circle"></i>
-                Silahkan untuk menentukan pemetaan soal terhadap CPMK sebelum melanjutkan!
+                Centang CPMK yang diukur oleh masing-masing soal.
             </div>
             <div class="table-responsive mb-3">
-                <table class="table table-bordered mb-0" id="soalTable_${type.key}">
-                    <thead style="background-color:#0f4c92;" class="text-white">
+                <table class="table table-bordered mb-0">
+                    <thead style="background:#0f4c92;" class="text-white">
                         <tr class="align-middle text-center">
-                            <th class="align-middle" style="min-width:110px;">Soal No</th>
+                            <th style="min-width:110px;font-size:12px;">Soal No</th>
                             ${cpmkHeaders}
-                            <th class="align-middle" style="min-width:70px;">Aksi</th>
+                            <th style="min-width:70px;font-size:12px;">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="soalBody_${type.key}">
-                        ${rows}
-                    </tbody>
+                    <tbody>${rows}</tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="addSoal('${type.key}')">
+            <button type="button" class="btn btn-secondary btn-sm"
+                onclick="addSoal('${type.key}')">
                 <i class="fas fa-plus me-1"></i> Tambah Soal
             </button>`;
+
             container.appendChild(section);
         });
     }
 
     function addSoal(type) {
         if (!state.soalData[type]) state.soalData[type] = [];
-        const nextNo = state.soalData[type].length + 1;
         state.soalData[type].push({
-            soal_no: nextNo,
+            soal_no: state.soalData[type].length + 1,
             cpmk_mappings: {}
         });
-        renderSoalSection();
+        loadDataRancanganSoal();
     }
 
     function removeSoal(type, idx) {
         state.soalData[type].splice(idx, 1);
-        // Renumber
-        state.soalData[type].forEach((s, i) => {
+        state.soalData[type].forEach(function(s, i) {
             s.soal_no = i + 1;
         });
-        renderSoalSection();
+        loadDataRancanganSoal();
     }
 
     function saveSoalMapping() {
-        // Sync checkbox state into soalData before moving on
-        document.querySelectorAll('.soal-cb').forEach(cb => {
-            const {
-                type,
-                soal,
-                cpmk
-            } = cb.dataset;
-            if (state.soalData[type] && state.soalData[type][parseInt(soal)]) {
-                state.soalData[type][parseInt(soal)].cpmk_mappings[cpmk] = cb.checked;
+        document.querySelectorAll('.soal-cb').forEach(function(cb) {
+            var type = cb.dataset.type,
+                soal = parseInt(cb.dataset.soal),
+                cpmk = cb.dataset.cpmk;
+            if (state.soalData[type] && state.soalData[type][soal]) {
+                state.soalData[type][soal].cpmk_mappings[cpmk] = cb.checked;
             }
         });
     }
 
     // ══════════════════════════════════════════
+    //  STEP 8 — Pelaksanaan Perkuliahan
+    // ══════════════════════════════════════════
+    function renderPelaksanaan() {
+        const files = [{
+                key: 'kontrak_kuliah',
+                label: 'Kontrak Kuliah',
+                inputId: 'file_kontrak_kuliah',
+                statusId: 'kontrakKuliahStatus',
+                icon: 'fa-file-signature',
+                color: '#0ea5e9',
+                dbField: 'file_kontrak_kuliah',
+            },
+            {
+                key: 'realisasi_mengajar',
+                label: 'Realisasi Mengajar',
+                inputId: 'file_realisasi_mengajar',
+                statusId: 'realisasiMengajarStatus',
+                icon: 'fa-chalkboard-teacher',
+                color: '#10b981',
+                dbField: 'file_realisasi_mengajar',
+            },
+            {
+                key: 'kehadiran',
+                label: 'Kehadiran Mahasiswa',
+                inputId: 'file_kehadiran',
+                statusId: 'kehadiranStatus',
+                icon: 'fa-clipboard-list',
+                color: '#f59e0b',
+                dbField: 'file_kehadiran',
+            },
+        ];
+
+        files.forEach(({
+            key,
+            label,
+            inputId,
+            statusId,
+            icon,
+            color,
+            dbField
+        }) => {
+            const existingFileName = DB_PELAKSANAAN?.[dbField] ?? null;
+            const existingId = `existing_${key}`;
+            const zoneId = `zone_${key}`;
+
+            // Cari container upload zone
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            const uploadZone = inputEl.closest('.upload-zone');
+            if (!uploadZone) return;
+
+            const col = uploadZone.closest('.col-md-4');
+            if (!col) return;
+
+            // Hapus existing badge sebelumnya jika ada (hindari duplikat saat masuk ulang)
+            const oldBadge = col.querySelector(`#${existingId}`);
+            if (oldBadge) oldBadge.remove();
+
+            if (existingFileName) {
+                // ── Ada file tersimpan → tampilkan info file + zone ganti ──
+                const badge = document.createElement('div');
+                badge.id = existingId;
+                badge.className = 'mb-2';
+                badge.innerHTML = `
+                <div class="file-status" style="display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;">
+                    <i class="fas fa-check-circle" style="color:#16a34a;"></i>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;font-size:12.5px;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                            ${existingFileName}
+                        </div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:1px;">
+                            File tersimpan — upload ulang untuk mengganti
+                        </div>
+                    </div>
+                    <a href="${BASE_URL}admin/portofolio/preview-pelaksanaan/${existingFileName}"
+                        target="_blank"
+                        title="Lihat PDF"
+                        class="btn btn-sm btn-outline-success"
+                        style="flex-shrink:0;font-size:11px;padding:2px 8px;">
+                        <i class="fas fa-eye me-1"></i>Lihat
+                    </a>
+                </div>`;
+
+                // Sisipkan sebelum upload-zone
+                uploadZone.parentNode.insertBefore(badge, uploadZone);
+
+                // Ubah tampilan zone menjadi "ganti"
+                uploadZone.querySelector('i').className = `fas ${icon}`;
+                const zoneP = uploadZone.querySelectorAll('p');
+                if (zoneP[0]) zoneP[0].textContent = 'Klik untuk mengganti file';
+                if (zoneP[1]) zoneP[1].textContent = 'Format PDF • Maks 10MB';
+                uploadZone.style.borderColor = color;
+                uploadZone.style.background = '#f8fafc';
+            }
+        });
+    }
+
+
+    // ══════════════════════════════════════════
     //  STEP 9 — Hasil Asesmen
     // ══════════════════════════════════════════
-    function renderHasilAsesmen() {
+    function loadDataHasilAsesmen() {
         const container = document.getElementById('hasilAsesmenContainer');
         container.innerHTML = '';
 
@@ -2032,9 +2211,9 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 10 — Evaluation
+    //  STEP 10 — Evaluasi Perkuliahan
     // ══════════════════════════════════════════
-    function renderEvaluation() {
+    function loadDataEvaluasi() {
         const container = document.getElementById('cpmkValueInputs');
         container.innerHTML = '';
         state.cpmkList.forEach(c => {
@@ -2169,6 +2348,13 @@
         const file = input.files[0];
         const statusEl = document.getElementById(statusId);
         const zone = input.closest('.upload-zone');
+
+        // Hide existing file status if any
+        const existingEl = zone.parentElement.querySelector('[id$="Existing"]');
+        if (existingEl) {
+            existingEl.style.display = 'none';
+        }
+
         if (file && statusEl) {
             statusEl.style.display = 'flex';
             statusEl.innerHTML = `<i class="fas fa-check-circle"></i><span>${file.name}</span><span class="ms-auto" style="color:var(--text-muted);">${(file.size/1024).toFixed(1)} KB</span>`;
@@ -2177,6 +2363,72 @@
                 zone.querySelector('i').className = 'fas fa-check-circle';
             }
         }
+    }
+
+    /**
+     * Show existing file in upload area
+     */
+    function showExistingFile(type, fileType, fileName) {
+        const existingContainer = document.getElementById(
+            type.toLowerCase() + fileType + 'Existing'
+        );
+
+        const fileNameSpan = document.getElementById(
+            type.toLowerCase() + fileType + 'FileName'
+        );
+
+        if (existingContainer && fileNameSpan) {
+            fileNameSpan.textContent = fileName;
+            existingContainer.style.display = 'block';
+        }
+    }
+
+    /**
+     * Show PDF preview in modal
+     */
+    function showPdfPreview(fileKey) {
+        const fileMap = {
+            'tugasSoal': 'soal_tugas',
+            'tugasRubrik': 'rubrik_tugas',
+            'utsSoal': 'soal_uts',
+            'utsRubrik': 'rubrik_uts',
+            'uasSoal': 'soal_uas',
+            'uasRubrik': 'rubrik_uas'
+        };
+
+        const fileName = state.existingFiles[fileKey] || '';
+        if (!fileName) {
+            showModalAlert('File tidak ditemukan.', 'danger');
+            return;
+        }
+
+        // Use the same endpoint as RPS preview
+        const previewUrl = BASE_URL + 'admin/portofolio/preview-asesmen/' + fileName;
+
+        const modalHtml = `
+            <div class="modal fade" id="pdfPreviewModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="fas fa-file-pdf me-2"></i>Pratinjau ${fileKey.replace(/([A-Z])/g, ' $1').trim()}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <iframe src="${previewUrl}" width="100%" height="600px" style="border:none;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'));
+        modal.show();
+
+        // Cleanup modal after hidden
+        document.getElementById('pdfPreviewModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
     }
 
     // ══════════════════════════════════════════
@@ -2265,6 +2517,9 @@
                             }, $cpmks ?? [])
                         ) ?>;
     const DB_MAPPINGS = <?= json_encode($mapping ?? []) ?>;
+    const DB_ASSESSMEN = <?= json_encode($asesmen ?? []) ?>;
+    const DB_PELAKSANAAN = <?= json_encode($pelaksanaan ?? []) ?>;
+    const DB_SOAL = <?= json_encode($soal ?? []) ?>;
 
     document.addEventListener('DOMContentLoaded', () => {
         // ── 1. Inisialisasi state.cpl dari CPL_DATA ────────────────────────────
@@ -2349,7 +2604,7 @@
                 }
                 const subNo = parseInt(subKey.split('_')[1]);
 
-                // Key di mappingMap harus String(id_cpl) agar cocok dengan renderMappingTable
+                // Key di mappingMap harus String(id_cpl) agar cocok dengan loadDataPemetaan
                 const cplKey = String(id_cpl);
 
                 if (!mappingMap[cplKey]) mappingMap[cplKey] = {};
@@ -2361,7 +2616,90 @@
             state.mapping = mappingMap;
         }
 
-        // ── 4. Auto-resume ke last_step ────────────────────────────────────────
+        // ── 4. Load existing assessment data from DB_ASSESSMEN ─────────────────
+        if (typeof DB_ASSESSMEN !== 'undefined' && DB_ASSESSMEN.length > 0) {
+            // Reset dulu
+            state.assessment.tugas = false;
+            state.assessment.uts = false;
+            state.assessment.uas = false;
+            state.asesmenIdMap = {};
+
+            DB_ASSESSMEN.forEach(a => {
+                const jenis = a.jenis_asesmen.toLowerCase();
+
+                // Tandai jenis aktif
+                if (jenis === 'tugas') state.assessment.tugas = true;
+                if (jenis === 'uts') state.assessment.uts = true;
+                if (jenis === 'uas') state.assessment.uas = true;
+
+                // Bangun asesmenIdMap: "tugas_1" -> db_id
+                const cpmkNo = Object.keys(state.cpmkIdMap).find(
+                    key => Number(state.cpmkIdMap[key]) === Number(a.id_cpmk)
+                );
+                if (cpmkNo) {
+                    state.asesmenIdMap[`${jenis}_${cpmkNo}`] = a.id;
+                }
+            });
+
+            console.log('state.assessment:', state.assessment);
+            console.log('state.asesmenIdMap:', state.asesmenIdMap);
+        }
+
+        // ── Load state.soalData dari DB_SOAL ──────────────────────────
+        if (typeof DB_SOAL !== 'undefined' && DB_SOAL.length > 0) {
+            console.log('Loading DB_SOAL:', DB_SOAL);
+
+            state.soalData = {};
+
+            DB_SOAL.forEach(soal => {
+                // Cari jenis asesmen dari asesmenIdMap
+                const asesmenKey = Object.keys(state.asesmenIdMap).find(
+                    key => Number(state.asesmenIdMap[key]) === Number(soal.id_asesmen)
+                );
+                if (!asesmenKey) {
+                    console.warn('id_asesmen tidak ditemukan di asesmenIdMap:', soal.id_asesmen);
+                    return;
+                }
+
+                // asesmenKey format: "tugas_1" → ambil jenis = "tugas"
+                const jenis = asesmenKey.split('_')[0];
+
+                if (!state.soalData[jenis]) state.soalData[jenis] = [];
+
+                // Cek apakah nomor soal sudah ada
+                let existing = state.soalData[jenis].find(s => s.soal_no === soal.nomor_soal);
+                if (!existing) {
+                    existing = {
+                        soal_no: soal.nomor_soal,
+                        cpmk_mappings: {}
+                    };
+                    state.soalData[jenis].push(existing);
+                }
+
+                // Tandai CPMK mapping
+                // Cari cpmkNo dari id_asesmen → asesmenKey → "jenis_cpmkNo"
+                // Semua asesmen untuk jenis ini, cari cpmkNo yg match
+                Object.keys(state.asesmenIdMap).forEach(key => {
+                    if (
+                        Number(state.asesmenIdMap[key]) === Number(soal.id_asesmen) &&
+                        key.startsWith(jenis + '_')
+                    ) {
+                        const cpmkNo = parseInt(key.split('_')[1]);
+                        existing.cpmk_mappings[cpmkNo] = true;
+                    }
+                });
+            });
+
+            // Sort soal per jenis berdasarkan nomor
+            Object.keys(state.soalData).forEach(jenis => {
+                state.soalData[jenis].sort((a, b) => a.soal_no - b.soal_no);
+            });
+
+            console.log('state.soalData setelah load DB_SOAL:', state.soalData);
+        }
+
+
+        // ── 5. Auto-resume ke last_step ────────────────────────────────────────
         if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
             goToStep(LAST_STEP);
         }
@@ -2386,6 +2724,7 @@
         soalData: {},
         mapping: {},
         cpmkValues: {},
+        existingFiles: {}, // Store existing file names: { tugasSoal: 'filename.pdf', ... }
     };
 
     const API = {
@@ -2643,6 +2982,7 @@
 
         // Kirim data mapping ke server menggunakan postJSON
         const res = await postJSON(API.mapping, {
+            id_portofolio: PORTO_ID,
             mappings: state.mappingData
         });
 
@@ -2696,93 +3036,89 @@
     //  STEP 6 — Rancangan Asesmen
     // ══════════════════════════════════════════════════════════════
     async function saveStep6AndNext(btn) {
-        saveAssessment(); // sync state.assessment
-
-        // Build asesmen_data array from checked checkboxes
-        const asesmenData = [];
-        document.querySelectorAll('.assess-cb:checked').forEach((cb) => {
-            const cpmkNo = parseInt(cb.dataset.cpmk);
-            const jenis = cb.dataset.type;
+        updateAssessUpload();
+        var asesmenData = [];
+        document.querySelectorAll('.assess-cb:checked').forEach(function(cb) {
             asesmenData.push({
-                id_cpmk: state.cpmkIdMap[cpmkNo] || cpmkNo,
-                jenis_asesmen: jenis,
+                id_cpmk: state.cpmkIdMap[parseInt(cb.dataset.cpmk)] || parseInt(cb.dataset.cpmk),
+                jenis_asesmen: cb.dataset.type,
             });
         });
-
         if (!asesmenData.length) {
             showModalAlert('Pilih minimal satu jenis asesmen.');
             return;
         }
 
-        const fd = new FormData();
+        var fd = new FormData();
         fd.append('asesmen_data', JSON.stringify(asesmenData));
-
-        // Attach files
-        const fileFields = [
-            'soal_tugas',
-            'rubrik_tugas',
-            'soal_uts',
-            'rubrik_uts',
-            'soal_uas',
-            'rubrik_uas',
-        ];
-        fileFields.forEach((f) => {
-            const el = document.getElementById(f);
+        ['soal_tugas', 'rubrik_tugas', 'soal_uts', 'rubrik_uts', 'soal_uas', 'rubrik_uas'].forEach(function(f) {
+            var el = document.getElementById(f);
             if (el && el.files[0]) fd.append('file_' + f, el.files[0]);
         });
 
         setBtnLoading(btn, true);
-        const res = await postForm(API.asesmen, fd);
+        var res = await postForm(API.asesmen, fd);
         setBtnLoading(btn, false);
 
         if (res.status === 'success') {
+            state.asesmenIdMap = {};
+            state.assessmentByCpmk = {};
+            state.existingFiles = {};
+
+            // Rebuild assessmentByCpmk and existingFiles from saved data
+            (res.asesmen || []).forEach(function(a) {
+                var cpmkNo = Object.keys(state.cpmkIdMap).find(function(k) {
+                    return state.cpmkIdMap[k] == a.id_cpmk;
+                });
+                if (cpmkNo) {
+                    state.asesmenIdMap[a.jenis_asesmen + '_' + cpmkNo] = a.id;
+                    if (!state.assessmentByCpmk[cpmkNo]) {
+                        state.assessmentByCpmk[cpmkNo] = [];
+                    }
+                    state.assessmentByCpmk[cpmkNo].push(a.jenis_asesmen);
+
+                    // Store file names with capitalized type
+                    var typeCapitalized = a.jenis_asesmen.charAt(0).toUpperCase() + a.jenis_asesmen.slice(1);
+                    if (a.file_soal) {
+                        state.existingFiles[typeCapitalized + 'Soal'] = a.file_soal;
+                    }
+                    if (a.file_rubrik) {
+                        state.existingFiles[typeCapitalized + 'Rubrik'] = a.file_rubrik;
+                    }
+                }
+            });
             showToast(res.message);
             nextStep();
-        } else {
-            showToast(res.message, 'danger');
-        }
+        } else showToast(res.message, 'danger');
     }
 
     // ══════════════════════════════════════════════════════════════
     //  STEP 7 — Rancangan Soal
     // ══════════════════════════════════════════════════════════════
     async function saveStep7AndNext(btn) {
-        saveSoalMapping(); // sync state.soalData from checkboxes
-
-        // Get asesmen IDs from DB (needed to link soal -> rancangan_asesmen)
-        // In production, these come back from step 6 response or re-fetched.
-        // Here we rely on state.asesmenIdMap populated after step 6.
-        const soalList = [];
-
-        Object.entries(state.soalData).forEach(([jenis, soals]) => {
-            soals.forEach((soal) => {
-                // For each CPMK this soal maps to, link via rancangan_asesmen
-                Object.entries(soal.cpmk_mappings).forEach(([cpmkNo, checked]) => {
+        saveSoalMapping();
+        var soalList = [];
+        Object.entries(state.soalData).forEach(function([jenis, soals]) {
+            soals.forEach(function(soal) {
+                Object.entries(soal.cpmk_mappings || {}).forEach(function([cpmkNo, checked]) {
                     if (!checked) return;
-                    const asesmenKey = `${jenis}_${cpmkNo}`;
-                    const id_asesmen = state.asesmenIdMap[asesmenKey];
-                    if (id_asesmen) {
-                        soalList.push({
-                            id_asesmen,
-                            nomor_soal: soal.soal_no,
-                        });
-                    }
+                    var id_asesmen = state.asesmenIdMap[jenis + '_' + cpmkNo];
+                    if (id_asesmen) soalList.push({
+                        id_asesmen: id_asesmen,
+                        nomor_soal: soal.soal_no
+                    });
                 });
             });
         });
-
         setBtnLoading(btn, true);
-        const res = await postJSON(API.soal, {
+        var res = await postJSON(API.soal, {
             soal_list: soalList
         });
         setBtnLoading(btn, false);
-
         if (res.status === 'success') {
             showToast(res.message);
             nextStep();
-        } else {
-            showToast(res.message, 'danger');
-        }
+        } else showToast(res.message, 'danger');
     }
 
     // ══════════════════════════════════════════════════════════════

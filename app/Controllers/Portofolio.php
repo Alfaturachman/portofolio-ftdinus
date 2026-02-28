@@ -170,7 +170,7 @@ class Portofolio extends BaseController
             ->select('id, id_portofolio, id_cpl, id_cpmk, id_sub_cpmk, is_active')
             ->where('id_portofolio', $id)
             ->get()->getResultArray();
-        
+
         log_message('debug', 'Step 5: Loaded ' . count($data['mapping']) . ' mappings for id_portofolio=' . $id);
 
         // Rancangan Asesmen
@@ -205,7 +205,7 @@ class Portofolio extends BaseController
     // ══════════════════════════════════════════════════════
 
     /**
-     * Step 1 – Upload RPS
+     * STEP 1 – Upload RPS
      * POST /admin/portofolio/step/rps
      * Multipart: id_portofolio, file_rps
      */
@@ -286,8 +286,38 @@ class Portofolio extends BaseController
             ->setBody(file_get_contents($path));
     }
 
+    // Server-side file serving for asesmen files
+    public function serveAsesmen(string $filename)
+    {
+        $db  = \Config\Database::connect();
+        $npp = session()->get('npp');
+
+        $path = WRITEPATH . 'uploads/asesmen/' . $filename;
+
+        // Pastikan file milik user yang login
+        $row = $db->table('rancangan_asesmen ra')
+            ->select('ra.file_soal, ra.file_rubrik')
+            ->join('portofolio p', 'p.id = ra.id_portofolio')
+            ->join('perkuliahan per', 'per.id = p.id_perkuliahan')
+            ->where('(ra.file_soal = "' . $db->escape($filename) . '" OR ra.file_rubrik = "' . $db->escape($filename) . '")')
+            ->where('per.id_users', $npp)
+            ->get()
+            ->getRowArray();
+
+        if (!$row || !is_file($path)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setBody('File tidak ditemukan.');
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', mime_content_type($path))
+            ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+            ->setBody(file_get_contents($path));
+    }
+
     /**
-     * Step 2 – Informasi Mata Kuliah
+     * STEP 2 – Informasi Mata Kuliah
      * POST /admin/portofolio/step/info-mk
      * Body: id_portofolio, mk_prasyarat, topik_perkuliahan
      */
@@ -326,7 +356,7 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 3 – CPL & PI  (read-only display, nothing to save; just advance step)
+     * STEP 3 – CPL & PI  (read-only display, nothing to save; just advance step)
      * POST /admin/portofolio/step/cpl
      */
     public function saveCPL()
@@ -339,7 +369,7 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 4 – CPMK & Sub CPMK
+     * STEP 4 – CPMK & Sub CPMK
      * POST /admin/portofolio/step/cpmk
      * Body (JSON): id_portofolio, cpmk_list (array of {id_cpl, no_cpmk, narasi_cpmk, subs[]})
      */
@@ -431,7 +461,7 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 5 – Pemetaan CPL-CPMK-SubCPMK
+     * STEP 5 – Pemetaan CPL-CPMK-SubCPMK
      * POST /admin/portofolio/step/mapping
      * Body (JSON): id_portofolio, mappings (array of {id_cpl, id_cpmk, id_sub_cpmk})
      */
@@ -531,7 +561,7 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 6 – Rancangan Asesmen
+     * STEP 6 – Rancangan Asesmen
      * POST /admin/portofolio/step/asesmen  (multipart – may include files)
      * Fields: id_portofolio,
      *         asesmen_cpmk[]  => array of {id_cpmk, jenis_asesmen}
@@ -541,67 +571,54 @@ class Portofolio extends BaseController
     public function saveAsesmen()
     {
         $db = \Config\Database::connect();
-        $id = (int) $this->request->getPost('id_portofolio');
+        $id = (string) $this->request->getPost('id_portofolio'); // ← string!
 
-        // Parse JSON string sent as a form field
-        $asesmenData = json_decode($this->request->getPost('asesmen_data'), true) ?? [];
-
-        // Fetch current asesmen (to update files only if new file uploaded)
-        $existing = [];
-        foreach ($db->table('rancangan_asesmen')->where('id_portofolio', $id)->get()->getResultArray() as $row) {
-            $existing[$row['jenis_asesmen']] = $row; // keyed by jenis: tugas/uts/uas
+        if (empty($id)) {
+            return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
         }
 
-        // Map jenis => [soal_field, rubrik_field]
+        $asesmenData = json_decode($this->request->getPost('asesmen_data'), true) ?? [];
+
+        $existing = [];
+        foreach ($db->table('rancangan_asesmen')->where('id_portofolio', $id)->get()->getResultArray() as $row) {
+            $existing[$row['jenis_asesmen']] = $row;
+        }
+
         $fileMap = [
             'tugas' => ['soal' => 'file_soal_tugas', 'rubrik' => 'file_rubrik_tugas'],
             'uts'   => ['soal' => 'file_soal_uts',   'rubrik' => 'file_rubrik_uts'],
             'uas'   => ['soal' => 'file_soal_uas',   'rubrik' => 'file_rubrik_uas'],
         ];
 
-        // Collect which jenis are used
         $jenisUsed = [];
         foreach ($asesmenData as $row) {
-            if (! in_array($row['jenis_asesmen'], $jenisUsed)) {
+            if (!in_array($row['jenis_asesmen'], $jenisUsed)) {
                 $jenisUsed[] = $row['jenis_asesmen'];
             }
         }
 
-        // Delete rows for jenis no longer selected
-        foreach (array_keys($existing) as $jenis) {
-            if (! in_array($jenis, $jenisUsed)) {
-                $db->table('rancangan_asesmen')
-                    ->where('id_portofolio', $id)
-                    ->where('jenis_asesmen', $jenis)
-                    ->delete();
-            }
-        }
-
-        // Upsert per jenis_asesmen per id_cpmk
         $db->table('rancangan_asesmen')->where('id_portofolio', $id)->delete();
 
         foreach ($asesmenData as $row) {
             $jenis   = $row['jenis_asesmen'];
             $id_cpmk = (int) $row['id_cpmk'];
-
             $fileSoal   = null;
             $fileRubrik = null;
 
-            // Only upload file once per jenis (first occurrence)
             if (isset($fileMap[$jenis])) {
-                $soalFile   = $this->request->getFile($fileMap[$jenis]['soal']);
+                $soalFile = $this->request->getFile($fileMap[$jenis]['soal']);
                 $rubrikFile = $this->request->getFile($fileMap[$jenis]['rubrik']);
 
-                if ($soalFile && $soalFile->isValid() && ! $soalFile->hasMoved()) {
+                if ($soalFile && $soalFile->isValid() && !$soalFile->hasMoved()) {
                     $nm = 'soal_' . $id . '_' . $jenis . '_' . time() . '.' . $soalFile->getExtension();
                     $soalFile->move(WRITEPATH . 'uploads/asesmen/', $nm);
                     $fileSoal = $nm;
-                    unset($fileMap[$jenis]['soal']); // prevent re-upload for same jenis
+                    unset($fileMap[$jenis]['soal']);
                 } elseif (isset($existing[$jenis])) {
                     $fileSoal = $existing[$jenis]['file_soal'];
                 }
 
-                if ($rubrikFile && $rubrikFile->isValid() && ! $rubrikFile->hasMoved()) {
+                if ($rubrikFile && $rubrikFile->isValid() && !$rubrikFile->hasMoved()) {
                     $nm = 'rubrik_' . $id . '_' . $jenis . '_' . time() . '.' . $rubrikFile->getExtension();
                     $rubrikFile->move(WRITEPATH . 'uploads/asesmen/', $nm);
                     $fileRubrik = $nm;
@@ -612,22 +629,51 @@ class Portofolio extends BaseController
             }
 
             $db->table('rancangan_asesmen')->insert([
-                'id_portofolio'  => $id,
-                'id_cpmk'        => $id_cpmk,
-                'jenis_asesmen'  => $jenis,
-                'file_soal'      => $fileSoal,
-                'file_rubrik'    => $fileRubrik,
-                'created_at'     => date('Y-m-d H:i:s'),
+                'id_portofolio' => $id,
+                'id_cpmk'       => $id_cpmk,
+                'jenis_asesmen' => $jenis,
+                'file_soal'     => $fileSoal,
+                'file_rubrik'   => $fileRubrik,
+                'created_at'    => date('Y-m-d H:i:s'),
             ]);
         }
 
+        // ← WAJIB: ambil data yang baru disimpan untuk dikirim ke frontend
+        $savedAsesmen = $db->table('rancangan_asesmen')
+            ->where('id_portofolio', $id)
+            ->get()->getResultArray();
+
         $this->_updateLastStep($id, 6);
 
-        return $this->_json(['status' => 'success', 'message' => 'Rancangan asesmen berhasil disimpan.']);
+        return $this->_json([
+            'status'  => 'success',
+            'message' => 'Rancangan asesmen berhasil disimpan.',
+            'asesmen' => array_map(fn($a) => [
+                'id'            => $a['id'],
+                'id_cpmk'       => $a['id_cpmk'],
+                'jenis_asesmen' => $a['jenis_asesmen'],
+                'file_soal'     => $a['file_soal'],
+                'file_rubrik'   => $a['file_rubrik'],
+            ], $savedAsesmen),
+        ]);
+    }
+
+    public function previewAsesmen($fileName)
+    {
+        $path = WRITEPATH . 'uploads/asesmen/' . $fileName;
+
+        if (!is_file($path)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setHeader('Content-Disposition', 'inline; filename="' . $fileName . '"')
+            ->setBody(file_get_contents($path));
     }
 
     /**
-     * Step 7 – Rancangan Soal
+     * STEP 7 – Rancangan Soal
      * POST /admin/portofolio/step/soal
      * Body (JSON): id_portofolio, soal_list (array of {id_asesmen, nomor_soal})
      */
@@ -635,7 +681,7 @@ class Portofolio extends BaseController
     {
         $db   = \Config\Database::connect();
         $json = $this->request->getJSON(true);
-        $id   = (int) ($json['id_portofolio'] ?? 0);
+        $id   = (string) ($json['id_portofolio'] ?? 0);
 
         $db->table('rancangan_soal')->where('id_portofolio', $id)->delete();
 
@@ -654,14 +700,14 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 8 – Pelaksanaan Perkuliahan
+     * STEP 8 – Pelaksanaan Perkuliahan
      * POST /admin/portofolio/step/pelaksanaan  (multipart)
      * Files: file_kontrak_kuliah, file_realisasi_mengajar, file_kehadiran
      */
     public function savePelaksanaan()
     {
         $db = \Config\Database::connect();
-        $id = (int) $this->request->getPost('id_portofolio');
+        $id = (string) $this->request->getPost('id_portofolio');
 
         $existing = $db->table('pelaksanaan')->where('id_portofolio', $id)->get()->getRowArray();
 
@@ -691,7 +737,7 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 9 – Hasil Asesmen
+     * STEP 9 – Hasil Asesmen
      * POST /admin/portofolio/step/hasil-asesmen  (multipart)
      * Files: file_jawaban_tugas, file_jawaban_uts, file_jawaban_uas
      *        file_nilai_matkul, file_nilai_cpmk
@@ -699,7 +745,7 @@ class Portofolio extends BaseController
     public function saveHasilAsesmen()
     {
         $db = \Config\Database::connect();
-        $id = (int) $this->request->getPost('id_portofolio');
+        $id = (string) $this->request->getPost('id_portofolio');
 
         $jenisMap = [
             'tugas' => 'file_jawaban_tugas',
@@ -763,7 +809,7 @@ class Portofolio extends BaseController
     }
 
     /**
-     * Step 10 – Evaluasi Perkuliahan
+     * STEP 10 – Evaluasi Perkuliahan
      * POST /admin/portofolio/step/evaluasi
      * Body (JSON): id_portofolio, evaluasi_list (array of {id_cpmk, rata_rata, isi_cpmk})
      */
@@ -771,7 +817,7 @@ class Portofolio extends BaseController
     {
         $db   = \Config\Database::connect();
         $json = $this->request->getJSON(true);
-        $id   = (int) ($json['id_portofolio'] ?? 0);
+        $id   = (string) ($json['id_portofolio'] ?? 0);
 
         $db->table('evaluasi')->where('id_portofolio', $id)->delete();
 

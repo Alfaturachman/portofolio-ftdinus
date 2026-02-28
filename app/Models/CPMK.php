@@ -50,41 +50,14 @@ class CPMK extends Model
         ]
     ];
 
-    /**
-     * Mendapatkan CPMK berdasarkan ID portofolio
-     */
-    public function getByIdPortofolio($id_portofolio)
+    public function getCpmkByPorto($idPorto)
     {
-        return $this->where('id_portofolio', $id_portofolio)->findAll();
-    }
-
-    /**
-     * Mendapatkan CPMK dengan relasi
-     */
-    public function getWithRelations($id_portofolio = null)
-    {
-        $this->select('cpmk.*, cpl.kode_cpl, cpl.narasi_cpl');
-        $this->join('cpl', 'cpl.id = cpmk.id_cpl');
-
-        if ($id_portofolio !== null) {
-            $this->where('cpmk.id_portofolio', $id_portofolio);
-        }
-
-        return $this->findAll();
-    }
-
-    /**
-     * Mendapatkan Sub CPMK berdasarkan CPMK
-     */
-    public function getWithSubCPMK($id_cpmk)
-    {
-        $subCPMKModel = new SubCPMK();
-        $cpmk = $this->find($id_cpmk);
-
-        if ($cpmk) {
-            $cpmk['sub_cpmk'] = $subCPMKModel->where('id_cpmk', $id_cpmk)->findAll();
-        }
-
-        return $cpmk;
+        return $this->db->table('cpmk c')
+            ->select('c.id, c.no_cpmk, c.narasi_cpmk AS isi_cpmk,
+                     IFNULL(e.rata_rata, 0) AS avg_cpmk')
+            ->join('evaluasi e', 'e.id_cpmk = c.id AND e.id_portofolio = c.id_portofolio', 'left')
+            ->where('c.id_portofolio', $idPorto)
+            ->orderBy('c.no_cpmk')
+            ->get()->getResultArray();
     }
 }

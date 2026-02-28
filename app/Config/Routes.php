@@ -22,6 +22,10 @@ $routes->post('admin/portofolio/start/(:any)', 'Portofolio::start/$1');
 $routes->post('admin/portofolio/step/rps',             'Portofolio::saveRPS');
 $routes->get('admin/portofolio/rps/(:any)', 'Portofolio::serveRPS/$1');
 
+// Serve asesmen files
+$routes->get('admin/portofolio/asesmen/(:any)', 'Portofolio::serveAsesmen/$1');
+$routes->get('admin/portofolio/preview-asesmen/(:any)', 'Portofolio::previewAsesmen/$1');
+
 // Step 2 — Info Mata Kuliah (JSON or form-encoded)
 $routes->post('admin/portofolio/step/info-mk',          'Portofolio::saveInfoMK');
 
@@ -48,6 +52,19 @@ $routes->post('admin/portofolio/step/hasil-asesmen',    'Portofolio::saveHasilAs
 
 // Step 10 — Evaluasi (JSON)
 $routes->post('admin/portofolio/step/evaluasi',         'Portofolio::saveEvaluasi');
+
+// Route cetak portofolio
+$routes->group('cetak', function ($routes) {
+    // Preview HTML di browser
+    $routes->get('(:segment)', 'Cetak::index/$1');
+
+    // Download PDF hasil gabungan
+    $routes->get('pdf/(:segment)', 'Cetak::generatePdf/$1');
+
+    // Tampilkan file PDF inline (preview lampiran)
+    $routes->get('file/(:segment)/(:segment)', 'Cetak::show/$1/$2');
+});
+
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
 
 

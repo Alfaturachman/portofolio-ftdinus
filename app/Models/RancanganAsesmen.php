@@ -38,45 +38,17 @@ class RancanganAsesmen extends Model
         ]
     ];
 
-    /**
-     * Mendapatkan asesmen berdasarkan jenis
-     */
-    public function getByJenis($id_portofolio, $jenis)
+    public function getAssessmentData($idPorto)
     {
-        return $this->where('id_portofolio', $id_portofolio)
-            ->where('jenis_asesmen', $jenis)
-            ->findAll();
-    }
-
-    /**
-     * Mendapatkan asesmen dengan detail CPMK
-     */
-    public function getWithCPMK($id_portofolio = null)
-    {
-        $this->select('rancangan_asesmen.*, cpmk.no_cpmk, cpmk.narasi_cpmk');
-        $this->join('cpmk', 'cpmk.id = rancangan_asesmen.id_cpmk');
-
-        if ($id_portofolio !== null) {
-            $this->where('rancangan_asesmen.id_portofolio', $id_portofolio);
-        }
-
-        return $this->findAll();
-    }
-
-    /**
-     * Mendapatkan soal-soal dari asesmen
-     */
-    public function getWithSoal($id_asesmen)
-    {
-        $rancanganSoalModel = new RancanganSoal();
-        $asesmen = $this->find($id_asesmen);
-
-        if ($asesmen) {
-            $asesmen['soal'] = $rancanganSoalModel->where('id_asesmen', $id_asesmen)
-                ->orderBy('nomor_soal', 'ASC')
-                ->findAll();
-        }
-
-        return $asesmen;
+        $rows = $this->db->table('rancangan_asesmen ra')
+            ->select('ra.id_cpmk, c.no_cpmk,
+               MAX(CASE WHEN ra.jenis_asesmen="tugas" THEN 1 ELSE 0 END) AS tugas,
+               MAX(CASE WHEN ra.jenis_asesmen="uts"   THEN 1 ELSE 0 END) AS uts,
+               MAX(CASE WHEN ra.jenis_asesmen="uas"   THEN 1 ELSE 0 END) AS uas')
+            ->join('cpmk c', 'c.id = ra.id_cpmk')
+            ->where('ra.id_portofolio', $idPorto)
+            ->groupBy('ra.id_cpmk')
+            ->get()->getResultArray();
+        return $rows;
     }
 }
