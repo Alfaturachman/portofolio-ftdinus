@@ -1172,28 +1172,8 @@
     //  STEP 3 — CPL Table
     // ══════════════════════════════════════════
     function renderCPLTable() {
-        // Kelompokkan CPL_DATA (flat rows) menjadi struktur { cpl_id: { ...cpl, pis: [...] } }
-        const grouped = {};
-        CPL_DATA.forEach(row => {
-            if (!grouped[row.id]) {
-                grouped[row.id] = {
-                    id: row.id,
-                    no_cpl: row.no_cpl,
-                    narasi: row.cpl_indo,
-                    pis: []
-                };
-            }
-            if (row.id_pi) {
-                grouped[row.id].pis.push({
-                    id: row.id_pi,
-                    no_pi: row.no_pi,
-                    isi: row.isi_pi
-                });
-            }
-        });
-
-        const data = Object.values(grouped);
-        state.cpl = data; // simpan ke state untuk dipakai step 4+
+        // Gunakan state.cpl yang sudah diinisialisasi di DOMContentLoaded
+        const data = state.cpl || [];
 
         document.getElementById('cplMKName').textContent =
             '<?= esc($porto['nama_mk']) ?> (<?= esc($porto['kode_mk']) ?>)';
@@ -2092,6 +2072,29 @@
                         ) ?>;
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Inisialisasi state.cpl dari CPL_DATA (untuk Step 4+)
+        if (typeof CPL_DATA !== 'undefined' && CPL_DATA.length > 0) {
+            const grouped = {};
+            CPL_DATA.forEach(row => {
+                if (!grouped[row.id]) {
+                    grouped[row.id] = {
+                        id: row.id,
+                        no_cpl: row.no_cpl,
+                        narasi: row.cpl_indo,
+                        pis: []
+                    };
+                }
+                if (row.id_pi) {
+                    grouped[row.id].pis.push({
+                        id: row.id_pi,
+                        no_pi: row.no_pi,
+                        isi: row.isi_pi
+                    });
+                }
+            });
+            state.cpl = Object.values(grouped);
+        }
+
         // Isi state.cpmkList & ID map dari DB
         if (typeof DB_CPMKS !== 'undefined' && DB_CPMKS.length > 0) {
             state.cpmkIdMap = {};
