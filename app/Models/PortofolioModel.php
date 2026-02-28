@@ -135,11 +135,57 @@ class PortofolioModel extends Model
             ->get()->getResultArray();
 
         // Soal
-        $data['soal'] = $db->table('rancangan_soal rs')
-            ->select('rs.*, ra.jenis_asesmen, ra.id_cpmk')
+        $soal = $db->table('rancangan_soal rs')
+            ->select('
+        rs.id,
+        rs.id_portofolio,
+        rs.id_asesmen,
+        rs.id_cpmk as id_cpmk_soal,
+        rs.nomor_soal,
+        rs.created_at,
+        rs.updated_at,
+        ra.jenis_asesmen,
+        ra.file_soal,
+        ra.file_rubrik,
+        c.no_cpmk,
+        c.narasi_cpmk
+    ')
             ->join('rancangan_asesmen ra', 'ra.id = rs.id_asesmen')
+            ->join('cpmk c', 'c.id = rs.id_cpmk') // JOIN dengan tabel cpmk untuk mendapatkan no_cpmk
             ->where('rs.id_portofolio', $id)
-            ->get()->getResultArray();
+            ->orderBy('ra.jenis_asesmen, rs.nomor_soal, c.no_cpmk')
+            ->get()
+            ->getResultArray();
+
+        // Kelompokkan data per jenis asesmen
+        $soalPerJenis = [];
+        foreach ($soal as $s) {
+            $jenis = $s['jenis_asesmen']; // tugas, uts, uas
+
+            if (!isset($soalPerJenis[$jenis])) {
+                $soalPerJenis[$jenis] = [];
+            }
+
+            $nomorSoal = $s['nomor_soal'];
+
+            // Inisialisasi array untuk nomor soal jika belum ada
+            if (!isset($soalPerJenis[$jenis][$nomorSoal])) {
+                $soalPerJenis[$jenis][$nomorSoal] = [
+                    'nomor_soal' => $nomorSoal,
+                    'cpmk_list' => [] // Dalam kasus 1 soal hanya 1 CPMK, array ini hanya berisi 1 item
+                ];
+            }
+
+            // Tambahkan CPMK ke dalam soal (dalam kasus ini hanya 1 CPMK per soal)
+            $soalPerJenis[$jenis][$nomorSoal]['cpmk_list'][] = [
+                'id_cpmk' => $s['id_cpmk_soal'],
+                'no_cpmk' => $s['no_cpmk'],
+                'narasi' => $s['narasi_cpmk']
+            ];
+        }
+
+        // Kirim ke view
+        $data['soal'] = $soalPerJenis;
 
         // Pelaksanaan
         $data['pelaksanaan'] = $db->table('pelaksanaan')

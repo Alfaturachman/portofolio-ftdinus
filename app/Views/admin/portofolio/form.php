@@ -1704,14 +1704,6 @@
     // Di bagian inisialisasi DOMContentLoaded, tambahkan console.log untuk melihat data dari database:
 
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('=== DOM LOADED - INITIAL DATA ===');
-        console.log('CPL_DATA:', CPL_DATA);
-        console.log('PORTO_ID:', PORTO_ID);
-        console.log('PERKULIAHAN_ID:', PERKULIAHAN_ID);
-        console.log('DB_CPMKS:', DB_CPMKS);
-        console.log('DB_MAPPINGS:', DB_MAPPINGS);
-        console.log('LAST_STEP:', LAST_STEP);
-
         // ── 1. Inisialisasi state.cpl dari CPL_DATA ────────────────────────────
         if (typeof CPL_DATA !== 'undefined' && CPL_DATA.length > 0) {
             const grouped = {};
@@ -1733,25 +1725,21 @@
                 }
             });
             state.cpl = Object.values(grouped);
-            console.log('state.cpl setelah grouping:', state.cpl);
         }
 
         // ── 2. Isi state.cpmkList & ID map dari DB_CPMKS ──────────────────────
         if (typeof DB_CPMKS !== 'undefined' && DB_CPMKS.length > 0) {
-            console.log('Mengolah DB_CPMKS:', DB_CPMKS);
 
             state.cpmkIdMap = {};
             state.subIdMap = {};
 
             state.cpmkList = DB_CPMKS.map((c, i) => {
-                const no = i + 1; // nomor urut (1-based)
-                console.log(`Mapping CPMK ${no}:`, c);
-                state.cpmkIdMap[no] = c.id; // no → db_id
+                const no = i + 1;
+                state.cpmkIdMap[no] = c.id;
 
                 (c.subs || []).forEach((s) => {
                     // key: "cpmkNo_subNo" → db sub id
                     state.subIdMap[`${no}_${s.no}`] = s.id;
-                    console.log(`  Sub mapping: ${no}_${s.no} -> ${s.id}`);
                 });
 
                 return {
@@ -1764,15 +1752,10 @@
                     })),
                 };
             });
-
-            console.log('state.cpmkIdMap setelah inisialisasi:', state.cpmkIdMap);
-            console.log('state.subIdMap setelah inisialisasi:', state.subIdMap);
-            console.log('state.cpmkList setelah inisialisasi:', state.cpmkList);
         }
 
         // ── 3. Bangun state.mapping dari DB_MAPPINGS ──────────────────────────
         if (typeof DB_MAPPINGS !== 'undefined' && DB_MAPPINGS.length > 0) {
-            console.log('Mengolah DB_MAPPINGS:', DB_MAPPINGS);
 
             const mappingMap = {};
 
@@ -1783,17 +1766,13 @@
                     id_sub_cpmk
                 } = map;
 
-                console.log(`Processing mapping: CPL ${id_cpl} - CPMK ${id_cpmk} - Sub ${id_sub_cpmk}`);
-
                 // Cari cpmkNo (1,2,3,...) dari state.cpmkIdMap
                 const cpmkNo = Object.keys(state.cpmkIdMap).find(
                     key => Number(state.cpmkIdMap[key]) === Number(id_cpmk)
                 );
                 if (!cpmkNo) {
-                    console.warn('⚠️ DB_MAPPINGS: id_cpmk tidak ditemukan di cpmkIdMap:', id_cpmk, state.cpmkIdMap);
                     return;
                 }
-                console.log(`  → ditemukan cpmkNo: ${cpmkNo}`);
 
                 // Cari subNo dari state.subIdMap
                 const subKey = Object.keys(state.subIdMap).find(
@@ -1804,30 +1783,23 @@
                     return;
                 }
                 const subNo = parseInt(subKey.split('_')[1]);
-                console.log(`  → ditemukan subNo: ${subNo}`);
 
                 const cplKey = String(id_cpl);
 
                 if (!mappingMap[cplKey]) mappingMap[cplKey] = {};
                 if (!mappingMap[cplKey][String(cpmkNo)]) mappingMap[cplKey][String(cpmkNo)] = [];
                 mappingMap[cplKey][String(cpmkNo)].push(subNo);
-                console.log(`  ✅ Mapping ditambahkan: mappingMap[${cplKey}][${cpmkNo}] =`, mappingMap[cplKey][String(cpmkNo)]);
             });
 
             state.mapping = mappingMap;
-            console.log('state.mapping setelah inisialisasi:', state.mapping);
         } else {
             console.log('DB_MAPPINGS tidak ada atau kosong');
         }
 
         // ── 4. Auto-resume ke last_step ────────────────────────────────────────
         if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
-            console.log('Auto-resume ke step:', LAST_STEP);
             goToStep(LAST_STEP);
         }
-
-        console.log('=== DOM LOADED - FINAL STATE ===');
-        console.log('Final state:', state);
     });
 
 
@@ -1966,6 +1938,7 @@
             return;
         }
 
+        // Urutan jenis asesmen
         const orderedTypes = [];
         let idx = 1;
         if (state.assessment.tugas) orderedTypes.push({
@@ -1993,27 +1966,68 @@
             return;
         }
 
+        // Buat mapping nomor CPMK untuk header
         const cpmkNos = state.cpmkList.map(c => c.no);
 
+        // Gunakan data dari state.soalData yang sudah dikonversi saat DOMContentLoaded
+        // Jangan langsung pakai DB_SOAL karena strukturnya berbeda
+        const soalDataFromDB = typeof DB_SOAL !== 'undefined' ? DB_SOAL : {};
+
         orderedTypes.forEach(type => {
-            // Inisialisasi jika kosong — JANGAN reset jika sudah ada datanya
-            if (!state.soalData[type.key] || !state.soalData[type.key].length) {
-                state.soalData[type.key] = [{
-                    soal_no: 1,
-                    cpmk_mappings: {}
-                }];
+            // Inisialisasi state.soalData[type.key] jika belum ada
+            if (!state.soalData[type.key]) {
+                state.soalData[type.key] = [];
+
+                // Jika ada data dari database, konversi ke format yang sesuai
+                if (soalDataFromDB[type.key]) {
+                    Object.keys(soalDataFromDB[type.key]).forEach(nomorSoal => {
+                        const soalData = soalDataFromDB[type.key][nomorSoal];
+                        const soal = {
+                            soal_no: parseInt(nomorSoal),
+                            cpmk_mappings: {}
+                        };
+
+                        // Tandai CPMK yang tercakup dalam soal ini
+                        if (soalData.cpmk_list && soalData.cpmk_list.length > 0) {
+                            soalData.cpmk_list.forEach(cpmk => {
+                                // Cari nomor CPMK berdasarkan id
+                                const cpmkNo = Object.keys(state.cpmkIdMap).find(
+                                    key => Number(state.cpmkIdMap[key]) === Number(cpmk.id_cpmk)
+                                );
+                                if (cpmkNo) {
+                                    soal.cpmk_mappings[cpmkNo] = true;
+                                }
+                            });
+                        }
+
+                        state.soalData[type.key].push(soal);
+                    });
+
+                    // Urutkan berdasarkan nomor soal
+                    state.soalData[type.key].sort((a, b) => a.soal_no - b.soal_no);
+                } else {
+                    // Default: 1 soal
+                    state.soalData[type.key] = [{
+                        soal_no: 1,
+                        cpmk_mappings: {}
+                    }];
+                }
             }
 
             const soalList = state.soalData[type.key];
 
+            // Header CPMK
             const cpmkHeaders = cpmkNos.map(no =>
                 `<th class="text-center align-middle" style="min-width:80px;font-size:12px;">CPMK ${no}</th>`
             ).join('');
 
-            // Gunakan INDEX (i) sebagai data-soal — bukan soal_no
+            // Buat rows untuk setiap soal
             const rows = soalList.map((soal, i) => {
+                // Untuk setiap CPMK, cek apakah soal ini untuk CPMK tersebut
                 const cells = cpmkNos.map(cno => {
-                    const checked = soal.cpmk_mappings && soal.cpmk_mappings[cno] ? 'checked' : '';
+                    // Cek apakah CPMK ini tercakup dalam soal
+                    const isChecked = soal.cpmk_mappings && soal.cpmk_mappings[cno] ? true : false;
+
                     return `
                 <td class="text-center align-middle">
                     <input type="checkbox"
@@ -2022,15 +2036,15 @@
                         data-type="${type.key}"
                         data-soal="${i}"
                         data-cpmk="${cno}"
-                        ${checked}>
+                        ${isChecked ? 'checked' : ''}>
                 </td>`;
                 }).join('');
 
                 const deleteBtn = soalList.length > 1 ?
                     `<button type="button" class="btn btn-sm btn-outline-danger px-2"
-                        onclick="removeRancanganSoal('${type.key}', ${i})">
-                        <i class="fas fa-trash-alt" style="font-size:11px;"></i>
-                   </button>` :
+                    onclick="removeRancanganSoal('${type.key}', ${i})">
+                    <i class="fas fa-trash-alt" style="font-size:11px;"></i>
+                </button>` :
                     `<span style="color:var(--text-muted);font-size:11px;">—</span>`;
 
                 return `
@@ -2723,38 +2737,39 @@
         }
 
         // ── Load state.soalData dari DB_SOAL ──────────────────────
-        if (typeof DB_SOAL !== 'undefined' && DB_SOAL.length > 0) {
+        if (typeof DB_SOAL !== 'undefined' && Object.keys(DB_SOAL).length > 0) {
             state.soalData = {};
 
-            DB_SOAL.forEach(soal => {
-                // Cari SEMUA asesmenKey yang memiliki id_asesmen ini
-                // (satu nomor_soal bisa ada di banyak id_asesmen karena per CPMK)
-                const matchingKeys = Object.keys(state.asesmenIdMap).filter(
-                    key => Number(state.asesmenIdMap[key]) === Number(soal.id_asesmen)
-                );
+            // Loop setiap jenis asesmen
+            Object.keys(DB_SOAL).forEach(jenis => {
+                state.soalData[jenis] = [];
 
-                matchingKeys.forEach(asesmenKey => {
-                    const parts = asesmenKey.split('_');
-                    const jenis = parts[0];
-                    const cpmkNo = parseInt(parts[1]);
+                // Loop setiap nomor soal dalam jenis tersebut
+                Object.keys(DB_SOAL[jenis]).forEach(nomorSoal => {
+                    const soalData = DB_SOAL[jenis][nomorSoal];
 
-                    if (!state.soalData[jenis]) state.soalData[jenis] = [];
+                    const soal = {
+                        soal_no: parseInt(nomorSoal),
+                        cpmk_mappings: {}
+                    };
 
-                    // Cari entry yang sama berdasarkan soal_no — JANGAN buat duplikat
-                    let existing = state.soalData[jenis].find(s => s.soal_no === soal.nomor_soal);
-                    if (!existing) {
-                        existing = {
-                            soal_no: soal.nomor_soal,
-                            cpmk_mappings: {}
-                        };
-                        state.soalData[jenis].push(existing);
+                    // Tandai CPMK yang tercakup dalam soal ini
+                    if (soalData.cpmk_list && soalData.cpmk_list.length > 0) {
+                        soalData.cpmk_list.forEach(cpmk => {
+                            // Cari nomor CPMK berdasarkan id
+                            const cpmkNo = Object.keys(state.cpmkIdMap).find(
+                                key => Number(state.cpmkIdMap[key]) === Number(cpmk.id_cpmk)
+                            );
+                            if (cpmkNo) {
+                                soal.cpmk_mappings[cpmkNo] = true;
+                            }
+                        });
                     }
-                    // Merge: tandai CPMK ini sebagai checked
-                    existing.cpmk_mappings[cpmkNo] = true;
-                });
-            });
 
-            Object.keys(state.soalData).forEach(jenis => {
+                    state.soalData[jenis].push(soal);
+                });
+
+                // Urutkan berdasarkan nomor soal
                 state.soalData[jenis].sort((a, b) => a.soal_no - b.soal_no);
             });
         }
@@ -3156,30 +3171,35 @@
     //  STEP 7 — Rancangan Soal
     // ══════════════════════════════════════════════════════════════
     async function saveStep7AndNext(btn) {
-        // 1. Sync checkbox DOM → state dulu
         saveSoalMapping();
 
         var soalList = [];
-        var seen = new Set(); // deduplikasi id_asesmen + nomor_soal
+        var seen = new Set(); // untuk deduplikasi
 
         Object.entries(state.soalData).forEach(function([jenis, soals]) {
             soals.forEach(function(soal) {
                 Object.entries(soal.cpmk_mappings || {}).forEach(function([cpmkNo, checked]) {
                     if (!checked) return;
 
+                    // Dapatkan id_asesmen dari mapping
                     var id_asesmen = state.asesmenIdMap[jenis + '_' + cpmkNo];
-                    if (!id_asesmen) {
-                        console.warn('id_asesmen tidak ditemukan untuk:', jenis + '_' + cpmkNo);
+
+                    // Dapatkan id_cpmk dari state.cpmkIdMap
+                    var id_cpmk = state.cpmkIdMap[parseInt(cpmkNo)];
+
+                    if (!id_asesmen || !id_cpmk) {
+                        console.warn('Data tidak lengkap untuk:', jenis + '_' + cpmkNo);
                         return;
                     }
 
-                    // Deduplikasi: satu id_asesmen + nomor_soal hanya dikirim sekali
+                    // Buat key unik untuk menghindari duplikasi
                     var key = id_asesmen + '_' + soal.soal_no;
                     if (seen.has(key)) return;
                     seen.add(key);
 
                     soalList.push({
                         id_asesmen: id_asesmen,
+                        id_cpmk: id_cpmk,
                         nomor_soal: soal.soal_no
                     });
                 });

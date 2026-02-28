@@ -543,27 +543,44 @@ class Portofolio extends BaseController
     /**
      * STEP 7 – Rancangan Soal
      * POST /admin/portofolio/step/soal
-     * Body (JSON): id_portofolio, soal_list (array of {id_asesmen, nomor_soal})
+     * Body (JSON): id_portofolio, soal_list (array of {id_asesmen, id_cpmk, nomor_soal})
      */
     public function saveSoal()
     {
-        $db   = \Config\Database::connect();
+        $db = \Config\Database::connect();
         $json = $this->request->getJSON(true);
-        $id   = (string) ($json['id_portofolio'] ?? 0);
+        $id = (string) ($json['id_portofolio'] ?? 0);
 
+        // Hapus data lama
         $db->table('rancangan_soal')->where('id_portofolio', $id)->delete();
 
         $soalList = $json['soal_list'] ?? [];
+        $groupedSoals = [];
+
+        // Kelompokkan berdasarkan id_asesmen, id_cpmk, dan nomor_soal
         foreach ($soalList as $soal) {
+            $key = $soal['id_asesmen'] . '_' . $soal['id_cpmk'] . '_' . $soal['nomor_soal'];
+            if (!isset($groupedSoals[$key])) {
+                $groupedSoals[$key] = [
+                    'id_portofolio' => $id,
+                    'id_asesmen' => $soal['id_asesmen'],
+                    'id_cpmk' => $soal['id_cpmk'],
+                    'nomor_soal' => $soal['nomor_soal']
+                ];
+            }
+        }
+
+        // Insert ke rancangan_soal - setiap soal terkait dengan satu CPMK
+        foreach ($groupedSoals as $item) {
             $db->table('rancangan_soal')->insert([
-                'id_portofolio' => $id,
-                'id_asesmen'    => (int) $soal['id_asesmen'],
-                'nomor_soal'    => (int) $soal['nomor_soal'],
+                'id_portofolio' => $item['id_portofolio'],
+                'id_asesmen' => $item['id_asesmen'],
+                'id_cpmk' => $item['id_cpmk'],
+                'nomor_soal' => $item['nomor_soal'],
             ]);
         }
 
         $this->_updateLastStep($id, 7);
-
         return $this->_json(['status' => 'success', 'message' => 'Rancangan soal berhasil disimpan.']);
     }
 

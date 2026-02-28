@@ -13,6 +13,7 @@ class RancanganSoal extends Model
     protected $allowedFields    = [
         'id_portofolio',
         'id_asesmen',
+        'id_cpmk',
         'nomor_soal',
         'created_at',
         'updated_at'
@@ -25,6 +26,7 @@ class RancanganSoal extends Model
     protected $validationRules = [
         'id_portofolio' => 'required|integer|is_not_unique[portofolio.id]',
         'id_asesmen' => 'required|integer|is_not_unique[rancangan_asesmen.id]',
+        'id_cpmk' => 'required|integer|is_not_unique[cpmk.id]',
         'nomor_soal' => 'required|integer'
     ];
 
@@ -42,18 +44,17 @@ class RancanganSoal extends Model
 
         return $this->orderBy('nomor_soal', 'ASC')->findAll();
     }
-    
+
     public function getAssessmentSoalData($idPorto)
     {
         return $this->db->table('rancangan_soal rs')
             ->select('
             rs.nomor_soal AS no_soal,
-            ra.id_cpmk,
+            rs.id_cpmk,
             ra.jenis_asesmen AS kategori_soal,
             1 AS nilai
         ')
             ->join('rancangan_asesmen ra', 'ra.id = rs.id_asesmen')
-            ->join('cpmk c', 'c.id = ra.id_cpmk')
             ->where('rs.id_portofolio', $idPorto)
             ->orderBy('ra.jenis_asesmen')
             ->orderBy('rs.nomor_soal')
