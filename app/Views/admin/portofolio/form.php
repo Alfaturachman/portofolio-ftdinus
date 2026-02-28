@@ -590,7 +590,7 @@
     </div>
 </div>
 
-<!-- ═══════════════ STEP 2: Info Matakuliah ═══════════════ -->
+<!-- ═══════════════ STEP 2: Info Mata Kuliah ═══════════════ -->
 <div class="step-panel" id="step-2">
     <div class="form-card">
         <div class="form-card-header">
@@ -724,7 +724,7 @@
     </div>
 </div>
 
-<!-- ═══════════════ STEP 5: Pemetaan ═══════════════ -->
+<!-- ═══════════════ STEP 5: Pemetaan CPL-CPMK-SubCPMK ═══════════════ -->
 <div class="step-panel" id="step-5">
     <div class="form-card">
         <div class="form-card-header">
@@ -1236,7 +1236,7 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 2 — MK
+    //  STEP 2 — Info Mata Kuliah
     // ══════════════════════════════════════════
     function saveMK() {
         state.mk.mk_prasyarat = document.getElementById('mk_prasyarat').value;
@@ -1297,7 +1297,7 @@
     }
 
     // ══════════════════════════════════════════
-    //  STEP 4 — CPMK Builder
+    //  STEP 4 — CPMK & Sub CPMK
     // ══════════════════════════════════════════
     function loadDataMapping() {
         const container = document.getElementById('cpmkContainer');
@@ -2962,7 +2962,7 @@
     }
 
     // ══════════════════════════════════════════════════════════════
-    //  STEP 3 — CPL & PI (advance only)
+    //  STEP 3 — CPL & PI
     // ══════════════════════════════════════════════════════════════
     async function saveStep3AndNext(btn) {
         setBtnLoading(btn, true);
