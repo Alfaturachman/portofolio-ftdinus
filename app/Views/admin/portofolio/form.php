@@ -2820,9 +2820,9 @@
     const DB_ASSESSMEN = <?= json_encode($asesmen ?? []) ?>;
     const DB_PELAKSANAAN = <?= json_encode($pelaksanaan ?? []) ?>;
     const DB_HASIL_ASESMEN = <?= json_encode([
-                                    'jawaban' => $hasilAsesmen ?? [],
-                                    'nilai_matkul' => $nilaiMatkul['file_nilai_matkul'] ?? null,
-                                    'nilai_cpmk' => $nilaiCPMK['file_nilai_cpmk'] ?? null
+                                    'jawaban' => $hasil_asesmen ?? [],
+                                    'nilai_matkul' => $nilai_matkul['file_nilai_matkul'] ?? null,
+                                    'nilai_cpmk' => $nilai_cpmk['file_nilai_cpmk'] ?? null
                                 ]) ?>;
     const DB_SOAL = <?= json_encode($soal ?? []) ?>;
 
