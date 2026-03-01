@@ -1045,27 +1045,19 @@
         <div class="form-card-body">
             <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
                 <i class="fas fa-check-circle"></i>
-                Tahap akhir! Isi nilai setiap CPMK dan lihat grafik capaian.
+                Tahap akhir! Isi nilai setiap CPMK dan evaluasi capaian pembelajaran.
             </div>
 
             <div class="section-header mb-3">
                 <div class="section-dot"></div>
-                <div class="section-title">Nilai per CPMK</div>
+                <div class="section-title">Nilai & Evaluasi per CPMK</div>
             </div>
-            <div class="row g-3 mb-4" id="cpmkValueInputs">
-                <!-- Rendered by JS -->
+            <div class="row g-4 mb-4" id="cpmkValueInputs">
+                <!-- Rendered by JS: numeric input + textarea for each CPMK -->
             </div>
 
             <div class="chart-wrap">
                 <canvas id="cpmkChart" height="100"></canvas>
-            </div>
-
-            <div class="section-header mb-3">
-                <div class="section-dot"></div>
-                <div class="section-title">Ringkasan Portofolio</div>
-            </div>
-            <div class="row g-3 p-3" style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;" id="summaryContent">
-                <!-- Rendered by JS -->
             </div>
 
             <div class="step-nav">
@@ -1568,7 +1560,6 @@
         console.log('Current state.mapping:', state.mapping);
         console.log('Current state.cpmkIdMap:', state.cpmkIdMap);
         console.log('Current state.subIdMap:', state.subIdMap);
-        console.log('DB_MAPPINGS:', typeof DB_MAPPINGS !== 'undefined' ? DB_MAPPINGS : 'undefined');
 
         const hasDomCPMK = document.querySelectorAll('.cpmk-block').length > 0;
         if (hasDomCPMK) {
@@ -1585,21 +1576,38 @@
         (state.cpl || []).map(c => {
             cplLabelMap[c.id] = c.no_cpl;
         });
-        console.log('cplLabelMap:', cplLabelMap);
 
-        // ── Kumpulkan SEMUA nomor sub yang ada di SEMUA CPMK (global unique set) ──
+        // ── Kumpulkan SEMUA nomor sub yang ada di SEMUA CPMK untuk header kolom (GLOBAL POOL) ──
         const allSubNos = new Set();
         state.cpmkList.forEach(c => {
-            console.log(`CPMK ${c.no} memiliki subs:`, c.subs);
             c.subs.forEach(s => allSubNos.add(parseInt(s.no)));
         });
-        console.log('allSubNos:', Array.from(allSubNos));
 
-        const maxSub = allSubNos.size > 0 ? Math.max(...allSubNos) : 0;
-        const subColumns = Array.from({
-            length: maxSub
-        }, (_, i) => i + 1);
-        console.log('subColumns (yang akan ditampilkan):', subColumns);
+        // Urutkan nomor sub untuk header
+        const sortedSubNos = Array.from(allSubNos).sort((a, b) => a - b);
+        console.log('Global Sub pool (header):', sortedSubNos);
+
+        // ── Build map untuk quick lookup: subNo → array of CPMK yang memiliki Sub ini ──
+        // Ini untuk referensi saja, semua CPMK tetap bisa memilih semua Sub
+        const subCpmkMap = {};
+        state.cpmkList.forEach(c => {
+            c.subs.forEach(s => {
+                const subNo = parseInt(s.no);
+                if (!subCpmkMap[subNo]) subCpmkMap[subNo] = [];
+                subCpmkMap[subNo].push(c.no);
+            });
+        });
+        console.log('Sub → CPMK map:', subCpmkMap);
+
+        // ── Build map untuk ID Sub: "cpmkNo_subNo" → id_sub dari database ──
+        // Karena Sub CPMK bersifat global, kita perlu map untuk setiap kombinasi CPMK-Sub
+        // Untuk Sub yang tidak dimiliki CPMK, kita gunakan ID dari CPMK pertama yang memiliki Sub tersebut
+        const globalSubIdMap = {};
+        // Gunakan state.subIdMap yang sudah berisi ID dari DB
+        Object.entries(state.subIdMap).forEach(([key, subId]) => {
+            globalSubIdMap[key] = subId;
+        });
+        console.log('Global Sub ID map:', globalSubIdMap);
 
         // ── Build header ──
         const headerRow = document.getElementById('mappingHeaderRow');
@@ -1611,7 +1619,7 @@
         headerRow.innerHTML = `
         <th rowspan="2" class="align-middle" style="background:var(--accent);color:#fff;min-width:160px;">CPL</th>
         <th rowspan="2" class="align-middle" style="background:var(--accent);color:#fff;min-width:180px;">CPMK</th>
-        <th colspan="${subColumns.length}" class="text-center" style="background:var(--accent);color:#fff;">Sub CPMK</th>`;
+        <th colspan="${sortedSubNos.length}" class="text-center" style="background:var(--accent);color:#fff;">Sub CPMK (Global Pool)</th>`;
 
         // Sub-header row (nomor sub)
         let subHeaderRow = document.getElementById('mappingSubHeaderRow');
@@ -1620,9 +1628,13 @@
             subHeaderRow.id = 'mappingSubHeaderRow';
             headerRow.parentNode.insertBefore(subHeaderRow, headerRow.nextSibling);
         }
-        subHeaderRow.innerHTML = subColumns.map(n =>
-            `<th class="text-center" style="background:var(--accent);color:#fff;min-width:60px;">${n}</th>`
-        ).join('');
+        subHeaderRow.innerHTML = sortedSubNos.map(n => {
+            const cpmkList = subCpmkMap[n] || [];
+            const title = cpmkList.length > 0 ?
+                `Sub ${n} (dimiliki oleh: ${cpmkList.map(no => 'CPMK ' + no).join(', ')})` :
+                `Sub ${n}`;
+            return `<th class="text-center" style="background:var(--accent);color:#fff;min-width:60px;" title="${title}">${n}</th>`;
+        }).join('');
 
         // ── Group CPMK by CPL ──
         const byCpl = {};
@@ -1661,42 +1673,55 @@
                 <small style="color:var(--text-muted);font-size:11.5px;">${cpmk.narasi || ''}</small>
             </td>`;
 
-                // Sub CPMK cells — SEMUA kolom (1..maxSub) untuk setiap CPMK
-                subColumns.forEach(subNo => {
+                // ── Sub CPMK cells ──
+                // SEMUA CPMK bisa memilih SEMUA Sub dari global pool
+                // Checkbox tersedia untuk semua kombinasi CPMK-Sub
+                sortedSubNos.forEach(subNo => {
                     const mappingExists = state.mapping &&
                         state.mapping[String(cplId)] &&
                         state.mapping[String(cplId)][String(cpmk.no)] &&
                         state.mapping[String(cplId)][String(cpmk.no)].includes(subNo);
 
-                    // Debug untuk mapping tertentu
-                    if (mappingExists) {
-                        console.log(`Mapping ditemukan: CPL ${cplId} - CPMK ${cpmk.no} - Sub ${subNo}`);
+                    const isChecked = mappingExists || false;
+                    const idCpmk = state.cpmkIdMap[cpmk.no] || '';
+
+                    // ── PERBAIKAN: gunakan globalSubIdMap yang sudah benar ──
+                    const directKey = `${cpmk.no}_${subNo}`;
+                    let idSub = globalSubIdMap[directKey] || '';
+
+                    // Jika CPMK ini tidak punya Sub ini, cari dari CPMK lain yang punya
+                    if (!idSub) {
+                        const ownerCpmkNo = subCpmkMap[subNo]?.[0];
+                        if (ownerCpmkNo) {
+                            const ownerKey = `${ownerCpmkNo}_${subNo}`;
+                            idSub = globalSubIdMap[ownerKey] || '';
+                        }
                     }
 
-                    const isChecked = mappingExists || false;
-
-                    // Cari ID untuk data attribute
-                    const idCpmk = state.cpmkIdMap[cpmk.no] || '';
-                    const idSub = state.subIdMap[`${cpmk.no}_${subNo}`] || '';
+                    const ownsSub = !!globalSubIdMap[directKey];
 
                     html += `<td class="text-center align-middle">
-                    <input type="checkbox"
-                        class="mapping-checkbox form-check-input"
-                        style="width:20px;height:20px;cursor:pointer;accent-color:var(--primary);"
-                        data-cpl="${cplId}"
-                        data-cpmk="${cpmk.no}"
-                        data-sub="${subNo}"
-                        data-id-cpmk="${idCpmk}"
-                        data-id-sub="${idSub}"
-                        ${isChecked ? 'checked' : ''}>
-                </td>`;
+                        <input type="checkbox"
+                            class="mapping-checkbox form-check-input"
+                            style="width:20px;height:20px;cursor:pointer;accent-color:var(--primary);"
+                            data-cpl="${cplId}"
+                            data-cpmk="${cpmk.no}"
+                            data-sub="${subNo}"
+                            data-id-cpmk="${idCpmk}"
+                            data-id-sub="${idSub}"
+                            data-owns="${ownsSub}"
+                            ${isChecked ? 'checked' : ''}>
+                    </td>`;
                 });
 
                 tr.innerHTML = html;
                 tbody.appendChild(tr);
             });
         });
-
+        // Setelah buka step 5, cek globalSubIdMap sudah benar
+        document.querySelectorAll('.mapping-checkbox').forEach((cb, i) => {
+            console.log(`CB ${i}: id-cpmk=${cb.dataset.idCpmk}, id-sub=${cb.dataset.idSub}`);
+        });
         console.log('loadDataPemetaan selesai. Total checkbox:', document.querySelectorAll('.mapping-checkbox').length);
         console.log('=== RENDER MAPPING TABLE END ===\n');
     }
@@ -1732,6 +1757,7 @@
 
             state.cpmkIdMap = {};
             state.subIdMap = {};
+            state.globalSubMap = {};
 
             state.cpmkList = DB_CPMKS.map((c, i) => {
                 const no = i + 1;
@@ -1740,6 +1766,11 @@
                 (c.subs || []).forEach((s) => {
                     // key: "cpmkNo_subNo" → db sub id
                     state.subIdMap[`${no}_${s.no}`] = s.id;
+                    // Global map: sub_id → { no, cpmkNo } untuk lookup global
+                    state.globalSubMap[s.id] = {
+                        no: parseInt(s.no),
+                        cpmkNo: no
+                    };
                 });
 
                 return {
@@ -1771,18 +1802,28 @@
                     key => Number(state.cpmkIdMap[key]) === Number(id_cpmk)
                 );
                 if (!cpmkNo) {
+                    console.warn('⚠️ DB_MAPPINGS: id_cpmk tidak ditemukan:', id_cpmk);
                     return;
                 }
 
-                // Cari subNo dari state.subIdMap
-                const subKey = Object.keys(state.subIdMap).find(
-                    key => Number(state.subIdMap[key]) === Number(id_sub_cpmk)
-                );
-                if (!subKey) {
-                    console.warn('⚠️ DB_MAPPINGS: id_sub_cpmk tidak ditemukan di subIdMap:', id_sub_cpmk, state.subIdMap);
+                // Cari subNo dari GLOBAL map (karena Sub bisa milik CPMK lain)
+                let subNo = null;
+                if (state.globalSubMap && state.globalSubMap[id_sub_cpmk]) {
+                    subNo = state.globalSubMap[id_sub_cpmk].no;
+                } else {
+                    // Fallback: cari di subIdMap (untuk backward compatibility)
+                    const subKey = Object.keys(state.subIdMap).find(
+                        key => Number(state.subIdMap[key]) === Number(id_sub_cpmk)
+                    );
+                    if (subKey) {
+                        subNo = parseInt(subKey.split('_')[1]);
+                    }
+                }
+
+                if (!subNo) {
+                    console.warn('⚠️ DB_MAPPINGS: id_sub_cpmk tidak ditemukan:', id_sub_cpmk);
                     return;
                 }
-                const subNo = parseInt(subKey.split('_')[1]);
 
                 const cplKey = String(id_cpl);
 
@@ -1812,12 +1853,20 @@
         state.mappingData = [];
 
         checkboxes.forEach(cb => {
-
             const idCpl = cb.dataset.cpl;
-            const idCpmk = cb.dataset.idCpmk;
-            const idSub = cb.dataset.idSub;
+            const idCpmk = cb.dataset.idCpmk; // dari data-id-cpmk
+            const idSub = cb.dataset.idSub; // dari data-id-sub
 
-            if (!idCpl || !idCpmk || !idSub) return;
+            console.log('Checkbox checked:', {
+                idCpl,
+                idCpmk,
+                idSub
+            });
+
+            if (!idCpl || !idCpmk || !idSub) {
+                console.warn('Checkbox tanpa data valid:', cb);
+                return;
+            }
 
             state.mappingData.push({
                 id_cpl: parseInt(idCpl),
@@ -1826,7 +1875,7 @@
             });
         });
 
-        console.log('Mapping yang akan dikirim:', state.mappingData);
+        console.log('✅ Mapping yang akan dikirim:', state.mappingData);
     }
 
     // ══════════════════════════════════════════
@@ -2458,20 +2507,55 @@
     function loadDataEvaluasi() {
         const container = document.getElementById('cpmkValueInputs');
         container.innerHTML = '';
+
+        // Load existing evaluasi data from DB_EVALUASI into state
+        if (typeof DB_EVALUASI !== 'undefined' && DB_EVALUASI.length > 0) {
+            DB_EVALUASI.forEach(ev => {
+                // Find cpmk number from cpmkIdMap
+                const cpmkNo = Object.keys(state.cpmkIdMap).find(
+                    key => Number(state.cpmkIdMap[key]) === Number(ev.id_cpmk)
+                );
+                if (cpmkNo) {
+                    // Store in state.cpmkValues for numeric value
+                    state.cpmkValues[cpmkNo] = parseFloat(ev.rata_rata) || 0;
+                    // Store isi_cpmk in a separate state object
+                    if (!state.cpmkEvaluasi) state.cpmkEvaluasi = {};
+                    state.cpmkEvaluasi[cpmkNo] = ev.isi_cpmk || '';
+                }
+            });
+        }
+
         state.cpmkList.forEach(c => {
             const div = document.createElement('div');
-            div.className = 'col-md-3 col-sm-4 col-6';
+            div.className = 'col-lg-6 col-md-12';
+            const existingValue = state.cpmkValues[c.no] || '';
+            const existingText = state.cpmkEvaluasi?.[c.no] || '';
+
             div.innerHTML = `
-            <div class="form-floating">
-                <input type="number" class="form-control cpmk-val-input" id="cpmkVal_${c.no}" min="0" max="100" step="0.1"
-                    placeholder="CPMK ${c.no}" value="${state.cpmkValues[c.no] || ''}" oninput="updateChart()">
-                <label>CPMK ${c.no}</label>
+            <div class="card border" style="border-radius:10px;">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center" style="border-radius:10px 10px 0 0;">
+                    <h6 class="mb-0 fw-semibold"><i class="fas fa-graduation-cap me-2"></i>CPMK ${c.no}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nilai Rata-Rata CPMK ${c.no}</label>
+                        <input type="number" class="form-control cpmk-val-input" id="cpmkVal_${c.no}"
+                            min="0" max="100" step="0.1" placeholder="0-100"
+                            value="${existingValue}" oninput="updateChart()">
+                        <small class="text-muted">Masukkan nilai rata-rata mahasiswa untuk CPMK ini (0-100)</small>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Evaluasi Capaian CPMK ${c.no}</label>
+                        <textarea class="form-control cpmk-ev-input" id="cpmkEv_${c.no}" rows="4"
+                            placeholder="Jelaskan evaluasi capaian pembelajaran untuk CPMK ini (analisis, kendala, dan rencana perbaikan)">${existingText}</textarea>
+                        <small class="text-muted">Deskripsikan analisis capaian, kendala, dan rencana perbaikan</small>
+                    </div>
+                </div>
             </div>`;
             container.appendChild(div);
         });
 
         initChart();
-        renderSummary();
     }
 
     function initChart() {
@@ -2531,16 +2615,6 @@
             chartInstance.data.datasets[0].data = state.cpmkList.map(c => state.cpmkValues[c.no] || 0);
             chartInstance.update();
         }
-    }
-
-    function renderSummary() {
-        const div = document.getElementById('summaryContent');
-        const mk = state.mk;
-        div.innerHTML = `
-                <div class="col-md-4"><div style="font-size:12px;color:var(--text-muted);">Mata Kuliah</div><div style="font-size:13px;font-weight:600;">${mk.nama_mk || '—'} (${mk.kode_mk || '—'})</div></div>
-                <div class="col-md-4"><div style="font-size:12px;color:var(--text-muted);">CPMK Dibuat</div><div style="font-size:13px;font-weight:600;">${state.cpmkList.length} CPMK</div></div>
-                <div class="col-md-4"><div style="font-size:12px;color:var(--text-muted);">Asesmen Dipilih</div><div style="font-size:13px;font-weight:600;">${[state.assessment.tugas?'Tugas':'', state.assessment.uts?'UTS':'', state.assessment.uas?'UAS':''].filter(Boolean).join(', ') || '—'}</div></div>
-            `;
     }
 
     // ══════════════════════════════════════════
@@ -2764,7 +2838,9 @@
             },
             soalData: {},
             mapping: {},
-            cpmkValues: {}
+            cpmkValues: {},
+            cpmkEvaluasi: {},
+            globalSubMap: {}
         });
         cpmkCounter = 0;
         document.getElementById('cpmkContainer').innerHTML = '';
@@ -2825,6 +2901,7 @@
                                     'nilai_cpmk' => $nilai_cpmk['file_nilai_cpmk'] ?? null
                                 ]) ?>;
     const DB_SOAL = <?= json_encode($soal ?? []) ?>;
+    const DB_EVALUASI = <?= json_encode($evaluasi ?? []) ?>;
 
     // ══════════════════════════════════════════
     //  STATE
@@ -2845,8 +2922,10 @@
         soalData: {},
         mapping: {},
         cpmkValues: {},
+        cpmkEvaluasi: {},
         cpmkIdMap: {},
         subIdMap: {},
+        globalSubMap: {},
         asesmenIdMap: {},
         existingFiles: {},
     };
@@ -3527,8 +3606,11 @@
             fd.append('file_nilai_cpmk', elNilaiCPMK.files[0]);
         }
 
-        // Validasi: minimal satu file diupload
-        if (fd.entries().next().done) {
+        // Validasi: minimal satu file diupload ATAU sudah ada file di database
+        const hasNewFile = !fd.entries().next().done;
+        const hasExistingFile = state.existingFiles && Object.keys(state.existingFiles).length > 0;
+
+        if (!hasNewFile && !hasExistingFile) {
             showModalAlert('Pilih minimal satu file untuk diupload.');
             return;
         }
@@ -3557,10 +3639,19 @@
     async function submitForm(btn) {
         updateChart(); // sync state.cpmkValues
 
+        // Sync textarea values to state before submit
+        state.cpmkList.forEach(c => {
+            const evEl = document.getElementById(`cpmkEv_${c.no}`);
+            if (evEl) {
+                if (!state.cpmkEvaluasi) state.cpmkEvaluasi = {};
+                state.cpmkEvaluasi[c.no] = evEl.value.trim();
+            }
+        });
+
         const evalList = state.cpmkList.map((c) => ({
             id_cpmk: state.cpmkIdMap[c.no] || c.no,
             rata_rata: state.cpmkValues[c.no] || 0,
-            isi_cpmk: '', // extend if you add a textarea per CPMK
+            isi_cpmk: state.cpmkEvaluasi?.[c.no] || '',
         }));
 
         if (!evalList.length) {

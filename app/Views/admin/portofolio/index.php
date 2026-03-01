@@ -402,12 +402,12 @@
                     <div class="row g-3" id="detailInfoGrid"></div>
                 </div>
             </div>
-            <div class="modal-footer border-top-0 pt-0 gap-2">
+            <div class="modal-footer border-top-0 pt-0">
                 <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                <button class="btn btn-primary btn-sm px-4" id="btnLanjut" onclick="lanjutkanPortofolio()"><i class="bi bi-pencil me-1"></i>Lanjutkan</button>
                 <form id="formStart" method="post">
                     <button class="btn btn-success btn-sm px-4" id="btnDetailBikin" onclick="mulaiPortofolio()"><i class="bi bi-play-circle me-1"></i>Mulai</button>
                 </form>
-                <button class="btn btn-primary btn-sm px-4" id="btnLanjut" onclick="lanjutkanPortofolio()"><i class="bi bi-pencil me-1"></i>Lanjutkan</button>
             </div>
         </div>
     </div>
