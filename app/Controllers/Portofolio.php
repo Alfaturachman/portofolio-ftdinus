@@ -716,7 +716,7 @@ class Portofolio extends BaseController
         // Mark as fully complete
         $this->_updateLastStep($id, 10);
 
-        return $this->_json(['status' => 'success', 'message' => 'Portofolio berhasil disimpan sepenuhnya! 🎉']);
+        return $this->_json(['status' => 'success', 'message' => 'Portofolio berhasil disimpan!']);
     }
 
     // ══════════════════════════════════════════════════════
