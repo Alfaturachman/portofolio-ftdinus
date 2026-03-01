@@ -1146,6 +1146,7 @@
     const DB_PELAKSANAAN = <?= json_encode($pelaksanaan ?? []) ?>;
     const DB_SOAL = <?= json_encode($soal ?? []) ?>;
     const DB_EVALUASI = <?= json_encode($evaluasi ?? []) ?>;
+    const DB_EVALUASI_KESIMPULAN = <?= json_encode($evaluasi_kesimpulan ?? []) ?>;
     const DB_HASIL_ASESMEN = <?= json_encode([
                                     'jawaban'      => $hasil_asesmen ?? [],
                                     'nilai_matkul' => $nilai_matkul['file_nilai_matkul'] ?? null,
@@ -2840,54 +2841,88 @@
     // ╚══════════════════════════════════════════════════════════════╝
 
     function loadDataEvaluasi() {
-        // Load nilai & evaluasi dari DB ke state
-        if (typeof DB_EVALUASI !== 'undefined' && DB_EVALUASI.length > 0) {
+        // 1. Bersihkan container (hindari duplikasi saat step dikunjungi ulang)
+        const container = document.getElementById('cpmkValueInputs');
+        container.innerHTML = '';
+        const oldEl = document.getElementById('evaluasiKesimpulanContainer');
+        if (oldEl) oldEl.remove();
+
+        // 2. Load nilai CPMK dari DB
+        state.cpmkValues = {};
+        if (typeof DB_EVALUASI !== 'undefined' && Array.isArray(DB_EVALUASI)) {
             DB_EVALUASI.forEach(ev => {
+                if (!ev.id_cpmk) return;
                 const cpmkNo = Object.keys(state.cpmkIdMap).find(
                     key => Number(state.cpmkIdMap[key]) === Number(ev.id_cpmk)
                 );
-                if (!cpmkNo) return;
-                state.cpmkValues[cpmkNo] = parseFloat(ev.rata_rata) || 0;
-                if (!state.cpmkEvaluasi) state.cpmkEvaluasi = {};
-                state.cpmkEvaluasi[cpmkNo] = ev.isi_cpmk || '';
+                if (cpmkNo) state.cpmkValues[cpmkNo] = parseFloat(ev.rata_rata) || 0;
             });
         }
 
-        const container = document.getElementById('cpmkValueInputs');
-        container.innerHTML = '';
+        // 3. Load kesimpulan — handle object (getRowArray) ATAU array (getResultArray)
+        state.kesimpulanEvaluasi = '';
+        if (typeof DB_EVALUASI_KESIMPULAN !== 'undefined' && DB_EVALUASI_KESIMPULAN) {
+            if (!Array.isArray(DB_EVALUASI_KESIMPULAN)) {
+                // getRowArray() → object langsung
+                state.kesimpulanEvaluasi = DB_EVALUASI_KESIMPULAN.kesimpulan || '';
+            } else if (DB_EVALUASI_KESIMPULAN.length > 0) {
+                // getResultArray() → ambil baris pertama
+                state.kesimpulanEvaluasi = DB_EVALUASI_KESIMPULAN[0].kesimpulan || '';
+            }
+        }
 
+        // 4. Render input nilai per CPMK
         state.cpmkList.forEach(c => {
-            const existingValue = state.cpmkValues[c.no] || '';
-            const existingText = state.cpmkEvaluasi?.[c.no] || '';
-
+            const val = state.cpmkValues[c.no] !== undefined ? state.cpmkValues[c.no] : '';
             const div = document.createElement('div');
-            div.className = 'col-lg-6 col-md-12';
+            div.className = 'col-lg-4 col-md-6 col-sm-12 mb-3';
             div.innerHTML = `
-            <div class="card border" style="border-radius:10px;">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center" style="border-radius:10px 10px 0 0;">
+            <div class="card border h-100" style="border-radius:10px;">
+                <div class="card-header bg-light py-2">
                     <h6 class="mb-0 fw-semibold"><i class="fas fa-graduation-cap me-2"></i>CPMK ${c.no}</h6>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nilai Rata-Rata CPMK ${c.no}</label>
-                        <input type="number" class="form-control cpmk-val-input" id="cpmkVal_${c.no}"
-                            min="0" max="100" step="0.1" placeholder="0-100"
-                            value="${existingValue}" oninput="updateChart()">
-                        <small class="text-muted">Masukkan nilai rata-rata mahasiswa untuk CPMK ini (0-100)</small>
-                    </div>
-                    <div>
-                        <label class="form-label fw-semibold">Evaluasi Capaian CPMK ${c.no}</label>
-                        <textarea class="form-control cpmk-ev-input" id="cpmkEv_${c.no}" rows="4"
-                            placeholder="Jelaskan evaluasi capaian pembelajaran untuk CPMK ini">${existingText}</textarea>
-                        <small class="text-muted">Deskripsikan analisis capaian, kendala, dan rencana perbaikan</small>
-                    </div>
+                <div class="card-body py-2">
+                    <label class="form-label fw-semibold small">Nilai Rata-Rata</label>
+                    <input type="number" class="form-control form-control-sm cpmk-val-input"
+                        id="cpmkVal_${c.no}" min="0" max="100" step="0.1"
+                        placeholder="0-100" value="${val}" oninput="updateChart()">
+                    <small class="text-muted">Nilai rata-rata berisi angka 0–100</small>
                 </div>
             </div>`;
             container.appendChild(div);
         });
 
+        // 5. Render textarea kesimpulan dengan ID tetap (tidak duplikat)
+        const evaluasiContainer = document.createElement('div');
+        evaluasiContainer.id = 'evaluasiKesimpulanContainer';
+        evaluasiContainer.className = 'row mt-3';
+        evaluasiContainer.innerHTML = `
+        <div class="col-12">
+            <div class="card border mb-4" style="border-radius:10px;">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="fas fa-clipboard-check me-2"></i>Kesimpulan Evaluasi Capaian Pembelajaran
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <label class="form-label fw-semibold">Evaluasi Keseluruhan CPMK</label>
+                    <textarea class="form-control" id="kesimpulanEvaluasi" rows="4"
+                        placeholder="Buat kesimpulan evaluasi..."
+                    >${escHtml(state.kesimpulanEvaluasi)}</textarea>
+                    <small class="text-muted">Analisis capaian, kendala, dan rekomendasi perbaikan.</small>
+                    ${state.kesimpulanEvaluasi
+                        ? `<div class="alert alert-success py-2 mt-2 mb-0" style="font-size:12.5px;">
+                               <i class="fas fa-check-circle me-1"></i>Kesimpulan telah tersimpan sebelumnya.
+                           </div>` : ''}
+                </div>
+            </div>
+        </div>`;
+        container.parentNode.insertBefore(evaluasiContainer, container.nextSibling);
+
+        // 6. Init chart
         initChart();
     }
+
 
     function initChart() {
         const ctx = document.getElementById('cpmkChart').getContext('2d');
@@ -2937,6 +2972,7 @@
         });
     }
 
+
     function updateChart() {
         state.cpmkList.forEach(c => {
             const el = document.getElementById(`cpmkVal_${c.no}`);
@@ -2951,29 +2987,55 @@
     async function submitForm(btn) {
         updateChart();
 
-        // Sync textarea evaluasi ke state
-        state.cpmkList.forEach(c => {
-            const evEl = document.getElementById(`cpmkEv_${c.no}`);
-            if (evEl) {
-                if (!state.cpmkEvaluasi) state.cpmkEvaluasi = {};
-                state.cpmkEvaluasi[c.no] = evEl.value.trim();
-            }
-        });
+        // Ambil kesimpulan evaluasi terintegrasi
+        const kesimpulanEvaluasi = document.getElementById('kesimpulanEvaluasi')?.value.trim() || '';
 
-        const evalList = state.cpmkList.map(c => ({
-            id_cpmk: state.cpmkIdMap[c.no] || c.no,
-            rata_rata: state.cpmkValues[c.no] || 0,
-            isi_cpmk: state.cpmkEvaluasi?.[c.no] || '',
-        }));
-
-        if (!evalList.length) {
-            showModalAlert('Data CPMK tidak ditemukan.');
+        if (!kesimpulanEvaluasi) {
+            showModalAlert('Kesimpulan evaluasi capaian pembelajaran harus diisi.');
             return;
         }
 
+        // Ambil nilai dari input fields
+        const nilaiInputs = document.querySelectorAll('.cpmk-val-input');
+        let semuaNilaiTerisi = true;
+
+        nilaiInputs.forEach(input => {
+            if (!input.value) {
+                semuaNilaiTerisi = false;
+                showModalAlert(`Semua nilai CPMK harus diisi.`);
+                return;
+            }
+        });
+
+        if (!semuaNilaiTerisi) return;
+
+        // Siapkan data evaluasi: simpan nilai per CPMK + satu kesimpulan terintegrasi
+        const evaluasiList = [];
+
+        // Simpan nilai per CPMK
+        state.cpmkList.forEach(c => {
+            const nilaiInput = document.getElementById(`cpmkVal_${c.no}`);
+            const nilai = nilaiInput ? parseFloat(nilaiInput.value) || 0 : 0;
+
+            evaluasiList.push({
+                id_cpmk: state.cpmkIdMap[c.no] || c.no,
+                rata_rata: nilai,
+                isi_cpmk: '' // Kosongkan karena kita pakai satu kesimpulan terintegrasi
+            });
+        });
+
+        // Simpan satu kesimpulan terintegrasi (dengan id_cpmk = 0)
+        evaluasiList.push({
+            id_cpmk: 0, // Menandakan ini adalah kesimpulan global
+            rata_rata: null,
+            isi_cpmk: kesimpulanEvaluasi
+        });
+
+        console.log('Data evaluasi yang dikirim:', evaluasiList); // Untuk debugging
+
         setBtnLoading(btn, true);
         const res = await postJSON(API.evaluasi, {
-            evaluasi_list: evalList
+            evaluasi_list: evaluasiList
         });
         setBtnLoading(btn, false);
 

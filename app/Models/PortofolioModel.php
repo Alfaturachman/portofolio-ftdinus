@@ -216,6 +216,10 @@ class PortofolioModel extends Model
         $data['evaluasi'] = $db->table('evaluasi')
             ->where('id_portofolio', $id)
             ->get()->getResultArray();
+        
+        $data['evaluasi_kesimpulan'] = $db->table('evaluasi_kesimpulan')
+            ->where('id_portofolio', $id)
+            ->get()->getResultArray();
 
         return $data;
     }

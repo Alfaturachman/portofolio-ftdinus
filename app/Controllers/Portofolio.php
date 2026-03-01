@@ -700,24 +700,93 @@ class Portofolio extends BaseController
         $json = $this->request->getJSON(true);
         $id   = (string) ($json['id_portofolio'] ?? 0);
 
-        $db->table('evaluasi')->where('id_portofolio', $id)->delete();
+        if (empty($id)) {
+            return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
+        }
 
         $evalList = $json['evaluasi_list'] ?? [];
+        if (empty($evalList)) {
+            return $this->_json(['status' => 'error', 'message' => 'Data evaluasi tidak boleh kosong.']);
+        }
+
+        // ── Ambil semua id_cpmk yang valid untuk portofolio ini ──────────
+        $validCpmks = $db->table('cpmk')
+            ->select('id')
+            ->where('id_portofolio', $id)
+            ->get()
+            ->getResultArray();
+
+        $validCpmkIds = array_column($validCpmks, 'id');
+
+        if (empty($validCpmkIds)) {
+            return $this->_json(['status' => 'error', 'message' => 'CPMK tidak ditemukan. Pastikan step 4 sudah disimpan.']);
+        }
+
+        // ── Hapus data evaluasi lama ──────────────────────────────────────
+        $db->table('evaluasi')->where('id_portofolio', $id)->delete();
+
+        // ── Hapus data evaluasi_kesimpulan lama ───────────────────────────
+        $db->table('evaluasi_kesimpulan')->where('id_portofolio', $id)->delete();
+
+        // ── Insert data evaluasi per CPMK ─────────────────────────────────
+        $inserted  = 0;
+        $errors    = [];
+        $kesimpulanGlobal = '';
+
         foreach ($evalList as $e) {
+            $id_cpmk = isset($e['id_cpmk']) ? (int) $e['id_cpmk'] : 0;
+
+            // Skip jika id_cpmk = 0 (untuk kesimpulan global) - handle terpisah
+            if ($id_cpmk === 0) {
+                $kesimpulanGlobal = isset($e['isi_cpmk']) ? trim($e['isi_cpmk']) : '';
+                continue;
+            }
+
+            // Validasi id_cpmk ada di tabel cpmk
+            if (!in_array($id_cpmk, $validCpmkIds)) {
+                $errors[] = "id_cpmk {$id_cpmk} tidak valid";
+                log_message('warning', "saveEvaluasi: id_cpmk={$id_cpmk} tidak valid, dilewati.");
+                continue;
+            }
+
+            // Pastikan data ada
+            $rata_rata = isset($e['rata_rata']) ? (float) $e['rata_rata'] : 0;
+            $isi_cpmk  = ''; // Kosongkan isi_cpmk di tabel evaluasi
+
             $db->table('evaluasi')->insert([
                 'id_portofolio' => $id,
-                'id_cpmk'       => (int) $e['id_cpmk'],
-                'rata_rata'     => (float) $e['rata_rata'],
-                'isi_cpmk'      => trim($e['isi_cpmk'] ?? ''),
+                'id_cpmk'       => $id_cpmk,
+                'rata_rata'     => $rata_rata,
+                'isi_cpmk'      => $isi_cpmk, // Kosong
+                'created_at'    => date('Y-m-d H:i:s'),
+            ]);
+            $inserted++;
+        }
+
+        // ── Simpan kesimpulan global ke tabel evaluasi_kesimpulan ─────────
+        if (!empty($kesimpulanGlobal)) {
+            $db->table('evaluasi_kesimpulan')->insert([
+                'id_portofolio' => $id,
+                'kesimpulan'    => $kesimpulanGlobal,
                 'created_at'    => date('Y-m-d H:i:s'),
             ]);
         }
 
-        // Mark as fully complete
+        if ($inserted === 0 && empty($kesimpulanGlobal)) {
+            return $this->_json([
+                'status'  => 'error',
+                'message' => 'Tidak ada data evaluasi yang valid. ' . implode(', ', $errors),
+            ]);
+        }
+
         $this->_updateLastStep($id, 10);
 
-        return $this->_json(['status' => 'success', 'message' => 'Portofolio berhasil disimpan!']);
+        return $this->_json([
+            'status'  => 'success',
+            'message' => "Portofolio berhasil disimpan!",
+        ]);
     }
+
 
     // ══════════════════════════════════════════════════════
     //  HELPERS
