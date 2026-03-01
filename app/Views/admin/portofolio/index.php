@@ -315,14 +315,6 @@
         <div class="page-title">Portofolio Mata Kuliah</div>
         <div class="page-subtitle">Manajemen data portofolio perkuliahan dosen</div>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <button class="btn btn-outline-secondary btn-sm px-3" onclick="openFilterModal()">
-            <i class="bi bi-funnel me-1"></i> Filter
-        </button>
-        <a href="<?= base_url('admin/portofolio/add') ?>" class="btn btn-primary btn-sm px-3">
-            <i class="bi bi-plus-lg me-1"></i> Buat Portofolio
-        </a>
-    </div>
 </div>
 
 <!-- Stat Mini Cards -->
@@ -413,59 +405,6 @@
     </div>
 </div>
 
-<!-- ══════════════════════ MODAL FILTER ══════════════════════ -->
-<div class="modal fade" id="modalFilter" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold">Filter Portofolio</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold" style="font-size:12.5px;">Program Studi</label>
-                        <select class="form-select form-select-sm select2-filter" id="filterProdi">
-                            <option value="">Semua Prodi</option>
-                            <option>Informatika</option>
-                            <option>Teknik Elektro</option>
-                            <option>Sistem Informasi</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold" style="font-size:12.5px;">Tahun Ajaran</label>
-                        <select class="form-select form-select-sm" id="filterTahun">
-                            <option value="">Semua Tahun</option>
-                            <option>2025/2026</option>
-                            <option>2024/2025</option>
-                            <option>2023/2024</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold" style="font-size:12.5px;">Semester</label>
-                        <select class="form-select form-select-sm" id="filterSemester">
-                            <option value="">Semua Semester</option>
-                            <option>Ganjil</option>
-                            <option>Genap</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold" style="font-size:12.5px;">Status</label>
-                        <select class="form-select form-select-sm" id="filterStatus">
-                            <option value="">Semua Status</option>
-                            <option>Proses</option>
-                            <option>Selesai</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0 pt-0">
-                <button class="btn btn-secondary btn-sm" onclick="resetFilter()" data-bs-dismiss="modal">Reset</button>
-                <button class="btn btn-primary btn-sm px-4" onclick="applyFilter()" data-bs-dismiss="modal">Terapkan</button>
-            </div>
-        </div>
-    </div>
-</div>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -474,7 +413,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     // ══════════════════════════════════
-    //  DEMO DATA
+    //  DATA & STATE
     // ══════════════════════════════════
     const STEPS = ['Upload RPS', 'Info MK', 'CPL & PI', 'CPMK', 'Pemetaan', 'Asesmen', 'Rancangan Soal', 'Pelaksanaan', 'Hasil Asesmen', 'Evaluasi'];
 
@@ -502,7 +441,6 @@
                                     'prodi'         => $d['prodi']        ?? '-',
                                     'kode_kelas'    => $d['kode_kelas']          ?? '-',
                                     'kelompok_mk'   => $d['kelompok_mk']  ?? '-',
-                                    'kurikulum'     => $d['nama_kurikulum'],
                                     'mk_prasyarat'  => $d['mk_prasyarat'] ?? '-',
                                     'topik_mk'      => $d['topik_mk']     ?? '-',
                                     'sks'           => $d['sks']          ?? '-',
@@ -512,7 +450,6 @@
     let currentDetailId = null;
     let currentIdPerkuliahan = null;
     const modalDetail = new bootstrap.Modal('#modalDetail');
-    const modalFilter = new bootstrap.Modal('#modalFilter');
     let dt;
 
     // ══════════════════════════════════
@@ -714,32 +651,6 @@
     }
 
     // ══════════════════════════════════
-    //  FILTER
-    // ══════════════════════════════════
-    function openFilterModal() {
-        modalFilter.show();
-    }
-
-    function applyFilter() {
-        const prodi = document.getElementById('filterProdi').value.toLowerCase();
-        const tahun = document.getElementById('filterTahun').value;
-        const semester = document.getElementById('filterSemester').value;
-        const status = document.getElementById('filterStatus').value.toLowerCase();
-        const filtered = portofolioData.filter(d => {
-            return (!prodi || d.prodi.toLowerCase().includes(prodi)) &&
-                (!tahun || d.tahun === tahun) &&
-                (!semester || d.semester === semester) &&
-                (!status || d.status === status);
-        });
-        renderTable(filtered);
-    }
-
-    function resetFilter() {
-        ['filterProdi', 'filterTahun', 'filterSemester', 'filterStatus'].forEach(id => document.getElementById(id).value = '');
-        renderTable(portofolioData);
-    }
-
-    // ══════════════════════════════════
     //  TOAST & SIDEBAR
     // ══════════════════════════════════
     function showToast(msg, type = 'success') {
@@ -773,12 +684,6 @@
                     tr.style.animationDelay = `${i * 0.03}s`;
                 });
             }
-        });
-
-        // Init select2 for filter
-        $('.select2-filter').select2({
-            theme: 'bootstrap-5',
-            dropdownParent: $('#modalFilter'),
         });
     });
 </script>
