@@ -439,7 +439,7 @@ class Portofolio extends BaseController
     public function saveAsesmen()
     {
         $db = \Config\Database::connect();
-        $id = (string) $this->request->getPost('id_portofolio'); // ← string!
+        $id = (string) $this->request->getPost('id_portofolio');
 
         if (empty($id)) {
             return $this->_json(['status' => 'error', 'message' => 'ID Portofolio tidak valid.']);
@@ -447,10 +447,14 @@ class Portofolio extends BaseController
 
         $asesmenData = json_decode($this->request->getPost('asesmen_data'), true) ?? [];
 
+        // Ambil data existing untuk fallback file lama
         $existing = [];
         foreach ($db->table('rancangan_asesmen')->where('id_portofolio', $id)->get()->getResultArray() as $row) {
             $existing[$row['jenis_asesmen']] = $row;
         }
+
+        // ── Upload file SEKALI per jenis (di luar loop CPMK) ──────────────
+        $uploadedFiles = []; // ['tugas' => ['soal' => 'nama_file', 'rubrik' => 'nama_file'], ...]
 
         $fileMap = [
             'tugas' => ['soal' => 'file_soal_tugas', 'rubrik' => 'file_rubrik_tugas'],
@@ -458,55 +462,47 @@ class Portofolio extends BaseController
             'uas'   => ['soal' => 'file_soal_uas',   'rubrik' => 'file_rubrik_uas'],
         ];
 
-        $jenisUsed = [];
-        foreach ($asesmenData as $row) {
-            if (!in_array($row['jenis_asesmen'], $jenisUsed)) {
-                $jenisUsed[] = $row['jenis_asesmen'];
+        foreach ($fileMap as $jenis => $fields) {
+            $uploadedFiles[$jenis] = [
+                'soal'   => $existing[$jenis]['file_soal']   ?? null, // default: file lama
+                'rubrik' => $existing[$jenis]['file_rubrik'] ?? null,
+            ];
+
+            // Upload soal jika ada file baru
+            $soalFile = $this->request->getFile($fields['soal']);
+            if ($soalFile && $soalFile->isValid() && !$soalFile->hasMoved()) {
+                $nm = 'soal_' . $id . '_' . $jenis . '_' . time() . '.' . $soalFile->getExtension();
+                $soalFile->move(WRITEPATH . 'uploads/asesmen/', $nm);
+                $uploadedFiles[$jenis]['soal'] = $nm;
+            }
+
+            // Upload rubrik jika ada file baru
+            $rubrikFile = $this->request->getFile($fields['rubrik']);
+            if ($rubrikFile && $rubrikFile->isValid() && !$rubrikFile->hasMoved()) {
+                $nm = 'rubrik_' . $id . '_' . $jenis . '_' . time() . '.' . $rubrikFile->getExtension();
+                $rubrikFile->move(WRITEPATH . 'uploads/asesmen/', $nm);
+                $uploadedFiles[$jenis]['rubrik'] = $nm;
             }
         }
 
+        // ── Hapus data lama & insert baru ─────────────────────────────────
         $db->table('rancangan_asesmen')->where('id_portofolio', $id)->delete();
 
         foreach ($asesmenData as $row) {
             $jenis   = $row['jenis_asesmen'];
             $id_cpmk = (int) $row['id_cpmk'];
-            $fileSoal   = null;
-            $fileRubrik = null;
-
-            if (isset($fileMap[$jenis])) {
-                $soalFile = $this->request->getFile($fileMap[$jenis]['soal']);
-                $rubrikFile = $this->request->getFile($fileMap[$jenis]['rubrik']);
-
-                if ($soalFile && $soalFile->isValid() && !$soalFile->hasMoved()) {
-                    $nm = 'soal_' . $id . '_' . $jenis . '_' . time() . '.' . $soalFile->getExtension();
-                    $soalFile->move(WRITEPATH . 'uploads/asesmen/', $nm);
-                    $fileSoal = $nm;
-                    unset($fileMap[$jenis]['soal']);
-                } elseif (isset($existing[$jenis])) {
-                    $fileSoal = $existing[$jenis]['file_soal'];
-                }
-
-                if ($rubrikFile && $rubrikFile->isValid() && !$rubrikFile->hasMoved()) {
-                    $nm = 'rubrik_' . $id . '_' . $jenis . '_' . time() . '.' . $rubrikFile->getExtension();
-                    $rubrikFile->move(WRITEPATH . 'uploads/asesmen/', $nm);
-                    $fileRubrik = $nm;
-                    unset($fileMap[$jenis]['rubrik']);
-                } elseif (isset($existing[$jenis])) {
-                    $fileRubrik = $existing[$jenis]['file_rubrik'];
-                }
-            }
 
             $db->table('rancangan_asesmen')->insert([
                 'id_portofolio' => $id,
                 'id_cpmk'       => $id_cpmk,
                 'jenis_asesmen' => $jenis,
-                'file_soal'     => $fileSoal,
-                'file_rubrik'   => $fileRubrik,
+                'file_soal'     => $uploadedFiles[$jenis]['soal']   ?? null,
+                'file_rubrik'   => $uploadedFiles[$jenis]['rubrik'] ?? null,
                 'created_at'    => date('Y-m-d H:i:s'),
             ]);
         }
 
-        // ← WAJIB: ambil data yang baru disimpan untuk dikirim ke frontend
+        // ── Ambil data tersimpan untuk response ───────────────────────────
         $savedAsesmen = $db->table('rancangan_asesmen')
             ->where('id_portofolio', $id)
             ->get()->getResultArray();
