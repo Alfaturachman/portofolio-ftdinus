@@ -968,7 +968,7 @@
                 Upload dokumentasi pelaksanaan perkuliahan (kontrak kuliah, realisasi mengajar, kehadiran).
             </div>
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-lg-4 col-md-12 col-sm-12">
                     <label class="form-label fw-semibold">Kontrak Kuliah (PDF)</label>
                     <div class="upload-zone" onclick="document.getElementById('file_kontrak_kuliah').click()">
                         <input type="file" id="file_kontrak_kuliah" accept="application/pdf" onchange="handleFileUpload(this,'kontrakKuliahStatus')">
@@ -977,7 +977,7 @@
                     </div>
                     <div id="kontrakKuliahStatus" style="display:none;" class="file-status"></div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-lg-4 col-md-12 col-sm-12">
                     <label class="form-label fw-semibold">Realisasi Mengajar (PDF)</label>
                     <div class="upload-zone" onclick="document.getElementById('file_realisasi_mengajar').click()">
                         <input type="file" id="file_realisasi_mengajar" accept="application/pdf" onchange="handleFileUpload(this,'realisasiMengajarStatus')">
@@ -986,7 +986,7 @@
                     </div>
                     <div id="realisasiMengajarStatus" style="display:none;" class="file-status"></div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-lg-4 col-md-12 col-sm-12">
                     <label class="form-label fw-semibold">Kehadiran (PDF)</label>
                     <div class="upload-zone" onclick="document.getElementById('file_kehadiran').click()">
                         <input type="file" id="file_kehadiran" accept="application/pdf" onchange="handleFileUpload(this,'kehadiranStatus')">
@@ -1188,7 +1188,7 @@
         if (n === 5) loadDataPemetaan();
         if (n === 6) loadDataRancanganAsesmen();
         if (n === 7) loadDataRancanganSoal();
-        if (n === 8) renderPelaksanaan();
+        if (n === 8) loadDataPelaksanaan();
         if (n === 9) loadDataHasilAsesmen();
         if (n === 10) loadDataEvaluasi();
     }
@@ -1604,7 +1604,7 @@
         // ── Build header ──
         const headerRow = document.getElementById('mappingHeaderRow');
         if (!headerRow) {
-            console.error('❌ mappingHeaderRow tidak ditemukan!');
+            console.error('mappingHeaderRow tidak ditemukan!');
             return;
         }
 
@@ -1635,7 +1635,7 @@
 
         const tbody = document.getElementById('mappingBody');
         if (!tbody) {
-            console.error('❌ mappingBody tidak ditemukan!');
+            console.error('mappingBody tidak ditemukan!');
             return;
         }
         tbody.innerHTML = '';
@@ -1670,7 +1670,7 @@
 
                     // Debug untuk mapping tertentu
                     if (mappingExists) {
-                        console.log(`✅ Mapping ditemukan: CPL ${cplId} - CPMK ${cpmk.no} - Sub ${subNo}`);
+                        console.log(`Mapping ditemukan: CPL ${cplId} - CPMK ${cpmk.no} - Sub ${subNo}`);
                     }
 
                     const isChecked = mappingExists || false;
@@ -1697,7 +1697,7 @@
             });
         });
 
-        console.log('✅ loadDataPemetaan selesai. Total checkbox:', document.querySelectorAll('.mapping-checkbox').length);
+        console.log('loadDataPemetaan selesai. Total checkbox:', document.querySelectorAll('.mapping-checkbox').length);
         console.log('=== RENDER MAPPING TABLE END ===\n');
     }
 
@@ -1938,7 +1938,6 @@
             return;
         }
 
-        // Urutan jenis asesmen
         const orderedTypes = [];
         let idx = 1;
         if (state.assessment.tugas) orderedTypes.push({
@@ -1966,19 +1965,13 @@
             return;
         }
 
-        // Buat mapping nomor CPMK untuk header
         const cpmkNos = state.cpmkList.map(c => c.no);
-
-        // Gunakan data dari state.soalData yang sudah dikonversi saat DOMContentLoaded
-        // Jangan langsung pakai DB_SOAL karena strukturnya berbeda
         const soalDataFromDB = typeof DB_SOAL !== 'undefined' ? DB_SOAL : {};
 
         orderedTypes.forEach(type => {
-            // Inisialisasi state.soalData[type.key] jika belum ada
             if (!state.soalData[type.key]) {
                 state.soalData[type.key] = [];
 
-                // Jika ada data dari database, konversi ke format yang sesuai
                 if (soalDataFromDB[type.key]) {
                     Object.keys(soalDataFromDB[type.key]).forEach(nomorSoal => {
                         const soalData = soalDataFromDB[type.key][nomorSoal];
@@ -1986,27 +1979,18 @@
                             soal_no: parseInt(nomorSoal),
                             cpmk_mappings: {}
                         };
-
-                        // Tandai CPMK yang tercakup dalam soal ini
                         if (soalData.cpmk_list && soalData.cpmk_list.length > 0) {
                             soalData.cpmk_list.forEach(cpmk => {
-                                // Cari nomor CPMK berdasarkan id
                                 const cpmkNo = Object.keys(state.cpmkIdMap).find(
                                     key => Number(state.cpmkIdMap[key]) === Number(cpmk.id_cpmk)
                                 );
-                                if (cpmkNo) {
-                                    soal.cpmk_mappings[cpmkNo] = true;
-                                }
+                                if (cpmkNo) soal.cpmk_mappings[cpmkNo] = true;
                             });
                         }
-
                         state.soalData[type.key].push(soal);
                     });
-
-                    // Urutkan berdasarkan nomor soal
                     state.soalData[type.key].sort((a, b) => a.soal_no - b.soal_no);
                 } else {
-                    // Default: 1 soal
                     state.soalData[type.key] = [{
                         soal_no: 1,
                         cpmk_mappings: {}
@@ -2015,26 +1999,21 @@
             }
 
             const soalList = state.soalData[type.key];
-
-            // Header CPMK
             const cpmkHeaders = cpmkNos.map(no =>
                 `<th class="text-center align-middle" style="min-width:80px;font-size:12px;">CPMK ${no}</th>`
             ).join('');
 
-            // Buat rows untuk setiap soal
+            // Gunakan array index (i) sebagai data-soal, bukan soal_no
             const rows = soalList.map((soal, i) => {
-                // Untuk setiap CPMK, cek apakah soal ini untuk CPMK tersebut
                 const cells = cpmkNos.map(cno => {
-                    // Cek apakah CPMK ini tercakup dalam soal
                     const isChecked = soal.cpmk_mappings && soal.cpmk_mappings[cno] ? true : false;
-
                     return `
                 <td class="text-center align-middle">
                     <input type="checkbox"
                         class="soal-cb form-check-input"
                         style="width:18px;height:18px;cursor:pointer;accent-color:var(--primary);"
                         data-type="${type.key}"
-                        data-soal="${i}"
+                        data-soal-idx="${i}"
                         data-cpmk="${cno}"
                         ${isChecked ? 'checked' : ''}>
                 </td>`;
@@ -2090,42 +2069,11 @@
         });
     }
 
-    function addRancanganSoal(type) {
-        saveRancanganSoalMapping();
-
-        if (!state.soalData[type]) state.soalData[type] = [];
-
-        const existing = state.soalData[type];
-
-        // Cari nomor terbesar yang ada
-        const maxNo = existing.length ?
-            Math.max(...existing.map(s => s.soal_no)) :
-            0;
-
-        existing.push({
-            soal_no: maxNo + 1,
-            cpmk_mappings: {}
-        });
-
-        loadDataRancanganSoal();
-    }
-
-    function removeRancanganSoal(type, idx) {
-        // WAJIB: sync checkbox DOM → state dulu sebelum render ulang
-        saveRancanganSoalMapping();
-
-        state.soalData[type].splice(idx, 1);
-        state.soalData[type].forEach(function(s, i) {
-            s.soal_no = i + 1;
-        });
-
-        loadDataRancanganSoal();
-    }
-
+    // Gunakan data-soal-idx bukan data-soal
     function saveRancanganSoalMapping() {
         document.querySelectorAll('.soal-cb').forEach(function(cb) {
             var type = cb.dataset.type;
-            var soalIdx = parseInt(cb.dataset.soal); // index array (0-based)
+            var soalIdx = parseInt(cb.dataset.soalIdx); // ← gunakan soalIdx
             var cpmk = cb.dataset.cpmk;
 
             if (state.soalData[type] && state.soalData[type][soalIdx] !== undefined) {
@@ -2137,113 +2085,164 @@
         });
     }
 
+    function addRancanganSoal(type) {
+        saveRancanganSoalMapping(); // sync dulu sebelum re-render
+
+        if (!state.soalData[type]) state.soalData[type] = [];
+        const existing = state.soalData[type];
+        const maxNo = existing.length ? Math.max(...existing.map(s => s.soal_no)) : 0;
+        existing.push({
+            soal_no: maxNo + 1,
+            cpmk_mappings: {}
+        });
+
+        loadDataRancanganSoal();
+    }
+
+    function removeRancanganSoal(type, idx) {
+        saveRancanganSoalMapping(); // sync dulu sebelum hapus
+        state.soalData[type].splice(idx, 1);
+        // Re-number soal_no berurutan
+        state.soalData[type].forEach(function(s, i) {
+            s.soal_no = i + 1;
+        });
+        loadDataRancanganSoal();
+    }
+
     // ══════════════════════════════════════════
     //  STEP 8 — Pelaksanaan Perkuliahan
     // ══════════════════════════════════════════
-    function renderPelaksanaan() {
-        const files = [{
-                key: 'kontrak_kuliah',
-                label: 'Kontrak Kuliah',
-                inputId: 'file_kontrak_kuliah',
-                statusId: 'kontrakKuliahStatus',
-                icon: 'fa-file-signature',
-                color: '#0ea5e9',
-                dbField: 'file_kontrak_kuliah',
-            },
-            {
-                key: 'realisasi_mengajar',
-                label: 'Realisasi Mengajar',
-                inputId: 'file_realisasi_mengajar',
-                statusId: 'realisasiMengajarStatus',
-                icon: 'fa-chalkboard-teacher',
-                color: '#10b981',
-                dbField: 'file_realisasi_mengajar',
-            },
-            {
-                key: 'kehadiran',
-                label: 'Kehadiran Mahasiswa',
-                inputId: 'file_kehadiran',
-                statusId: 'kehadiranStatus',
-                icon: 'fa-clipboard-list',
-                color: '#f59e0b',
-                dbField: 'file_kehadiran',
-            },
-        ];
+    function loadDataPelaksanaan() {
+        // Cek apakah ada data pelaksanaan dari database
+        if (typeof DB_PELAKSANAAN !== 'undefined' && DB_PELAKSANAAN && Object.keys(DB_PELAKSANAAN).length > 0) {
+            console.log('Loading existing pelaksanaan data:', DB_PELAKSANAAN);
 
-        files.forEach(({
-            key,
-            label,
-            inputId,
-            statusId,
-            icon,
-            color,
-            dbField
-        }) => {
-            const existingFileName = DB_PELAKSANAAN?.[dbField] ?? null;
-            const existingId = `existing_${key}`;
-            const zoneId = `zone_${key}`;
+            // Data file yang akan ditampilkan
+            const files = [{
+                    dbField: 'file_kontrak_kuliah',
+                    inputId: 'file_kontrak_kuliah',
+                    statusId: 'kontrakKuliahStatus',
+                    zoneId: null, // tidak ada zone khusus untuk kontrak
+                    label: 'Kontrak Kuliah'
+                },
+                {
+                    dbField: 'file_realisasi_mengajar',
+                    inputId: 'file_realisasi_mengajar',
+                    statusId: 'realisasiMengajarStatus',
+                    zoneId: null,
+                    label: 'Realisasi Mengajar'
+                },
+                {
+                    dbField: 'file_kehadiran',
+                    inputId: 'file_kehadiran',
+                    statusId: 'kehadiranStatus',
+                    zoneId: null,
+                    label: 'Kehadiran'
+                }
+            ];
 
-            // Cari container upload zone
-            const inputEl = document.getElementById(inputId);
-            if (!inputEl) return;
+            files.forEach(file => {
+                const fileName = DB_PELAKSANAAN[file.dbField];
 
-            const uploadZone = inputEl.closest('.upload-zone');
-            if (!uploadZone) return;
+                // Skip jika tidak ada file
+                if (!fileName) return;
 
-            const col = uploadZone.closest('.col-md-4');
-            if (!col) return;
+                // Dapatkan elemen-elemen yang diperlukan
+                const statusEl = document.getElementById(file.statusId);
+                const inputEl = document.getElementById(file.inputId);
+                const zone = inputEl ? inputEl.closest('.upload-zone') : null;
 
-            // Hapus existing badge sebelumnya jika ada (hindari duplikat saat masuk ulang)
-            const oldBadge = col.querySelector(`#${existingId}`);
-            if (oldBadge) oldBadge.remove();
+                if (!statusEl || !inputEl) return;
 
-            if (existingFileName) {
-                // ── Ada file tersimpan → tampilkan info file + zone ganti ──
-                const badge = document.createElement('div');
-                badge.id = existingId;
-                badge.className = 'mb-2';
-                badge.innerHTML = `
-                <div class="file-status" style="display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;">
-                    <i class="fas fa-check-circle" style="color:#16a34a;"></i>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-weight:600;font-size:12.5px;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                            ${existingFileName}
-                        </div>
-                        <div style="font-size:11px;color:#6b7280;margin-top:1px;">
-                            File tersimpan — upload ulang untuk mengganti
-                        </div>
-                    </div>
-                    <a href="${BASE_URL}admin/portofolio/preview-pelaksanaan/${existingFileName}"
-                        target="_blank"
-                        title="Lihat PDF"
-                        class="btn btn-sm btn-outline-success"
-                        style="flex-shrink:0;font-size:11px;padding:2px 8px;">
-                        <i class="fas fa-eye me-1"></i>Lihat
+                // Update status element untuk menampilkan file yang sudah ada
+                statusEl.style.display = 'flex';
+                statusEl.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span style="flex:1;">${fileName}</span>
+                    <a href="${BASE_URL}admin/portofolio/preview-pelaksanaan/${fileName}" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-success">
+                       <i class="fas fa-eye"></i> Lihat
                     </a>
-                </div>`;
+                </div>
+            `;
 
-                // Sisipkan sebelum upload-zone
-                uploadZone.parentNode.insertBefore(badge, uploadZone);
+                // Update tampilan upload zone
+                if (zone) {
+                    zone.classList.add('has-file');
+                    const icon = zone.querySelector('i');
+                    if (icon) {
+                        icon.className = 'fas fa-check-circle text-success';
+                    }
 
-                // Ubah tampilan zone menjadi "ganti"
-                uploadZone.querySelector('i').className = `fas ${icon}`;
-                const zoneP = uploadZone.querySelectorAll('p');
-                if (zoneP[0]) zoneP[0].textContent = 'Klik untuk mengganti file';
-                if (zoneP[1]) zoneP[1].textContent = 'Format PDF • Maks 10MB';
-                uploadZone.style.borderColor = color;
-                uploadZone.style.background = '#f8fafc';
-            }
-        });
+                    // Tambahkan teks bahwa file sudah ada
+                    const existingText = document.createElement('p');
+                    existingText.className = 'text-success small mt-1';
+                    existingText.innerHTML = '<i class="fas fa-check"></i> File sudah tersimpan';
+
+                    // Hapus teks existing sebelumnya jika ada
+                    const oldText = zone.querySelector('.file-exists-text');
+                    if (oldText) oldText.remove();
+
+                    existingText.classList.add('file-exists-text');
+                    zone.appendChild(existingText);
+                }
+
+                // Sembunyikan input file asli atau beri opsi untuk mengganti
+                // Kita tetap biarkan input file ada tapi dengan overlay
+            });
+
+            // Tambahkan opsi untuk mengganti file (opsional)
+            addReplaceOptionToPelaksanaan();
+        }
     }
 
+    /**
+     * Tambahkan opsi untuk mengganti file pada setiap upload zone
+     */
+    function addReplaceOptionToPelaksanaan() {
+        const uploadZones = document.querySelectorAll('#step-8 .upload-zone');
+
+        uploadZones.forEach(zone => {
+            // Cek apakah sudah ada tombol replace
+            if (zone.querySelector('.replace-file-btn')) return;
+
+            const input = zone.querySelector('input[type="file"]');
+            if (!input) return;
+
+            // Buat tombol replace
+            const replaceBtn = document.createElement('button');
+            replaceBtn.type = 'button';
+            replaceBtn.className = 'btn btn-sm btn-outline-primary mt-2 replace-file-btn';
+            replaceBtn.innerHTML = '<i class="fas fa-exchange-alt me-1"></i>Ganti File';
+            replaceBtn.onclick = (e) => {
+                e.stopPropagation();
+                input.click();
+            };
+
+            zone.appendChild(replaceBtn);
+
+            // Override onclick zone agar tidak konflik
+            const originalClick = zone.onclick;
+            zone.onclick = (e) => {
+                if (!e.target.closest('.replace-file-btn')) {
+                    input.click();
+                }
+            };
+        });
+    }
 
     // ══════════════════════════════════════════
     //  STEP 9 — Hasil Asesmen
     // ══════════════════════════════════════════
     function loadDataHasilAsesmen() {
         const container = document.getElementById('hasilAsesmenContainer');
+        if (!container) return;
+
         container.innerHTML = '';
 
+        // Cek apakah ada data asesmen yang dipilih
         const types = [];
         if (state.assessment.tugas) types.push({
             key: 'tugas',
@@ -2261,31 +2260,196 @@
             color: '#8b5cf6'
         });
 
-        if (!types.length) {
-            container.innerHTML = `<div class="alert alert-warning mb-3">Belum ada asesmen yang dipilih.</div>`;
-            return;
+        // Debug: cek state.existingFiles sebelum render
+        console.log('Rendering step 9 with existingFiles:', state.existingFiles);
+
+        // Buat container untuk upload area
+        const uploadContainer = document.createElement('div');
+        uploadContainer.className = 'row g-4';
+
+        // Bagian 1: Upload Jawaban Mahasiswa (per jenis asesmen)
+        if (types.length > 0) {
+            const jawabanCol = document.createElement('div');
+            jawabanCol.className = 'col-lg-8';
+
+            let jawabanHtml = '<div class="card border mb-3"><div class="card-header bg-light"><h6 class="mb-0"><i class="fas fa-file-pdf me-2"></i>Upload Jawaban Mahasiswa</h6></div><div class="card-body">';
+
+            types.forEach((type) => {
+                // Cek existing file dari state.existingFiles
+                const existingFile = state.existingFiles && state.existingFiles[`hasil_${type.key}`] ?
+                    state.existingFiles[`hasil_${type.key}`] : null;
+
+                jawabanHtml += `
+            <div class="mb-4">
+                <div class="section-header">
+                    <div class="section-dot" style="background:${type.color};"></div>
+                    <div class="section-title">${type.label}</div>
+                </div>
+                
+                <!-- Existing file display -->
+                <div id="existing_hasil_${type.key}" class="file-status mb-2" style="display: ${existingFile ? 'flex' : 'none'};">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span class="ms-2 flex-grow-1">${existingFile || ''}</span>
+                    ${existingFile ? `
+                    <span class="ms-auto">
+                        <a href="${BASE_URL}admin/portofolio/preview-file/${existingFile}" target="_blank" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-eye"></i> Lihat
+                        </a>
+                    </span>
+                    ` : ''}
+                </div>
+                
+                <!-- Upload zone -->
+                <div class="upload-zone ${existingFile ? 'has-file' : ''}" 
+                    id="zone_hasil_${type.key}" 
+                    onclick="document.getElementById('jawaban_${type.key}').click()">
+
+                    <input type="file" 
+                        id="jawaban_${type.key}" 
+                        accept="application/pdf" 
+                        onchange="handleFileUpload(this, 'status_hasil_${type.key}', '${type.key}')">
+
+                    <i class="fas ${existingFile ? 'fa-check-circle text-success' : 'fa-cloud-upload-alt'}"
+                       id="icon_hasil_${type.key}"></i>
+
+                    <p class="fw-semibold" style="color:var(--text-sub);">
+                        ${existingFile ? 'Klik untuk mengganti file PDF' : 'Klik untuk upload file PDF'}
+                    </p>
+
+                    <p style="font-size:11px;">
+                        File jawaban mahasiswa (gabungan atau per kelompok)
+                    </p>
+
+                    <div id="status_hasil_${type.key}" 
+                        class="file-status mt-2" 
+                        style="display:none;">
+                    </div>
+                </div>
+            </div>`;
+            });
+
+            jawabanHtml += '</div></div>';
+            jawabanCol.innerHTML = jawabanHtml;
+            uploadContainer.appendChild(jawabanCol);
         }
 
-        types.forEach((type, idx) => {
-            const div = document.createElement('div');
-            div.className = 'col-md-4 mb-3';
-            div.innerHTML = `
-            <div class="section-header"><div class="section-dot" style="background:${type.color};"></div><div class="section-title">${idx + 1}. ${type.label}</div></div>
-            <div class="upload-zone" onclick="document.getElementById('jawaban_${type.key}').click()">
-                <input type="file" id="jawaban_${type.key}" accept="application/pdf" onchange="handleFileUpload(this,'hasil_${type.key}_status')">
-                <i class="fas fa-file-alt"></i>
-                <p>Jawaban Mahasiswa</p>
-                <p style="font-size:11px;">Contoh: jawaban benar, sedang, salah</p>
-            </div>
-            <div id="hasil_${type.key}_status" style="display:none;" class="file-status"></div>`;
-            container.appendChild(div);
-        });
+        // Bagian 2: Upload Nilai (Matkul dan CPMK)
+        const nilaiCol = document.createElement('div');
+        nilaiCol.className = 'col-lg-4';
 
-        // Wrap in row
-        const row = document.createElement('div');
-        row.className = 'row g-3';
-        while (container.firstChild) row.appendChild(container.firstChild);
-        container.appendChild(row);
+        // Cek existing files untuk nilai dari state.existingFiles
+        const existingNilaiMK = state.existingFiles ? state.existingFiles['nilai_matkul'] : null;
+        const existingNilaiCPMK = state.existingFiles ? state.existingFiles['nilai_cpmk'] : null;
+
+        let nilaiHtml = `
+        <div class="card border">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Upload Nilai</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Nilai Mata Kuliah</label>
+                    
+                    <!-- Existing file display -->
+                    <div id="existing_nilai_matkul" class="file-status mb-2" style="display: ${existingNilaiMK ? 'flex' : 'none'};">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span class="ms-2 flex-grow-1">${existingNilaiMK || ''}</span>
+                        ${existingNilaiMK ? `
+                        <span class="ms-auto">
+                            <a href="${BASE_URL}admin/portofolio/preview-file/${existingNilaiMK}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </span>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Upload zone -->
+                    <div class="upload-zone ${existingNilaiMK ? 'has-file' : ''}" onclick="document.getElementById('file_nilai_matkul').click()">
+                        <input type="file" id="file_nilai_matkul" accept="application/pdf,.xlsx,.xls,.csv" onchange="handleFileUpload(this, 'status_nilai_matkul', 'nilai_matkul')">
+                        <i class="fas ${existingNilaiMK ? 'fa-check-circle text-success' : 'fa-file-excel'}"></i>
+                        <p>${existingNilaiMK ? 'Klik untuk mengganti file' : 'Upload File Nilai MK'}</p>
+                        <p style="font-size:11px;">Format: Excel/PDF</p>
+                    </div>
+                    <div id="status_nilai_matkul" style="display:none;" class="file-status mt-2"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nilai per CPMK</label>
+                    
+                    <!-- Existing file display -->
+                    <div id="existing_nilai_cpmk" class="file-status mb-2" style="display: ${existingNilaiCPMK ? 'flex' : 'none'};">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span class="ms-2 flex-grow-1">${existingNilaiCPMK || ''}</span>
+                        ${existingNilaiCPMK ? `
+                        <span class="ms-auto">
+                            <a href="${BASE_URL}admin/portofolio/preview-file/${existingNilaiCPMK}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </span>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Upload zone -->
+                    <div class="upload-zone ${existingNilaiCPMK ? 'has-file' : ''}" onclick="document.getElementById('file_nilai_cpmk').click()">
+                        <input type="file" id="file_nilai_cpmk" accept="application/pdf,.xlsx,.xls,.csv" onchange="handleFileUpload(this, 'status_nilai_cpmk', 'nilai_cpmk')">
+                        <i class="fas ${existingNilaiCPMK ? 'fa-check-circle text-success' : 'fa-file-excel'}"></i>
+                        <p>${existingNilaiCPMK ? 'Klik untuk mengganti file' : 'Upload File Nilai CPMK'}</p>
+                        <p style="font-size:11px;">Format: Excel/PDF</p>
+                    </div>
+                    <div id="status_nilai_cpmk" style="display:none;" class="file-status mt-2"></div>
+                </div>
+                
+                <div class="alert alert-info mt-3 mb-0 py-2" style="font-size:12px;">
+                    <i class="fas fa-info-circle me-1"></i>
+                    File nilai akan digunakan untuk analisis di tahap evaluasi.
+                </div>
+            </div>
+        </div>`;
+
+        nilaiCol.innerHTML = nilaiHtml;
+        uploadContainer.appendChild(nilaiCol);
+
+        container.appendChild(uploadContainer);
+    }
+
+    /**
+     * Load existing files for hasil asesmen from database
+     */
+    function loadExistingHasilAsesmen() {
+        // Inisialisasi state.existingFiles jika belum ada
+        if (!state.existingFiles) {
+            state.existingFiles = {};
+        }
+
+        // Cek apakah ada data hasil asesmen dari database
+        if (typeof DB_HASIL_ASESMEN !== 'undefined' && DB_HASIL_ASESMEN) {
+            console.log('Loading existing hasil asesmen:', DB_HASIL_ASESMEN);
+
+            // Simpan file jawaban per jenis - sekarang langsung sebagai object
+            if (DB_HASIL_ASESMEN.jawaban && typeof DB_HASIL_ASESMEN.jawaban === 'object') {
+                Object.entries(DB_HASIL_ASESMEN.jawaban).forEach(([jenis, fileName]) => {
+                    if (fileName) {
+                        state.existingFiles[`hasil_${jenis}`] = fileName;
+                        console.log(`Loaded jawaban_${jenis}:`, fileName);
+                    }
+                });
+            }
+
+            // Simpan file nilai matkul
+            if (DB_HASIL_ASESMEN.nilai_matkul) {
+                state.existingFiles['nilai_matkul'] = DB_HASIL_ASESMEN.nilai_matkul;
+                console.log('Loaded nilai_matkul:', DB_HASIL_ASESMEN.nilai_matkul);
+            }
+
+            // Simpan file nilai cpmk
+            if (DB_HASIL_ASESMEN.nilai_cpmk) {
+                state.existingFiles['nilai_cpmk'] = DB_HASIL_ASESMEN.nilai_cpmk;
+                console.log('Loaded nilai_cpmk:', DB_HASIL_ASESMEN.nilai_cpmk);
+            }
+        }
+
+        // Debug: tampilkan state.existingFiles setelah load
+        console.log('state.existingFiles after load:', state.existingFiles);
     }
 
     // ══════════════════════════════════════════
@@ -2422,23 +2586,79 @@
         }
     }
 
-    function handleFileUpload(input, statusId) {
+    /**
+     * Handle file upload dengan validasi dan update tampilan
+     */
+    function handleFileUpload(input, statusId, fileKey = null) {
         const file = input.files[0];
         const statusEl = document.getElementById(statusId);
         const zone = input.closest('.upload-zone');
 
+        if (!statusEl || !zone) return;
+
         // Hide existing file status if any
-        const existingEl = zone.parentElement.querySelector('[id$="Existing"]');
+        const parentContainer = zone.closest('div[id^="zone_"]')?.parentNode || zone.parentNode;
+        const existingEl = parentContainer.querySelector('[id^="existing_"]');
         if (existingEl) {
             existingEl.style.display = 'none';
         }
 
-        if (file && statusEl) {
-            statusEl.style.display = 'flex';
-            statusEl.innerHTML = `<i class="fas fa-check-circle"></i><span>${file.name}</span><span class="ms-auto" style="color:var(--text-muted);">${(file.size/1024).toFixed(1)} KB</span>`;
-            if (zone) {
+        if (file) {
+            // Validasi file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showModalAlert('Ukuran file maksimal 10 MB.', 'danger');
+                input.value = ''; // Reset input
+                return;
+            }
+
+            // Validasi file type untuk PDF
+            if (file.type === 'application/pdf' ||
+                file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                file.type === 'application/vnd.ms-excel' ||
+                file.type === 'text/csv') {
+
+                statusEl.style.display = 'flex';
+                statusEl.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <span class="flex-grow-1">${file.name}</span>
+                    <span class="text-muted small">${(file.size/1024).toFixed(1)} KB</span>
+                </div>`;
+
                 zone.classList.add('has-file');
-                zone.querySelector('i').className = 'fas fa-check-circle';
+                const icon = zone.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-check-circle text-success';
+                }
+
+                // Update teks di zone
+                const pText = zone.querySelector('p.fw-semibold');
+                if (pText) {
+                    pText.textContent = 'Klik untuk mengganti file';
+                }
+
+                // Jika ada fileKey, update state.existingFiles
+                if (fileKey) {
+                    if (!state.existingFiles) state.existingFiles = {};
+                    // Jangan overwrite state.existingFiles, hanya untuk display sementara
+                    // File akan benar-benar tersimpan saat save
+                }
+            } else {
+                showModalAlert('Format file tidak didukung. Gunakan PDF atau Excel.', 'danger');
+                input.value = ''; // Reset input
+            }
+        } else {
+            // Reset jika tidak ada file
+            statusEl.style.display = 'none';
+            statusEl.innerHTML = '';
+
+            // Kembalikan ke tampilan awal jika tidak ada file yang dipilih
+            if (!zone.classList.contains('has-file-from-db')) {
+                zone.classList.remove('has-file');
+                const icon = zone.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-cloud-upload-alt';
+                }
             }
         }
     }
@@ -2568,7 +2788,9 @@
     });
 </script>
 <script>
-    // Inject PHP
+    // ══════════════════════════════════════════
+    //  CONFIG & INITIAL DATA
+    // ══════════════════════════════════════════
     const BASE_URL = '<?= base_url() ?>';
     const PORTO_ID = <?= json_encode($porto['id'] ?? '') ?>;
     const LAST_STEP = <?= (int)($last_step ?? 1) ?>;
@@ -2597,7 +2819,37 @@
     const DB_MAPPINGS = <?= json_encode($mapping ?? []) ?>;
     const DB_ASSESSMEN = <?= json_encode($asesmen ?? []) ?>;
     const DB_PELAKSANAAN = <?= json_encode($pelaksanaan ?? []) ?>;
+    const DB_HASIL_ASESMEN = <?= json_encode([
+                                    'jawaban' => $hasilAsesmen ?? [],
+                                    'nilai_matkul' => $nilaiMatkul['file_nilai_matkul'] ?? null,
+                                    'nilai_cpmk' => $nilaiCPMK['file_nilai_cpmk'] ?? null
+                                ]) ?>;
     const DB_SOAL = <?= json_encode($soal ?? []) ?>;
+
+    // ══════════════════════════════════════════
+    //  STATE
+    // ══════════════════════════════════════════
+    let currentStep = 1;
+    const TOTAL_STEPS = 10;
+
+    const state = {
+        rpsFile: null,
+        mk: {},
+        cpl: [],
+        cpmkList: [],
+        assessment: {
+            tugas: false,
+            uts: false,
+            uas: false
+        },
+        soalData: {},
+        mapping: {},
+        cpmkValues: {},
+        cpmkIdMap: {},
+        subIdMap: {},
+        asesmenIdMap: {},
+        existingFiles: {},
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
         // ── 1. Inisialisasi state.cpl dari CPL_DATA ────────────────────────────
@@ -2650,7 +2902,6 @@
         }
 
         // ── 3. Bangun state.mapping dari DB_MAPPINGS ──────────────────────────
-        // HARUS dijalankan SETELAH state.cpmkIdMap & state.subIdMap terisi (step 2)
         if (typeof DB_MAPPINGS !== 'undefined' && DB_MAPPINGS.length > 0) {
             const mappingMap = {};
 
@@ -2774,6 +3025,11 @@
             });
         }
 
+        // ── Load data pelaksanaan ──────────────────────
+        if (typeof DB_HASIL_ASESMEN !== 'undefined') {
+            loadExistingHasilAsesmen();
+        }
+
         // ── Auto-resume ke last_step ────────────────────────────────────────
         if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
             goToStep(LAST_STEP);
@@ -2781,27 +3037,8 @@
     });
 
     // ══════════════════════════════════════════
-    //  STATE
+    // API ENDPOINTS
     // ══════════════════════════════════════════
-    let currentStep = 1;
-    const TOTAL_STEPS = 10;
-
-    const state = {
-        rpsFile: null,
-        mk: {},
-        cpl: [],
-        cpmkList: [],
-        assessment: {
-            tugas: false,
-            uts: false,
-            uas: false
-        },
-        soalData: {},
-        mapping: {},
-        cpmkValues: {},
-        existingFiles: {},
-    };
-
     const API = {
         rps: BASE_URL + 'admin/portofolio/step/rps',
         infoMK: BASE_URL + 'admin/portofolio/step/info-mk',
@@ -2814,11 +3051,6 @@
         hasilAsesmen: BASE_URL + 'admin/portofolio/step/hasil-asesmen',
         evaluasi: BASE_URL + 'admin/portofolio/step/evaluasi',
     };
-
-    // Track DB IDs returned from server
-    state.cpmkIdMap = {};
-    state.subIdMap = {};
-    state.asesmenIdMap = {};
 
     // ── Helper: POST JSON ─────────────────────────────────────────
     async function postJSON(url, payload) {
@@ -3171,31 +3403,45 @@
     //  STEP 7 — Rancangan Soal
     // ══════════════════════════════════════════════════════════════
     async function saveStep7AndNext(btn) {
-        saveSoalMapping();
+        saveRancanganSoalMapping();
 
         var soalList = [];
-        var seen = new Set(); // untuk deduplikasi
 
         Object.entries(state.soalData).forEach(function([jenis, soals]) {
             soals.forEach(function(soal) {
-                Object.entries(soal.cpmk_mappings || {}).forEach(function([cpmkNo, checked]) {
-                    if (!checked) return;
+                // Kumpulkan semua CPMK yang dicentang untuk soal ini
+                var checkedCpmks = Object.entries(soal.cpmk_mappings || {})
+                    .filter(function([cpmkNo, checked]) {
+                        return checked;
+                    })
+                    .map(function([cpmkNo]) {
+                        return cpmkNo;
+                    });
 
-                    // Dapatkan id_asesmen dari mapping
+                if (checkedCpmks.length === 0) return; // skip soal yang tidak ada CPMK-nya
+
+                checkedCpmks.forEach(function(cpmkNo) {
+                    // Cari id_asesmen berdasarkan jenis + cpmkNo
+                    // asesmenIdMap key: "jenis_cpmkNo"
                     var id_asesmen = state.asesmenIdMap[jenis + '_' + cpmkNo];
-
-                    // Dapatkan id_cpmk dari state.cpmkIdMap
                     var id_cpmk = state.cpmkIdMap[parseInt(cpmkNo)];
 
-                    if (!id_asesmen || !id_cpmk) {
-                        console.warn('Data tidak lengkap untuk:', jenis + '_' + cpmkNo);
-                        return;
+                    if (!id_asesmen) {
+                        // Fallback: cari id_asesmen untuk jenis apapun dari cpmk yang tersedia
+                        // Ini terjadi jika mapping asesmen per-CPMK tidak lengkap
+                        var fallbackKey = Object.keys(state.asesmenIdMap)
+                            .find(function(k) {
+                                return k.startsWith(jenis + '_');
+                            });
+                        if (fallbackKey) id_asesmen = state.asesmenIdMap[fallbackKey];
                     }
 
-                    // Buat key unik untuk menghindari duplikasi
-                    var key = id_asesmen + '_' + soal.soal_no;
-                    if (seen.has(key)) return;
-                    seen.add(key);
+                    if (!id_asesmen || !id_cpmk) {
+                        console.warn('Data tidak lengkap untuk:', jenis + '_' + cpmkNo,
+                            '| asesmenIdMap:', state.asesmenIdMap,
+                            '| cpmkIdMap:', state.cpmkIdMap);
+                        return;
+                    }
 
                     soalList.push({
                         id_asesmen: id_asesmen,
@@ -3227,54 +3473,31 @@
         }
     }
 
-    function saveSoalMapping() {
-        document.querySelectorAll('.soal-cb').forEach(function(cb) {
-            var type = cb.dataset.type;
-            var soalIdx = parseInt(cb.dataset.soal); // index array (0-based)
-            var cpmk = cb.dataset.cpmk;
-
-            if (state.soalData[type] && state.soalData[type][soalIdx] !== undefined) {
-                if (!state.soalData[type][soalIdx].cpmk_mappings) {
-                    state.soalData[type][soalIdx].cpmk_mappings = {};
-                }
-                state.soalData[type][soalIdx].cpmk_mappings[cpmk] = cb.checked;
-            }
-        });
-    }
-
     // ══════════════════════════════════════════════════════════════
     //  STEP 8 — Pelaksanaan Perkuliahan
     // ══════════════════════════════════════════════════════════════
     async function saveStep8AndNext(btn) {
-        const fd = new FormData();
-        const fileFields = [
-            'kontrak_kuliah',
-            'realisasi_mengajar',
-            'kehadiran_mahasiswa',
-        ];
-        fileFields.forEach((f) => {
-            const el = document.getElementById(f);
-            if (el && el.files[0]) {
-                // map to controller field names
-                const fieldMap = {
-                    kontrak_kuliah: 'file_kontrak_kuliah',
-                    realisasi_mengajar: 'file_realisasi_mengajar',
-                    kehadiran_mahasiswa: 'file_kehadiran',
-                };
-                fd.append(fieldMap[f], el.files[0]);
-            }
-        });
+        var fd = new FormData();
+
+        var kontrakEl = document.getElementById('file_kontrak_kuliah');
+        var realisasiEl = document.getElementById('file_realisasi_mengajar');
+        var kehadiranEl = document.getElementById('file_kehadiran');
+
+        if (kontrakEl && kontrakEl.files[0])
+            fd.append('file_kontrak_kuliah', kontrakEl.files[0]);
+        if (realisasiEl && realisasiEl.files[0])
+            fd.append('file_realisasi_mengajar', realisasiEl.files[0]);
+        if (kehadiranEl && kehadiranEl.files[0])
+            fd.append('file_kehadiran', kehadiranEl.files[0]);
 
         setBtnLoading(btn, true);
-        const res = await postForm(API.pelaksanaan, fd);
+        var res = await postForm(API.pelaksanaan, fd);
         setBtnLoading(btn, false);
 
         if (res.status === 'success') {
             showToast(res.message);
             nextStep();
-        } else {
-            showToast(res.message, 'danger');
-        }
+        } else showToast(res.message, 'danger');
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -3282,28 +3505,49 @@
     // ══════════════════════════════════════════════════════════════
     async function saveStep9AndNext(btn) {
         const fd = new FormData();
+
+        // Upload file jawaban untuk setiap jenis asesmen yang dipilih
         const types = ['tugas', 'uts', 'uas'];
         types.forEach((t) => {
             const el = document.getElementById(`jawaban_${t}`);
-            if (el && el.files[0]) fd.append(`file_jawaban_${t}`, el.files[0]);
+            if (el && el.files[0]) {
+                fd.append(`file_jawaban_${t}`, el.files[0]);
+            }
         });
 
-        const elNilaiMK = document.getElementById('nilai_mk');
-        const elNilaiCPMK = document.getElementById('nilai_cpmk');
-        if (elNilaiMK && elNilaiMK.files[0])
+        // Upload file nilai matkul
+        const elNilaiMK = document.getElementById('file_nilai_matkul');
+        if (elNilaiMK && elNilaiMK.files[0]) {
             fd.append('file_nilai_matkul', elNilaiMK.files[0]);
-        if (elNilaiCPMK && elNilaiCPMK.files[0])
+        }
+
+        // Upload file nilai CPMK
+        const elNilaiCPMK = document.getElementById('file_nilai_cpmk');
+        if (elNilaiCPMK && elNilaiCPMK.files[0]) {
             fd.append('file_nilai_cpmk', elNilaiCPMK.files[0]);
+        }
+
+        // Validasi: minimal satu file diupload
+        if (fd.entries().next().done) {
+            showModalAlert('Pilih minimal satu file untuk diupload.');
+            return;
+        }
 
         setBtnLoading(btn, true);
-        const res = await postForm(API.hasilAsesmen, fd);
-        setBtnLoading(btn, false);
+        try {
+            const res = await postForm(API.hasilAsesmen, fd);
+            setBtnLoading(btn, false);
 
-        if (res.status === 'success') {
-            showToast(res.message);
-            nextStep();
-        } else {
-            showToast(res.message, 'danger');
+            if (res.status === 'success') {
+                showToast(res.message);
+                nextStep();
+            } else {
+                showToast(res.message || 'Gagal menyimpan hasil asesmen.', 'danger');
+            }
+        } catch (error) {
+            setBtnLoading(btn, false);
+            console.error('Error saving hasil asesmen:', error);
+            showModalAlert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.', 'danger');
         }
     }
 
@@ -3342,15 +3586,6 @@
             showToast(res.message, 'danger');
         }
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  AUTO-RESUME — Go to last saved step on page load
-    // ══════════════════════════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof LAST_STEP !== 'undefined' && LAST_STEP > 1) {
-            goToStep(LAST_STEP);
-        }
-    });
 
     function showToast(message, type = 'success') {
         // Buat elemen toast

@@ -137,21 +137,21 @@ class PortofolioModel extends Model
         // Soal
         $soal = $db->table('rancangan_soal rs')
             ->select('
-        rs.id,
-        rs.id_portofolio,
-        rs.id_asesmen,
-        rs.id_cpmk as id_cpmk_soal,
-        rs.nomor_soal,
-        rs.created_at,
-        rs.updated_at,
-        ra.jenis_asesmen,
-        ra.file_soal,
-        ra.file_rubrik,
-        c.no_cpmk,
-        c.narasi_cpmk
-    ')
+                rs.id,
+                rs.id_portofolio,
+                rs.id_asesmen,
+                rs.id_cpmk as id_cpmk_soal,
+                rs.nomor_soal,
+                rs.created_at,
+                rs.updated_at,
+                ra.jenis_asesmen,
+                ra.file_soal,
+                ra.file_rubrik,
+                c.no_cpmk,
+                c.narasi_cpmk
+            ')
             ->join('rancangan_asesmen ra', 'ra.id = rs.id_asesmen')
-            ->join('cpmk c', 'c.id = rs.id_cpmk') // JOIN dengan tabel cpmk untuk mendapatkan no_cpmk
+            ->join('cpmk c', 'c.id = rs.id_cpmk')
             ->where('rs.id_portofolio', $id)
             ->orderBy('ra.jenis_asesmen, rs.nomor_soal, c.no_cpmk')
             ->get()
@@ -193,15 +193,21 @@ class PortofolioModel extends Model
             ->get()->getRowArray();
 
         // Hasil Asesmen
-        $data['hasil_asesmen'] = $db->table('hasil_asesmen')
+        $hasilAsesmen = $db->table('hasil_asesmen')
             ->where('id_portofolio', $id)
             ->get()->getResultArray();
 
-        // Nilai
+        $data['hasil_asesmen'] = [];
+        foreach ($hasilAsesmen as $ha) {
+            $data['hasil_asesmen'][$ha['jenis_asesmen']] = $ha['file_jawaban'];
+        }
+
+        // Nilai Matkul
         $data['nilai_matkul'] = $db->table('nilai_matkul')
             ->where('id_portofolio', $id)
             ->get()->getRowArray();
 
+        // Nilai CPMK
         $data['nilai_cpmk'] = $db->table('nilai_cpmk')
             ->where('id_portofolio', $id)
             ->get()->getRowArray();
