@@ -519,7 +519,7 @@
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-primary" title="Detail" onclick="openDetail(${d.id ? `'${d.id}'` : 'null'}, ${d.id_perkuliahan})"><i class="bi bi-eye"></i></button>
                     ${d.id ? `<a href="<?= base_url('admin/portofolio/form/') ?>${d.id}" class="btn btn-sm btn-outline-success" title="Lanjutkan"><i class="bi bi-pencil"></i></a>` : ''}
-                    ${d.id ? `<a href="<?= base_url('admin/cetak/') ?>${d.id}" class="btn btn-sm btn-outline-info" title="Cetak"><i class="bi bi-printer"></i></a>` : ''}
+                    ${d.id ? `<a href="<?= base_url('cetak/') ?>${d.id}" class="btn btn-sm btn-outline-info" title="Cetak"><i class="bi bi-printer"></i></a>` : ''}
                 </div>
             </td>`;
             tbody.appendChild(tr);

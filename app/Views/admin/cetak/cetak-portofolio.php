@@ -17,13 +17,22 @@
 
         @page {
             size: A4;
-            margin: 2cm 2.5cm 2cm 2.5cm;
+            margin: 2cm;
         }
 
         @media print {
             body {
-                width: 210mm;
+                width: 100%;
                 margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            /* Pastikan tidak ada elemen yang overflow */
+            .cover-page,
+            .page-break,
+            .lampiran-section {
+                page-break-inside: avoid;
             }
         }
 
@@ -32,6 +41,9 @@
             font-size: 11pt;
             line-height: 1.5;
             color: #000;
+            margin: 0;
+            padding: 0;
+            width: 100%;
         }
 
         /* =============================================
@@ -51,7 +63,11 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 2cm 0;
+            padding: 1cm 0;
+            /* Kurangi padding */
+            margin: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .cover-title h1 {
@@ -204,9 +220,14 @@
            teks kecil putih untuk penanda posisi saat parsing)
         ============================================= */
         .insert-pdf {
-            font-size: 0.1pt;
+            font-size: 1pt;
             color: white;
             line-height: 0;
+            opacity: 0.01;
+            height: 1px;
+            overflow: hidden;
+            page-break-after: avoid;
+            page-break-before: avoid;
         }
 
         /* =============================================
