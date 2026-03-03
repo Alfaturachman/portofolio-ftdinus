@@ -595,14 +595,14 @@
         if (!empty($assessmentData)) {
             // Cek setiap baris asesmen untuk menentukan kategori yang tersedia
             foreach ($assessmentData as $row) {
-                if (!empty($row['tugas']) && !in_array('Tugas', $availableKategori)) {
-                    $availableKategori[] = 'Tugas';
+                if (!empty($row['tugas']) && !in_array('tugas', $availableKategori)) {
+                    $availableKategori[] = 'tugas';
                 }
-                if (!empty($row['uts']) && !in_array('UTS', $availableKategori)) {
-                    $availableKategori[] = 'UTS';
+                if (!empty($row['uts']) && !in_array('uts', $availableKategori)) {
+                    $availableKategori[] = 'uts';
                 }
-                if (!empty($row['uas']) && !in_array('UAS', $availableKategori)) {
-                    $availableKategori[] = 'UAS';
+                if (!empty($row['uas']) && !in_array('uas', $availableKategori)) {
+                    $availableKategori[] = 'uas';
                 }
             }
         }
@@ -621,16 +621,30 @@
         foreach ($cpmkData as $c) {
             $cpmkLookup[$c['id']] = $c;
         }
+
+        // Mapping untuk display label
+        $kategoriLabel = [
+            'tugas' => 'Tugas',
+            'uts' => 'UTS',
+            'uas' => 'UAS'
+        ];
         ?>
 
         <?php
         // Tampilkan hanya kategori yang tersedia (sesuai Rancangan Asesmen)
         $displayIndex = 6;
+        
+        // Jika assessmentSoalData kosong, pastikan tetap array
+        if (!is_array($assessmentSoalData)) {
+            $assessmentSoalData = [];
+        }
+        
         foreach ($availableKategori as $kategori):
             // Cek apakah ada data soal untuk kategori ini
             $hasData = !empty($groupedSoal[$kategori]);
+            $labelKategori = $kategoriLabel[$kategori] ?? $kategori;
         ?>
-            <h4 class="table-caption">Tabel <?= $displayIndex++ ?>. Distribusi Soal <?= esc($kategori) ?></h4>
+            <h4 class="table-caption">Tabel <?= $displayIndex++ ?>. Distribusi Soal <?= esc($labelKategori) ?></h4>
             <table>
                 <thead>
                     <tr>
@@ -689,7 +703,7 @@
                     <?php else: ?>
                         <tr>
                             <td colspan="<?= count($cpmkData) + 1 ?>" class="center">
-                                Tidak ada data soal untuk <?= esc($kategori) ?>
+                                <em>Data soal untuk <?= esc($labelKategori) ?> belum diinput. Silakan lengkapi di Tahap 7 (Rancangan Soal).</em>
                             </td>
                         </tr>
                     <?php endif; ?>

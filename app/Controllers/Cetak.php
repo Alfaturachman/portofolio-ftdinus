@@ -426,9 +426,9 @@ class Cetak extends BaseController
                 $defaultRow = [
                     'id_cpmk' => $cpmkData[0]['id'],
                     'no_cpmk' => $cpmkData[0]['no_cpmk'],
-                    'tugas' => in_array('Tugas', $availableKategori) ? 1 : 0,
-                    'uts' => in_array('UTS', $availableKategori) ? 1 : 0,
-                    'uas' => in_array('UAS', $availableKategori) ? 1 : 0
+                    'tugas' => in_array('tugas', $availableKategori) ? 1 : 0,
+                    'uts' => in_array('uts', $availableKategori) ? 1 : 0,
+                    'uas' => in_array('uas', $availableKategori) ? 1 : 0
                 ];
                 $assessmentData[] = $defaultRow;
             }
