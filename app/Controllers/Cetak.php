@@ -19,11 +19,12 @@ use App\Models\RancanganAsesmen;
 use App\Models\RancanganSoal;
 use App\Models\Pelaksanaan;
 use App\Models\Evaluasi;
+use App\Models\EvaluasiKesimpulan;
 
 class Cetak extends BaseController
 {
     // =========================================================
-    // PREVIEW - Tampilkan HTML di browser
+    // PREVIEW / INDEX
     // =========================================================
     public function index($idPorto)
     {
@@ -31,11 +32,11 @@ class Cetak extends BaseController
         if (!$viewData) {
             return redirect()->back()->with('error', 'Data portofolio tidak ditemukan.');
         }
-        return view('admin/cetak/cetak-portofolio', $viewData);
+        return $this->generatePdf($idPorto);
     }
 
     // =========================================================
-    // GENERATE PDF - Download PDF hasil gabungan
+    // GENERATE PDF
     // =========================================================
     public function generatePdf($idPorto)
     {
@@ -52,6 +53,7 @@ class Cetak extends BaseController
         $options->set('isRemoteEnabled', true);
         $options->set('isPhpEnabled', true);
         $options->set('isJavascriptEnabled', false);
+        $options->set('chroot', FCPATH);
 
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html, 'UTF-8');
@@ -61,21 +63,23 @@ class Cetak extends BaseController
         $generatedPdfPath = WRITEPATH . 'uploads/temp_generated_' . $idPorto . '.pdf';
         file_put_contents($generatedPdfPath, $dompdf->output());
 
-        $filePaths = $this->collectAttachmentFiles($idPorto);
-
+        $filePaths     = $this->collectAttachmentFiles($idPorto);
         $mergedPdfPath = WRITEPATH . 'uploads/merged_' . $idPorto . '.pdf';
+
         $this->mergePdfsWithMarkers($generatedPdfPath, $filePaths, $mergedPdfPath);
 
         if (file_exists($generatedPdfPath)) {
             @unlink($generatedPdfPath);
         }
 
+        // Hapus file temp asesmen jika ada
+        foreach (glob(WRITEPATH . 'uploads/temp_asesmen_*_' . $idPorto . '.pdf') as $tmp) {
+            @unlink($tmp);
+        }
+
         $portoData = $viewData['portofolioData'];
         $filename  = 'Portofolio_' . str_replace(' ', '_', $portoData['nama_matkul']) . '_' . date('Ymd') . '.pdf';
-
-        $content = file_get_contents($mergedPdfPath);
-        // Opsional: hapus merged setelah dibaca
-        // @unlink($mergedPdfPath);
+        $content   = file_get_contents($mergedPdfPath);
 
         return $this->response
             ->setHeader('Content-Type', 'application/pdf')
@@ -84,71 +88,97 @@ class Cetak extends BaseController
     }
 
     // =========================================================
-    // MERGE PDF DENGAN DETEKSI MARKER PER HALAMAN
+    // MERGE PDF — STRATEGI PRE-IMPORT
+    //
+    // BUG LAMA (versi sebelumnya):
+    //   Loop: for pageNo = 1..N
+    //     importPage($pageNo)  ← dari mainPdf
+    //     [kalau ada lampiran] setSourceFile(lampiran) → import → setSourceFile(mainPdf)
+    //     importPage($pageNo+1) ← MASALAH: setelah setSourceFile(mainPdf),
+    //                              FPDI reset internal pointer, tapi $pageNo
+    //                              sudah bertambah → halaman yang diimport
+    //                              meleset 1 posisi per lampiran yang disisipkan.
+    //
+    // SOLUSI (versi ini):
+    //   Fase 1 — PRE-IMPORT: Import SEMUA halaman mainPdf ke dalam
+    //            array $mainTemplates[] sebelum menyentuh file lampiran.
+    //            Setelah fase ini, FPDI sudah punya semua template
+    //            dari mainPdf dalam memori internalnya.
+    //   Fase 2 — RENDER: Loop $mainTemplates, render ke output PDF.
+    //            Karena mainPdf sudah selesai, setSourceFile(lampiran)
+    //            tidak akan mengganggu urutan halaman mainPdf.
     // =========================================================
     private function mergePdfsWithMarkers(string $mainPdf, array $filePaths, string $outputPath): void
     {
-        // Map marker text → key file lampiran
         $markerMap = [
-            'INSERT_PDF_RPS'              => 'RPS',
-            'INSERT_PDF_TUGAS'            => 'TUGAS',
-            'INSERT_PDF_UTS'              => 'UTS',
-            'INSERT_PDF_UAS'              => 'UAS',
-            'INSERT_PDF_KONTRAK'          => 'KONTRAK',
-            'INSERT_PDF_REALISASI'        => 'REALISASI',
-            'INSERT_PDF_KEHADIRAN'        => 'KEHADIRAN',
-            'INSERT_PDF_HASIL_TUGAS'      => 'HASIL_TUGAS',
-            'INSERT_PDF_HASIL_UTS'        => 'HASIL_UTS',
-            'INSERT_PDF_HASIL_UAS'        => 'HASIL_UAS',
+            'INSERT_PDF_RPS'               => 'RPS',
+            'INSERT_PDF_TUGAS'             => 'TUGAS',
+            'INSERT_PDF_UTS'               => 'UTS',
+            'INSERT_PDF_UAS'               => 'UAS',
+            'INSERT_PDF_KONTRAK'           => 'KONTRAK',
+            'INSERT_PDF_REALISASI'         => 'REALISASI',
+            'INSERT_PDF_KEHADIRAN'         => 'KEHADIRAN',
+            'INSERT_PDF_HASIL_TUGAS'       => 'HASIL_TUGAS',
+            'INSERT_PDF_HASIL_UTS'         => 'HASIL_UTS',
+            'INSERT_PDF_HASIL_UAS'         => 'HASIL_UAS',
             'INSERT_PDF_NILAI_MATA_KULIAH' => 'NILAI_MATA_KULIAH',
-            'INSERT_PDF_NILAI_CPMK'       => 'NILAI_CPMK',
+            'INSERT_PDF_NILAI_CPMK'        => 'NILAI_CPMK',
         ];
 
-        // 1. Baca teks per halaman dari PDF utama menggunakan Smalot parser
-        //    atau cara sederhana: cari string marker di raw PDF bytes
-        $pdfContent = file_get_contents($mainPdf);
+        // --- LANGKAH 1: Deteksi marker per halaman ---
+        $pageMarkerMap = $this->detectMarkersPerPage($mainPdf, $markerMap);
+        log_message('info', 'pageMarkerMap: ' . json_encode($pageMarkerMap));
 
-        // 2. Buat FPDI instance untuk output
+        // --- LANGKAH 2: Buat FPDI instance ---
         $pdf = new Fpdi();
         $pdf->SetAutoPageBreak(false);
         $pdf->SetPrintHeader(false);
         $pdf->SetPrintFooter(false);
 
-        $pageCount = $pdf->setSourceFile($mainPdf);
+        // --- LANGKAH 3: PRE-IMPORT semua halaman mainPdf ---
+        $pageCount     = $pdf->setSourceFile($mainPdf);
+        $mainTemplates = [];
 
-        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-            $templateId = $pdf->importPage($pageNo);
-            $size       = $pdf->getTemplateSize($templateId);
-            $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+        for ($p = 1; $p <= $pageCount; $p++) {
+            $tplId           = $pdf->importPage($p);
+            $size            = $pdf->getTemplateSize($tplId);
+            $mainTemplates[] = [
+                'tplId'  => $tplId,
+                'width'  => $size['width'],
+                'height' => $size['height'],
+                'pageNo' => $p,
+            ];
+        }
 
-            $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-            $pdf->useTemplate($templateId, 0, 0, $size['width'], $size['height'], true);
+        // --- LANGKAH 4: RENDER — mainPdf sudah selesai di-import ---
+        foreach ($mainTemplates as $tpl) {
+            $pageNo      = $tpl['pageNo'];
+            $orientation = ($tpl['width'] > $tpl['height']) ? 'L' : 'P';
 
-            // Cek apakah halaman ini mengandung marker
-            // Ekstrak teks halaman ini dari raw PDF (pendekatan sederhana)
-            $pageText = $this->extractPageText($mainPdf, $pageNo);
+            $pdf->AddPage($orientation, [$tpl['width'], $tpl['height']]);
+            $pdf->useTemplate($tpl['tplId'], 0, 0, $tpl['width'], $tpl['height'], true);
 
-            foreach ($markerMap as $marker => $fileKey) {
-                if (strpos($pageText, $marker) !== false) {
-                    // Sisipkan lampiran setelah halaman ini
+            // Sisipkan lampiran jika halaman ini punya marker
+            if (!empty($pageMarkerMap[$pageNo])) {
+                foreach ($pageMarkerMap[$pageNo] as $fileKey) {
                     if (!empty($filePaths[$fileKey]) && file_exists($filePaths[$fileKey])) {
                         try {
                             $attachCount = $pdf->setSourceFile($filePaths[$fileKey]);
-                            for ($p = 1; $p <= $attachCount; $p++) {
-                                $attTplId   = $pdf->importPage($p);
-                                $attSize    = $pdf->getTemplateSize($attTplId);
-                                $attOrient  = ($attSize['width'] > $attSize['height']) ? 'L' : 'P';
+
+                            for ($ap = 1; $ap <= $attachCount; $ap++) {
+                                $attTplId  = $pdf->importPage($ap);
+                                $attSize   = $pdf->getTemplateSize($attTplId);
+                                $attOrient = ($attSize['width'] > $attSize['height']) ? 'L' : 'P';
                                 $pdf->AddPage($attOrient, [$attSize['width'], $attSize['height']]);
                                 $pdf->useTemplate($attTplId, 0, 0, $attSize['width'], $attSize['height'], true);
                             }
-                            // Reset source kembali ke main PDF
-                            $pdf->setSourceFile($mainPdf);
-                            log_message('info', "Sisipkan $fileKey setelah halaman $pageNo");
+
+                            log_message('info', "Sisipkan [{$fileKey}] setelah halaman {$pageNo}");
                         } catch (\Exception $e) {
-                            log_message('error', "Gagal sisipkan $fileKey: " . $e->getMessage());
-                            // Reset source
-                            $pdf->setSourceFile($mainPdf);
+                            log_message('error', "Gagal sisipkan [{$fileKey}]: " . $e->getMessage());
                         }
+                    } else {
+                        log_message('warning', "File [{$fileKey}] tidak ada, dilewati.");
                     }
                 }
             }
@@ -158,72 +188,260 @@ class Cetak extends BaseController
     }
 
     // =========================================================
-    // EKSTRAK TEKS DARI HALAMAN TERTENTU (Raw PDF parsing)
+    // DETEKSI MARKER PER HALAMAN DARI RAW PDF
     // =========================================================
-    private function extractPageText(string $pdfPath, int $targetPage): string
+    private function detectMarkersPerPage(string $pdfPath, array $markerMap): array
     {
-        // Pendekatan: baca stream teks dari raw PDF
-        // Ini bukan parsing sempurna tapi cukup untuk marker teks ASCII
-        $content = file_get_contents($pdfPath);
+        $result = [];
 
-        // Cari semua stream dalam PDF
-        $streams = [];
-        preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $content, $matches);
-
-        if (empty($matches[1])) {
-            return '';
-        }
-
-        // Estimasi: ambil stream yang relevan dengan halaman
-        // (PDF page streams tidak selalu berurutan persis, ini pendekatan heuristik)
-        $streamIndex = $targetPage - 1;
-        if (isset($matches[1][$streamIndex])) {
-            $raw = $matches[1][$streamIndex];
-            // Dekode jika FlateDecode (terkompresi)
-            $decoded = @gzuncompress($raw);
-            if ($decoded !== false) {
-                return $decoded;
+        try {
+            $raw = file_get_contents($pdfPath);
+            if (!$raw) {
+                throw new \RuntimeException('File tidak dapat dibaca.');
             }
-            return $raw;
+
+            $allStreams     = $this->extractAllStreams($raw);
+            $pageContentMap = $this->buildPageContentMap($raw, $allStreams);
+
+            if (!empty($pageContentMap)) {
+                foreach ($pageContentMap as $pageNo => $pageText) {
+                    foreach ($markerMap as $marker => $fileKey) {
+                        if (strpos($pageText, $marker) !== false) {
+                            $result[$pageNo][] = $fileKey;
+                            log_message('info', "Marker [{$marker}] ditemukan di halaman {$pageNo}");
+                        }
+                    }
+                }
+            }
+
+            if (empty($result)) {
+                log_message('warning', 'Tidak ada marker terdeteksi via parsing, gunakan fallback.');
+                $result = $this->fallbackDetect($allStreams, $markerMap);
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'detectMarkersPerPage error: ' . $e->getMessage());
         }
 
-        return '';
+        return $result;
     }
 
     // =========================================================
-    // PREPARE VIEW DATA
+    // EKSTRAK SEMUA STREAM (objNum => decoded text)
+    // =========================================================
+    private function extractAllStreams(string $raw): array
+    {
+        $streams = [];
+
+        preg_match_all(
+            '/(\d+)\s+\d+\s+obj\b(.*?)stream\r?\n(.*?)\r?\nendstream/s',
+            $raw,
+            $matches,
+            PREG_SET_ORDER
+        );
+
+        foreach ($matches as $m) {
+            $objNum   = (int) $m[1];
+            $dictPart = $m[2];
+            $rawBytes = $m[3];
+            $decoded  = $rawBytes;
+
+            if (
+                strpos($dictPart, 'FlateDecode') !== false ||
+                strpos($dictPart, '/Fl ') !== false
+            ) {
+                $try = @gzuncompress($rawBytes);
+                if ($try === false) {
+                    $try = @gzdecode($rawBytes);
+                }
+                if ($try !== false) {
+                    $decoded = $try;
+                }
+            }
+
+            $streams[$objNum] = $decoded;
+        }
+
+        return $streams;
+    }
+
+    // =========================================================
+    // BANGUN MAP {pageNo => teks konten halaman}
+    // =========================================================
+    // =========================================================
+    // BANGUN MAP {pageNo => teks konten halaman}
+    // Mendukung XObject/TPL template (TCPDF/FPDI pattern):
+    //   allStreams[pageObjNum] = Contents stream halaman (off-by-one regex trick)
+    //   TPL XObject streams juga di-include untuk menemukan marker
+    // =========================================================
+    private function buildPageContentMap(string $raw, array $allStreams): array
+    {
+        $pageContentMap = [];
+
+        // Kumpulkan semua obj blocks beserta offset byte
+        preg_match_all(
+            '/(\d+)\s+\d+\s+obj\b(.*?)endobj/s',
+            $raw,
+            $matches,
+            PREG_SET_ORDER | PREG_OFFSET_CAPTURE
+        );
+
+        // --- Kumpulkan page objects (offset => [objNum, block]) ---
+        $pageObjects = [];
+        foreach ($matches as $m) {
+            $block  = $m[2][0];
+            $offset = (int) $m[0][1];
+            $objNum = (int) $m[1][0];
+
+            if (
+                preg_match('/\/Type\s*\/Page\b/', $block) &&
+                !preg_match('/\/Type\s*\/Pages\b/', $block)
+            ) {
+                $pageObjects[$offset] = ['objNum' => $objNum, 'block' => $block];
+            }
+        }
+
+        if (empty($pageObjects)) {
+            return [];
+        }
+
+        ksort($pageObjects); // urut byte offset = urut halaman fisik
+
+        // --- Bangun XObject map: /TPLx => obj ref ---
+        $xobjMap = []; // tplIndex => objRef
+        foreach ($matches as $m) {
+            $block = $m[2][0];
+            if (preg_match('/\/XObject\s*<<(.*?)>>/s', $block, $xm)) {
+                preg_match_all('/\/TPL(\d+)\s+(\d+)\s+\d+\s+R/', $xm[1], $tplMatches);
+                foreach ($tplMatches[1] as $k => $tplIdx) {
+                    $xobjMap[(int) $tplIdx] = (int) $tplMatches[2][$k];
+                }
+            }
+        }
+
+        // --- Untuk setiap halaman, kumpulkan teks ---
+        $pageIndex = 1;
+        foreach ($pageObjects as $info) {
+            $pageObjNum = $info['objNum'];
+            $block      = $info['block'];
+
+            // Kunci utama: allStreams[pageObjNum] = Contents stream halaman ini
+            // (regex off-by-one: \d+ obj ... stream dari obj berikutnya ter-capture
+            //  di key pageObjNum karena page dict tidak punya stream sendiri)
+            $pageText = isset($allStreams[$pageObjNum]) ? $allStreams[$pageObjNum] : '';
+
+            // Tambahkan teks dari XObject TPL yang dipanggil di stream ini
+            if (!empty($xobjMap)) {
+                preg_match_all('/\/TPL(\d+)\s+Do/', $pageText, $tplCalls);
+                foreach ($tplCalls[1] as $tplIdx) {
+                    $tplIdx = (int) $tplIdx;
+                    if (isset($xobjMap[$tplIdx], $allStreams[$xobjMap[$tplIdx]])) {
+                        $pageText .= $allStreams[$xobjMap[$tplIdx]];
+                    }
+                }
+            }
+
+            // Fallback: juga cek /Contents ref secara langsung (untuk PDF non-TCPDF)
+            if (preg_match('/\/Contents\s+(\d+)\s+\d+\s+R\b/', $block, $cm)) {
+                $cObjNum = (int) $cm[1];
+                if (isset($allStreams[$cObjNum]) && $allStreams[$cObjNum] !== $pageText) {
+                    $pageText .= $allStreams[$cObjNum];
+                    if (!empty($xobjMap)) {
+                        preg_match_all('/\/TPL(\d+)\s+Do/', $allStreams[$cObjNum], $tplCalls2);
+                        foreach ($tplCalls2[1] as $tplIdx) {
+                            $tplIdx = (int) $tplIdx;
+                            if (isset($xobjMap[$tplIdx], $allStreams[$xobjMap[$tplIdx]])) {
+                                $pageText .= $allStreams[$xobjMap[$tplIdx]];
+                            }
+                        }
+                    }
+                }
+            }
+
+            $pageContentMap[$pageIndex] = $pageText;
+            $pageIndex++;
+        }
+
+        return $pageContentMap;
+    }
+
+    // =========================================================
+    // FALLBACK DETEKSI
+    // =========================================================
+    private function fallbackDetect(array $allStreams, array $markerMap): array
+    {
+        $result = [];
+        ksort($allStreams);
+
+        $pageNo = 0;
+        foreach ($allStreams as $text) {
+            if (!preg_match('/[A-Za-z]{4,}/', $text)) {
+                continue;
+            }
+            $pageNo++;
+            foreach ($markerMap as $marker => $fileKey) {
+                if (strpos($text, $marker) !== false) {
+                    $result[$pageNo][] = $fileKey;
+                    log_message('info', "[FALLBACK] [{$marker}] di ~halaman {$pageNo}");
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    // =========================================================
+    // PREPARE VIEW DATA (perbaikan)
     // =========================================================
     private function prepareViewData($idPorto)
     {
-        $portofolioModel = new PortofolioModel();
-        $cplModel        = new CPL();
-        $cpmkModel       = new CPMK();
-        $subCpmkModel    = new SubCPMK();
-        $mappingModel    = new MappingCPLCPMKSCPMK();
-        $asesmenModel    = new RancanganAsesmen();
-        $soalModel       = new RancanganSoal();
-        $evaluasiModel   = new Evaluasi();
+        $portofolioModel         = new PortofolioModel();
+        $cplModel                = new CPL();
+        $cpmkModel               = new CPMK();
+        $subCpmkModel            = new SubCPMK();
+        $mappingModel            = new MappingCPLCPMKSCPMK();
+        $asesmenModel            = new RancanganAsesmen();
+        $soalModel               = new RancanganSoal();
+        $evaluasiModel           = new Evaluasi();
+        $evaluasiKesimpulanModel = new EvaluasiKesimpulan();
 
-        // Ambil data portofolio utama
         $portofolioData = $portofolioModel->getPortofolioCetakDetails($idPorto);
         if (!$portofolioData) {
             return null;
         }
 
-        $cplPiData        = $cplModel->getCplPiByPortoId($idPorto);
-        $cplData          = $cplModel->getCplByPortoId($idPorto);
-        $cpmkData         = $cpmkModel->getCpmkByPorto($idPorto);
-        $subCpmkData      = $subCpmkModel->getSubCpmkByPorto($idPorto);
-        $assessmentData   = $asesmenModel->getAssessmentData($idPorto);
+        $cplPiData          = $cplModel->getCplPiByPortoId($idPorto);
+        $cplData            = $cplModel->getCplByPortoId($idPorto);
+        $cpmkData           = $cpmkModel->getCpmkByPorto($idPorto);
+        $subCpmkData        = $subCpmkModel->getSubCpmkByPorto($idPorto);
+
+        // PERBAIKAN: Pastikan assessmentData tidak kosong dan memiliki struktur yang benar
+        $assessmentData     = $asesmenModel->getAssessmentData($idPorto);
+        if (empty($assessmentData)) {
+            // Jika tidak ada data asesmen, buat default berdasarkan data soal yang ada
+            $assessmentSoalData = $soalModel->getAssessmentSoalData($idPorto);
+            $availableKategori = array_unique(array_column($assessmentSoalData, 'kategori_soal'));
+
+            $assessmentData = [];
+            if (!empty($cpmkData)) {
+                $defaultRow = [
+                    'id_cpmk' => $cpmkData[0]['id'],
+                    'no_cpmk' => $cpmkData[0]['no_cpmk'],
+                    'tugas' => in_array('Tugas', $availableKategori) ? 1 : 0,
+                    'uts' => in_array('UTS', $availableKategori) ? 1 : 0,
+                    'uas' => in_array('UAS', $availableKategori) ? 1 : 0
+                ];
+                $assessmentData[] = $defaultRow;
+            }
+        }
+
         $assessmentSoalData = $soalModel->getAssessmentSoalData($idPorto);
-        $mappingData      = $mappingModel->getMapping($idPorto);
-        $evaluasiData     = $evaluasiModel->getEvaluasiByPorto($idPorto);
+        $mappingData        = $mappingModel->getMapping($idPorto);
+        $evaluasiData       = $evaluasiModel->getEvaluasiByPorto($idPorto);
+        $evaluasi           = $evaluasiKesimpulanModel->getEvaluasiKesimpulan($idPorto);
 
         $chartImageBase64 = $this->generateChartImage($cpmkData);
         $subCpmkNumbers   = array_column($subCpmkData, 'no_scpmk');
-
-        // Konversi logo ke base64
-        $logoBase64 = $this->getLogoBase64();
+        $logoBase64       = $this->getLogoBase64();
 
         return [
             'portofolioData'     => $portofolioData,
@@ -238,6 +456,7 @@ class Cetak extends BaseController
             'evaluasiData'       => $evaluasiData,
             'chartImageBase64'   => $chartImageBase64,
             'logoBase64'         => $logoBase64,
+            'evaluasi'           => $evaluasi,
         ];
     }
 
@@ -248,7 +467,7 @@ class Cetak extends BaseController
     {
         $filePaths = [];
 
-        // File RPS
+        // RPS
         $rpsModel = new RPS();
         $rpsData  = $rpsModel->where('id_portofolio', $idPorto)->first();
         if ($rpsData && !empty($rpsData['file_rps'])) {
@@ -258,48 +477,62 @@ class Cetak extends BaseController
             }
         }
 
-        // File Pelaksanaan (Kontrak, Realisasi, Kehadiran)
+        // Pelaksanaan
         $pelaksanaanModel = new Pelaksanaan();
         $pelaksanaan      = $pelaksanaanModel->where('id_portofolio', $idPorto)->first();
         if ($pelaksanaan) {
-            if (!empty($pelaksanaan['file_kontrak_kuliah'])) {
-                $path = WRITEPATH . 'uploads/pelaksanaan/' . $pelaksanaan['file_kontrak_kuliah'];
-                if (file_exists($path)) {
-                    $filePaths['KONTRAK'] = $path;
-                }
-            }
-            if (!empty($pelaksanaan['file_realisasi_mengajar'])) {
-                $path = WRITEPATH . 'uploads/pelaksanaan/' . $pelaksanaan['file_realisasi_mengajar'];
-                if (file_exists($path)) {
-                    $filePaths['REALISASI'] = $path;
-                }
-            }
-            if (!empty($pelaksanaan['file_kehadiran'])) {
-                $path = WRITEPATH . 'uploads/pelaksanaan/' . $pelaksanaan['file_kehadiran'];
-                if (file_exists($path)) {
-                    $filePaths['KEHADIRAN'] = $path;
+            foreach (
+                [
+                    'file_kontrak_kuliah'     => 'KONTRAK',
+                    'file_realisasi_mengajar' => 'REALISASI',
+                    'file_kehadiran'          => 'KEHADIRAN',
+                ] as $col => $key
+            ) {
+                if (!empty($pelaksanaan[$col])) {
+                    $path = WRITEPATH . 'uploads/pelaksanaan/' . $pelaksanaan[$col];
+                    if (file_exists($path)) {
+                        $filePaths[$key] = $path;
+                    }
                 }
             }
         }
 
-        // File Rancangan Asesmen (Soal Tugas, UTS, UAS)
+        // Rancangan Asesmen — gabungkan file_soal + file_rubrik per jenis
+        // agar tidak saling menimpa (bug lama: hanya satu yang muncul)
         $rancanganAsesmenModel = new RancanganAsesmen();
         $rancanganData         = $rancanganAsesmenModel->where('id_portofolio', $idPorto)->findAll();
+
+        $asesmenFiles = []; // [ 'TUGAS' => [path1, path2], 'UTS' => [...], ... ]
         foreach ($rancanganData as $item) {
-            $jenis = strtoupper($item['jenis_asesmen']); // tugas/uts/uas
-            if (!empty($item['file_soal'])) {
-                $path = WRITEPATH . 'uploads/asesmen/' . $item['file_soal'];
-                if (file_exists($path)) {
-                    $filePaths[$jenis] = $path;
+            $jenis = strtoupper($item['jenis_asesmen']);
+            foreach (['file_soal', 'file_rubrik'] as $col) {
+                if (!empty($item[$col])) {
+                    $path = WRITEPATH . 'uploads/asesmen/' . $item[$col];
+                    if (file_exists($path)) {
+                        $asesmenFiles[$jenis][] = $path;
+                    }
                 }
             }
         }
 
-        // File Hasil Asesmen
+        foreach ($asesmenFiles as $jenis => $paths) {
+            $paths = array_unique($paths);
+            if (count($paths) === 1) {
+                $filePaths[$jenis] = $paths[0];
+            } elseif (count($paths) > 1) {
+                $tmpOut = WRITEPATH . 'uploads/temp_asesmen_' . $jenis . '_' . $idPorto . '.pdf';
+                $merged = $this->mergeMultiplePdfs($paths, $tmpOut);
+                if ($merged) {
+                    $filePaths[$jenis] = $merged;
+                }
+            }
+        }
+
+        // Hasil Asesmen
         $hasilAsesmenModel = new HasilAsesmen();
         $hasilData         = $hasilAsesmenModel->where('id_portofolio', $idPorto)->findAll();
         foreach ($hasilData as $item) {
-            $jenis = strtoupper($item['jenis_asesmen']); // tugas/uts/uas
+            $jenis = strtoupper($item['jenis_asesmen']);
             if (!empty($item['file_jawaban'])) {
                 $path = WRITEPATH . 'uploads/hasil_asesmen/' . $item['file_jawaban'];
                 if (file_exists($path)) {
@@ -308,7 +541,7 @@ class Cetak extends BaseController
             }
         }
 
-        // File Nilai CPMK
+        // Nilai CPMK
         $nilaiCpmkModel = new NilaiCPMK();
         $nilaiCpmk      = $nilaiCpmkModel->where('id_portofolio', $idPorto)->first();
         if ($nilaiCpmk && !empty($nilaiCpmk['file_nilai_cpmk'])) {
@@ -318,7 +551,7 @@ class Cetak extends BaseController
             }
         }
 
-        // File Nilai Mata Kuliah
+        // Nilai Mata Kuliah
         $nilaiMatkulModel = new NilaiMatkul();
         $nilaiMatkul      = $nilaiMatkulModel->where('id_portofolio', $idPorto)->first();
         if ($nilaiMatkul && !empty($nilaiMatkul['file_nilai_matkul'])) {
@@ -332,7 +565,37 @@ class Cetak extends BaseController
     }
 
     // =========================================================
-    // GENERATE CHART IMAGE (QuickChart API)
+    // GABUNGKAN BEBERAPA PDF MENJADI SATU
+    // =========================================================
+    private function mergeMultiplePdfs(array $paths, string $outputPath): ?string
+    {
+        try {
+            $pdf = new Fpdi();
+            $pdf->SetAutoPageBreak(false);
+            $pdf->SetPrintHeader(false);
+            $pdf->SetPrintFooter(false);
+
+            foreach ($paths as $path) {
+                $pageCount = $pdf->setSourceFile($path);
+                for ($p = 1; $p <= $pageCount; $p++) {
+                    $tplId = $pdf->importPage($p);
+                    $size  = $pdf->getTemplateSize($tplId);
+                    $ori   = ($size['width'] > $size['height']) ? 'L' : 'P';
+                    $pdf->AddPage($ori, [$size['width'], $size['height']]);
+                    $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+                }
+            }
+
+            $pdf->Output($outputPath, 'F');
+            return $outputPath;
+        } catch (\Exception $e) {
+            log_message('error', 'mergeMultiplePdfs: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    // =========================================================
+    // GENERATE CHART IMAGE
     // =========================================================
     private function generateChartImage(array $cpmkData): string
     {
@@ -341,7 +604,7 @@ class Cetak extends BaseController
 
         foreach ($cpmkData as $cpmk) {
             $labels[] = 'CPMK ' . $cpmk['no_cpmk'];
-            $values[] = (float)($cpmk['avg_cpmk'] ?? 0);
+            $values[] = (float) ($cpmk['avg_cpmk'] ?? 0);
         }
 
         if (empty($labels)) {
@@ -375,16 +638,17 @@ class Cetak extends BaseController
             ],
         ];
 
-        $chartUrl  = 'https://quickchart.io/chart?c=' . urlencode(json_encode($chartConfig)) . '&width=500&height=300&format=png';
+        $chartUrl = 'https://quickchart.io/chart?c='
+            . urlencode(json_encode($chartConfig))
+            . '&width=500&height=300&format=png';
 
-        // Gunakan cURL untuk lebih reliable
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $chartUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         $imageData = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         if ($imageData === false || $httpCode !== 200) {
@@ -400,10 +664,8 @@ class Cetak extends BaseController
     // =========================================================
     private function getLogoBase64(): string
     {
-        $path = FCPATH . 'assets/images/logo_udinus.png'; // Sesuaikan dengan path logo Anda
-
+        $path = FCPATH . 'assets/images/logo_udinus.png';
         if (!file_exists($path)) {
-            // Coba path alternatif
             $path = WRITEPATH . 'uploads/logo_udinus.png';
             if (!file_exists($path)) {
                 return '';
@@ -411,19 +673,21 @@ class Cetak extends BaseController
         }
 
         $ext  = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $mime = ($ext == 'png') ? 'image/png' : (($ext == 'jpg' || $ext == 'jpeg') ? 'image/jpeg' : 'image/' . $ext);
-        $data = file_get_contents($path);
+        $mime = match ($ext) {
+            'png'         => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            default       => 'image/' . $ext,
+        };
 
-        return 'data:' . $mime . ';base64,' . base64_encode($data);
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
     }
 
     // =========================================================
-    // SHOW - Tampilkan file PDF di browser (inline)
+    // SHOW — tampilkan PDF inline
     // =========================================================
     public function show($folder, $filename)
     {
         $path = WRITEPATH . 'uploads/' . $folder . '/' . $filename;
-
         if (!file_exists($path)) {
             return $this->response->setStatusCode(404, 'File tidak ditemukan.');
         }

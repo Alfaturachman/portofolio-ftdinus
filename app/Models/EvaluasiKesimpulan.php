@@ -20,4 +20,9 @@ class EvaluasiKesimpulan extends Model
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+
+    public function getEvaluasiKesimpulan($idPorto)
+    {
+        return $this->where('id_portofolio', $idPorto)->first();
+    }
 }

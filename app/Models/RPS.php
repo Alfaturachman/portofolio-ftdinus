@@ -29,25 +29,7 @@ class RPS extends Model
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
 
-    // Validation
-    protected $validationRules      = [
-        'id_portofolio' => 'required|integer|is_not_unique[portofolio.id]',
-        'file_rps' => 'required|max_length[255]'
-    ];
-
-    protected $validationMessages   = [
-        'id_portofolio' => [
-            'required' => 'ID Portofolio harus diisi',
-            'integer' => 'ID Portofolio harus berupa angka',
-            'is_not_unique' => 'ID Portofolio tidak ditemukan'
-        ],
-        'file_rps' => [
-            'required' => 'File RPS harus diupload',
-            'max_length' => 'Nama file terlalu panjang'
-        ]
-    ];
-
-    protected $skipValidation       = false;
+    protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
     /**
