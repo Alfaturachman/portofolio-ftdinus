@@ -294,6 +294,21 @@
     <div class="page-break"></div>
     <div style="padding-left:1cm;padding-right:1cm;">
 
+        <?php
+        // Inisialisasi variabel untuk menampilkan bagian asesmen
+        $showTugas = false;
+        $showUts = false;
+        $showUas = false;
+
+        if (!empty($assessmentData)) {
+            foreach ($assessmentData as $row) {
+                if (!empty($row['tugas'])) $showTugas = true;
+                if (!empty($row['uts'])) $showUts = true;
+                if (!empty($row['uas'])) $showUas = true;
+            }
+        }
+        ?>
+
         <!-- ======================================================
          HALAMAN 2: DAFTAR ISI
     ====================================================== -->
@@ -312,9 +327,9 @@
                         <li>
                             Rancangan Asesmen
                             <ol class="toc-sub-alpha">
-                                <li>Tugas</li>
-                                <li>Ujian Tengah Semester</li>
-                                <li>Ujian Akhir Semester</li>
+                                <?php if ($showTugas): ?><li>Tugas</li><?php endif; ?>
+                                <?php if ($showUts): ?><li>Ujian Tengah Semester</li><?php endif; ?>
+                                <?php if ($showUas): ?><li>Ujian Akhir Semester</li><?php endif; ?>
                             </ol>
                         </li>
                     </ol>
@@ -330,9 +345,9 @@
                 <li style="margin-top:8px;">
                     Hasil Perkuliahan
                     <ol class="toc-sub">
-                        <li>Hasil Tugas</li>
-                        <li>Hasil Ujian Tengah Semester</li>
-                        <li>Hasil Ujian Akhir Semester</li>
+                        <?php if ($showTugas): ?><li>Hasil Tugas</li><?php endif; ?>
+                        <?php if ($showUts): ?><li>Hasil Ujian Tengah Semester</li><?php endif; ?>
+                        <?php if ($showUas): ?><li>Hasil Ujian Akhir Semester</li><?php endif; ?>
                         <li>Nilai Mata Kuliah</li>
                         <li>Nilai CPMK</li>
                     </ol>
@@ -574,21 +589,31 @@
         <?php
         // ======================================================
         // PERBAIKAN: Filter kategori soal berdasarkan Rancangan Asesmen
+        // Tampilkan hanya Tugas/UTS/UAS yang dipilih di Rancangan Asesmen
         // ======================================================
         $availableKategori = [];
         if (!empty($assessmentData)) {
-            $cpmkAsesmen = $assessmentData[0]; // Ambil baris pertama untuk cek asesmen yang tersedia
-            if ($cpmkAsesmen['tugas']) $availableKategori[] = 'Tugas';
-            if ($cpmkAsesmen['uts']) $availableKategori[] = 'UTS';
-            if ($cpmkAsesmen['uas']) $availableKategori[] = 'UAS';
+            // Cek setiap baris asesmen untuk menentukan kategori yang tersedia
+            foreach ($assessmentData as $row) {
+                if (!empty($row['tugas']) && !in_array('Tugas', $availableKategori)) {
+                    $availableKategori[] = 'Tugas';
+                }
+                if (!empty($row['uts']) && !in_array('UTS', $availableKategori)) {
+                    $availableKategori[] = 'UTS';
+                }
+                if (!empty($row['uas']) && !in_array('UAS', $availableKategori)) {
+                    $availableKategori[] = 'UAS';
+                }
+            }
         }
 
         // Jika tidak ada data asesmen, gunakan data soal yang ada
-        if (empty($availableKategori) && !empty($groupedSoal)) {
-            $availableKategori = array_keys($groupedSoal);
+        if (empty($availableKategori) && !empty($assessmentSoalData)) {
+            $availableKategori = array_unique(array_column($assessmentSoalData, 'kategori_soal'));
         }
 
-        $groupedSoal  = [];
+        // Kelompokkan data soal berdasarkan kategori
+        $groupedSoal = [];
         foreach ($assessmentSoalData as $soal) {
             $groupedSoal[$soal['kategori_soal']][] = $soal;
         }
@@ -599,7 +624,7 @@
         ?>
 
         <?php
-        // Tampilkan hanya kategori yang tersedia
+        // Tampilkan hanya kategori yang tersedia (sesuai Rancangan Asesmen)
         $displayIndex = 6;
         foreach ($availableKategori as $kategori):
             // Cek apakah ada data soal untuk kategori ini
@@ -618,6 +643,7 @@
                 <tbody>
                     <?php if ($hasData): ?>
                         <?php
+                        // Kelompokkan soal berdasarkan nomor soal
                         $bySoal = [];
                         foreach ($groupedSoal[$kategori] as $item) {
                             $bySoal[$item['no_soal']][] = $item;
@@ -671,6 +697,7 @@
             </table>
         <?php endforeach; ?>
 
+        <?php if ($showTugas): ?>
         <div class="page-break"></div>
 
         <!-- 7.1 Tugas -->
@@ -679,7 +706,9 @@
             <p>Terlampir</p>
             <p class="insert-pdf">INSERT_PDF_TUGAS</p>
         </div>
+        <?php endif; ?>
 
+        <?php if ($showUts): ?>
         <div class="page-break"></div>
 
         <!-- 7.2 UTS -->
@@ -688,7 +717,9 @@
             <p>Terlampir</p>
             <p class="insert-pdf">INSERT_PDF_UTS</p>
         </div>
+        <?php endif; ?>
 
+        <?php if ($showUas): ?>
         <div class="page-break"></div>
 
         <!-- 7.3 UAS -->
@@ -697,6 +728,7 @@
             <p>Terlampir</p>
             <p class="insert-pdf">INSERT_PDF_UAS</p>
         </div>
+        <?php endif; ?>
 
         <div class="page-break"></div>
 
@@ -737,6 +769,7 @@
     ====================================================== -->
         <h2 class="section-title">C. Hasil Perkuliahan</h2>
 
+        <?php if ($showTugas): ?>
         <!-- C.1 Hasil Tugas -->
         <div class="lampiran-section">
             <h3>1. Hasil Tugas</h3>
@@ -745,7 +778,9 @@
         </div>
 
         <div class="page-break"></div>
+        <?php endif; ?>
 
+        <?php if ($showUts): ?>
         <!-- C.2 Hasil UTS -->
         <div class="lampiran-section">
             <h3>2. Hasil Ujian Tengah Semester</h3>
@@ -754,7 +789,9 @@
         </div>
 
         <div class="page-break"></div>
+        <?php endif; ?>
 
+        <?php if ($showUas): ?>
         <!-- C.3 Hasil UAS -->
         <div class="lampiran-section">
             <h3>3. Hasil Ujian Akhir Semester</h3>
@@ -763,6 +800,7 @@
         </div>
 
         <div class="page-break"></div>
+        <?php endif; ?>
 
         <!-- C.4 Nilai Mata Kuliah -->
         <div class="lampiran-section">
