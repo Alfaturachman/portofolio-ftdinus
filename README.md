@@ -1,69 +1,412 @@
-# CodeIgniter 4 Application Starter
+# Portofolio FT - Academic Course Portfolio Management System
 
-## What is CodeIgniter?
+Sistem Manajemen Portofolio Mata Kuliah untuk **Fakultas Teknik, Universitas Dian Nuswantoro**.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+Aplikasi ini membantu dosen dalam membuat, mengelola, dan mengekspor portofolio perkuliahan yang mendokumentasikan seluruh siklus akademik, selaras denganCapaian Pembelajaran Lulusan (CPL), Indikator Pencapaian (PI), dan Capaian Pembelajaran Mata Kuliah (CPMK).
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+---
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## ✨ Features
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+### Admin Master Data Management
 
-## Installation & updates
+- **Users** - CRUD pengguna (dosen, mahasiswa, admin) + Excel import
+- **Kurikulum** - Manajemen tahun ajaran & nama kurikulum
+- **Prodi** - Manajemen program studi
+- **Mata Kuliah (MK)** - Katalog mata kuliah + Excel import
+- **CPL** - Capaian Pembelajaran Lulusan + Excel import
+- **PI** - Indikator Pencapaian + Excel import
+- **Mapping MK-CPL-PI** - Relasi mata kuliah dengan capaian pembelajaran
+- **Perkuliahan** - Penjadwalan perkuliahan (dosen + mata kuliah + kelas + semester)
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+### Portfolio Management (10-Step Wizard)
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+1. **Upload RPS** - Rencana Pembelajaran Semester
+2. **Info MK** - Topik perkuliahan & mata kuliah prasyarat
+3. **CPL & PI** - Review capaian pembelajaran (read-only, inherited dari mapping)
+4. **CPMK & Sub-CPMK** - Definisi capaian pembelajaran tingkat mata kuliah
+5. **Pemetaan** - Mapping relasi CPL → CPMK → Sub-CPMK
+6. **Rancangan Asesmen** - Desain tugas, UTS, UAS dengan upload file
+7. **Rancangan Soal** - Distribusi soal per asesmen per CPMK
+8. **Pelaksanaan** - Upload kontrak kuliah, realisasi mengajar, kehadiran
+9. **Hasil Asesmen** - Upload jawaban mahasiswa & lembar nilai
+10. **Evaluasi** - Evaluasi & kesimpulan per CPMK
 
-## Setup
+### PDF Export
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+- Generate portofolio lengkap dalam format PDF
+- Cover page, daftar isi, tabel data terstruktur
+- Merge file PDF eksternal (RPS, asesmen, jawaban, dll)
 
-## Important Change with index.php
+### Excel Import
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+- Import bulk data untuk Users, MK, CPL, PI, Mapping, Perkuliahan
+- Template Excel tersedia untuk setiap modul
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+---
 
-**Please** read the user guide for a better explanation of how CI4 works!
+## 🛠 Tech Stack
 
-## Repository Management
+| Layer                 | Technology                               |
+| --------------------- | ---------------------------------------- |
+| **Backend Framework** | CodeIgniter 4.7+                         |
+| **Language**          | PHP 8.2+                                 |
+| **Database**          | MySQL 5.7+                               |
+| **Frontend**          | Bootstrap 5, jQuery, DataTables, Select2 |
+| **PDF Generation**    | DomPDF, FPDI, TCPDF, PDFParser           |
+| **Excel Processing**  | PhpSpreadsheet                           |
+| **Charts**            | Chart.js                                 |
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+---
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+## 📋 Requirements
 
-## Server Requirements
+### PHP Extensions
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+- `intl`
+- `mbstring`
+- `json` (enabled by default)
+- `mysqlnd` (for MySQL)
+- `libcurl` (for HTTP requests)
+- `gd` or `imagick` (for PDF/image processing)
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+### Software
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+- PHP >= 8.2
+- Composer
+- MySQL 5.7+ / MariaDB 10.3+
+- Web Server (Apache/Nginx) or PHP built-in server
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+---
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+## 🚀 Installation
+
+### 1. Clone Repository
+
+```bash
+git clone <repository-url>
+cd portofolio-ft
+```
+
+### 2. Install Dependencies
+
+```bash
+composer install
+```
+
+### 3. Environment Setup
+
+```bash
+copy env .env
+```
+
+### 4. Configure `.env`
+
+Edit file `.env` dan sesuaikan:
+
+```env
+app.baseURL = 'http://localhost:8080'
+
+database.default.hostname = localhost
+database.default.username = root
+database.default.password =
+database.default.database = portofolio_v2
+database.default.DBDriver = MySQLi
+```
+
+---
+
+## 🗄 Database Setup
+
+### 1. Create Database
+
+```sql
+CREATE DATABASE portofolio_v2 CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+```
+
+### 2. Import Database
+
+Import SQL file yang tersedia (jika ada) atau jalankan migrations:
+
+```bash
+php spark migrate
+```
+
+### 3. Create Additional Tables
+
+Jalankan SQL tambahan jika diperlukan:
+
+```bash
+# Contoh: tabel pemetaan
+mysql -u root portofolio_v2 < database/pemetaan_table.sql
+```
+
+---
+
+## ⚙️ Configuration
+
+### Virtual Host (Recommended)
+
+**Apache** (httpd-vhosts.conf):
+
+```apache
+<VirtualHost *:80>
+    ServerName portofolio.test
+    DocumentRoot "D:/laragon/www/portofolio-ft/public"
+    <Directory "D:/laragon/www/portofolio-ft/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+**Nginx**:
+
+```nginx
+server {
+    listen 80;
+    server_name portofolio.test;
+    root D:/laragon/www/portofolio-ft/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+}
+```
+
+### Development Server
+
+```bash
+php spark serve
+```
+
+Akses: `http://localhost:8080`
+
+---
+
+## 📖 Usage
+
+### Login
+
+Buka `http://localhost:8080` atau domain yang sudah dikonfigurasi.
+Login menggunakan **NPP** (Nomor Pokok Pegawai) dan **password**.
+
+### Admin Dashboard
+
+Setelah login sebagai admin, akses modul:
+
+- `/admin/dashboard` - Dashboard utama
+- `/admin/users` - Manajemen pengguna
+- `/admin/kurikulum` - Manajemen kurikulum
+- `/admin/prodi` - Manajemen program studi
+- `/admin/mk` - Manajemen mata kuliah
+- `/admin/cpl` - Manajemen CPL
+- `/admin/pi` - Manajemen PI
+- `/admin/mapping_cpl` - Mapping MK-CPL-PI
+- `/admin/perkuliahan` - Manajemen perkuliahan
+
+### Lecturer (Dosen)
+
+Setelah login sebagai dosen:
+
+- `/dashboard` - Dashboard portofolio
+- `/admin/portofolio` - Daftar portofolio
+- `/admin/portofolio/form/{id}` - Edit portofolio (multi-step wizard)
+- `/cetak/{id}` - Preview & generate PDF portofolio
+
+---
+
+## 👥 User Roles
+
+| Role      | Access Level                                              |
+| --------- | --------------------------------------------------------- |
+| **admin** | Full access - Kelola semua master data & semua portofolio |
+| **dosen** | Create & edit portofolio untuk perkuliahan yang diampu    |
+
+---
+
+## 📝 Portfolio Mata Kuliah Steps
+
+| Step | Nama                  | Deskripsi                                                 |
+| ---- | --------------------- | --------------------------------------------------------- |
+| 1    | **Upload RPS**        | Upload dokumen Rencana Pembelajaran Semester (PDF)        |
+| 2    | **Info MK**           | Isi topik perkuliahan & mata kuliah prasyarat             |
+| 3    | **CPL & PI**          | Review capaian pembelajaran (auto-populated dari mapping) |
+| 4    | **CPMK & Sub-CPMK**   | Definisikan capaian pembelajaran tingkat mata kuliah      |
+| 5    | **Pemetaan**          | Mapping relasi antara CPL, CPMK, dan Sub-CPMK             |
+| 6    | **Rancangan Asesmen** | Desain asesmen (Tugas/UTS/UAS) + upload soal & rubrik     |
+| 7    | **Rancangan Soal**    | Plan distribusi soal per asesmen per CPMK                 |
+| 8    | **Pelaksanaan**       | Upload kontrak kuliah, realisasi mengajar, kehadiran      |
+| 9    | **Hasil Asesmen**     | Upload jawaban mahasiswa & lembar nilai                   |
+| 10   | **Evaluasi**          | Tulis evaluasi & kesimpulan per CPMK                      |
+
+---
+
+## 📁 Project Structure
+
+```
+portofolio-ft/
+├── app/
+│   ├── Config/
+│   │   ├── Routes.php              # Route definitions
+│   │   ├── Database.php            # Database configuration
+│   │   └── ...
+│   ├── Controllers/
+│   │   ├── BaseController.php
+│   │   ├── Login.php               # Authentication
+│   │   ├── Portofolio.php          # Portfolio CRUD & wizard
+│   │   ├── Cetak.php               # PDF generation
+│   │   └── Admin/
+│   │       ├── Dashboard.php
+│   │       ├── UsersController.php
+│   │       ├── KurikulumController.php
+│   │       ├── ProdiController.php
+│   │       ├── MKController.php
+│   │       ├── CplController.php
+│   │       ├── PiController.php
+│   │       ├── MkCplPiController.php
+│   │       └── PerkuliahanController.php
+│   ├── Models/                     # 23 models
+│   │   ├── PortofolioModel.php
+│   │   ├── Users.php
+│   │   ├── CPL.php
+│   │   ├── Pi.php
+│   │   ├── MK.php
+│   │   ├── CPMK.php
+│   │   ├── SubCPMK.php
+│   │   ├── RPS.php
+│   │   ├── RancanganAsesmen.php
+│   │   ├── Pelaksanaan.php
+│   │   ├── HasilAsesmen.php
+│   │   ├── Evaluasi.php
+│   │   └── ...
+│   └── Views/
+│       ├── template.php            # Admin layout
+│       ├── login.php
+│       ├── admin/
+│       │   ├── dashboard.php
+│       │   ├── users.php
+│       │   ├── kurikulum.php
+│       │   ├── portofolio/
+│       │   │   ├── index.php       # Portfolio list
+│       │   │   └── form.php        # Multi-step wizard (3222 lines)
+│       │   └── cetak/
+│       │       └── cetak-portofolio.php  # PDF template
+│       └── ...
+├── public/                         # Web root
+│   └── index.php
+├── writable/                       # Uploads, logs, cache
+│   └── uploads/
+├── database/
+│   └── pemetaan_table.sql
+├── composer.json
+├── spark
+└── README.md
+```
+
+---
+
+## 📄 PDF Generation
+
+### Libraries Used
+
+| Library                      | Purpose                              |
+| ---------------------------- | ------------------------------------ |
+| **dompdf/dompdf ^3.1**       | HTML to PDF conversion               |
+| **setasign/fpdi ^2.6**       | Import/merge existing PDFs           |
+| **setasign/fpdi-tcpdf ^2.3** | FPDI adapter for TCPDF backend       |
+| **tecnickcom/tcpdf ^6.10**   | PDF manipulation backend             |
+| **smalot/pdfparser ^2.12**   | Parse PDF content & marker detection |
+
+### How It Works
+
+1. HTML template (`cetak-portofolio.php`) dirender dengan data portofolio
+2. DomPDF mengkonversi HTML ke PDF
+3. FPDI merge external PDF files (RPS, asesmen, dll) ke PDF utama
+4. Marker-based insertion system (`INSERT_PDF_RPS`, `INSERT_PDF_TUGAS`, dll) menempatkan file di posisi yang benar
+5. Final PDF di-serve sebagai download atau preview
+
+### Access
+
+- **Preview:** `/cetak/{id_portofolio}`
+- **Download PDF:** `/cetak/pdf/{id_portofolio}`
+- **View Inline:** `/cetak/file/{id_portofolio}/{step}`
+
+---
+
+## 📊 Excel Import
+
+### Supported Modules
+
+- Users (Dosen/Mahasiswa)
+- Mata Kuliah
+- CPL
+- PI
+- Mapping MK-CPL-PI
+- Perkuliahan
+
+### How to Import
+
+1. Download template Excel dari modul terkait
+2. Isi data sesuai format template
+3. Upload file Excel melalui tombol "Import"
+4. Data akan divalidasi & diproses otomatis
+
+**Library:** PhpSpreadsheet
+
+---
+
+## 🐛 Troubleshooting
+
+### Permission Issues (Windows)
+
+```bash
+# Pastikan writable folder dapat ditulis
+icacls writable /grant Users:F /T
+```
+
+### PDF Not Generating
+
+- Pastikan extension `gd` atau `imagick` aktif di `php.ini`
+- Cek `writable/logs/` untuk error logs
+- Pastikan file RPS/asesmen tersedia & path benar
+
+### Excel Import Fails
+
+- Pastikan format Excel sesuai template
+- Cek data type & format cell
+- Validasi data sebelum import
+
+### Database Connection Error
+
+- Cek kredensial di `.env`
+- Pastikan MySQL service berjalan
+- Verifikasi database `portofolio_v2` sudah dibuat
+
+### Clear Cache
+
+```bash
+php spark cache:clear
+```
+
+---
+
+## 📞 Support
+
+Untuk pertanyaan atau bantuan:
+
+- Dokumentasi CodeIgniter 4: https://codeigniter.com/user_guide/
+- Forum CodeIgniter: https://forum.codeigniter.com/
+
+---
+
+## 📝 Notes
+
+- Proyek ini menggunakan **CodeIgniter 4** dengan struktur MVC standar
+- Authentication menggunakan **session-based** login
+- File upload disimpan di `writable/uploads/`
+- CSS framework: **Bootstrap 5**
+- DataTables untuk tabel interaktif
+- Select2 untuk dropdown enhancement
+
+---
