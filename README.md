@@ -1,8 +1,8 @@
-# Portofolio FT - Academic Course Portfolio Management System
+# Portofolio Mata Kuliah FT - Academic Course Portfolio Management System
 
 Sistem Manajemen Portofolio Mata Kuliah untuk **Fakultas Teknik, Universitas Dian Nuswantoro**.
 
-Aplikasi ini membantu dosen dalam membuat, mengelola, dan mengekspor portofolio perkuliahan yang mendokumentasikan seluruh siklus akademik, selaras denganCapaian Pembelajaran Lulusan (CPL), Indikator Pencapaian (PI), dan Capaian Pembelajaran Mata Kuliah (CPMK).
+Aplikasi ini membantu dosen dalam membuat, mengelola, dan mengekspor portofolio perkuliahan yang mendokumentasikan seluruh siklus akademik, selaras dengan Capaian Pembelajaran Lulusan (CPL), Indikator Pencapaian (PI), dan Capaian Pembelajaran Mata Kuliah (CPMK).
 
 ---
 
